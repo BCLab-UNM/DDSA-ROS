@@ -38,6 +38,8 @@ using namespace std;
 //Random number generator
 random_numbers::RandomNumberGenerator* rng;	
 
+void sendInfoLogMsg(string message);
+
 //Mobility Logic Functions
 void setVelocity(double linearVel, double angularVel);
 void openFingers(); // Open fingers to 90 degrees
@@ -184,9 +186,6 @@ int main(int argc, char **argv) {
   roverCountTimer = mNH.createTimer(ros::Duration(10.0), roverCountTimerEventHandler, true);
   robotNumber = roverNameToIndex(publishedName);
   
-  std_msgs::String msg;
-  msg.data = "Log Started";
-  infoLogPublisher.publish(msg);
   ros::spin();
   
   return EXIT_SUCCESS;
@@ -238,7 +237,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 	
         }
         //If returning with a target
-        else if (targetDetected.data != -1) {
+        else if (targetDetected) {
           //If goal has not yet been reached
           if (hypot(0.0 - currentLocation.x, 0.0 - currentLocation.y) > 0.5) {
             //set angle to center as goal heading
@@ -250,7 +249,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
           }
           //Otherwise, reset target and select new random uniform heading
           else {
-            targetDetected.data = -1;
+            targetDetected = false;
             //goalLocation.theta = rng->uniformReal(0, 2 * M_PI);  // What is this doing ???? <-----
           }
         }
@@ -289,8 +288,10 @@ void mobilityStateMachine(const ros::TimerEvent&) {
           if (moveToNest == false && hypot(0.0 - currentLocation.x, 0.0 - currentLocation.y) > 0.15 && peekQ.compare(publishedName)== 0){
 	  
             //Each rover will wait for 5 seconds before going to the center.
+            sendInfoLogMsg("Waiting 5 seconds...");
             ros::Duration(5.0).sleep(); 
-	  
+            
+            
             //set center as goal position
             goalLocation.x = 0.0;
             goalLocation.y = 0.0;
@@ -427,27 +428,6 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         break;
       }
     }
-    //Calculate angle between currentLocation.x/y and goalLocation.x/y
-    //Drive forward
-    //Stay in this state until angle is at least PI/2
-    case STATE_MACHINE_TRANSLATE: {
-      stateMachineMsg.data = "TRANSLATING";
-      ROS_INFO_STREAM("LT TRANSLATE");
-      if (fabs(angles::shortest_angular_distance(currentLocation.theta, atan2(goalLocation.y - currentLocation.y, goalLocation.x - currentLocation.x))) < M_PI_2) {
-	setVelocity(0.3, 0.0);
-      }
-      else {
-	setVelocity(0.0, 0.0); //stop
-	stateMachineState = STATE_MACHINE_TRANSFORM; //move back to transform step
-					
-      }
-      break;
-    }
-   
-    default: {
-      break;
-    }
-  }
 }
 else { // mode is NOT auto
 
@@ -482,41 +462,6 @@ void setVelocity(double linearVel, double angularVel)
 /***********************
  * ROS CALLBACK HANDLERS
  ************************/
-
-//if target has not previously been detected && rover is not going back to spiral.
-else if (targetDetected.data == -1 && ) {
-          
-  //check if target has not yet been collected
-  if (!targetsCollected[message->tags.data[0]]) {
-    //copy target ID to class variable
-    targetDetected.data = message->tags.data[0];
-			
-    // Remember where we were in the spiral
-    spiralPosition = currentLocation;
-    std_msgs::String msg;
-    msg.data = "Stored Spiral Position x: " + boost::lexical_cast<std::string>(goalLocation.x) + ", " 
-	+ "y: " + boost::lexical_cast<std::string>(goalLocation.y) + ", "
-	+ "yaw: " + boost::lexical_cast<std::string>(goalLocation.theta)
-	+ "Heading to nest";
-    infoLogPublisher.publish(msg);
-    
-    //set angle to center as goal heading
-    goalLocation.theta = M_PI + atan2(currentLocation.y, currentLocation.x);
-	
-    //set center as goal position
-    goalLocation.x = 0.0;
-    goalLocation.y = 0.0;
-	
-    //publish detected target
-    targetCollectedPublish.publish(targetDetected);
-      
-    //publish to scoring code
-    targetPickUpPublish.publish(message->image);
-      
-    //switch to transform state to trigger return to center
-    stateMachineState = STATE_MACHINE_TRANSFORM;
-  }   
-}  
 
 void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& message) {
   
@@ -584,7 +529,10 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
         targetDetected = true;
         targetDetectedTimer.setPeriod(ros::Duration(5.0));
         targetDetectedTimer.start();
-        
+
+        // Assume we picked up the target
+        spiralPosition = currentLocation;
+
         //switch to transform state to trigger return to center
         stateMachineState = STATE_MACHINE_TRANSFORM;
       }
@@ -735,4 +683,10 @@ int roverNameToIndex( string roverName ) {
   else{
     return 5;
   }
+}
+
+void sendInfoLogMsg(string message) {
+  std_msgs::String msg; 
+  msg.data = message;
+  infoLogPublisher.publish(msg);
 }
