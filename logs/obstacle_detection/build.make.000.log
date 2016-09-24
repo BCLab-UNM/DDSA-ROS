@@ -1,0 +1,12 @@
+make: Warning: File `Makefile' has modification time 17 s in the future
+make[1]: Warning: File `CMakeFiles/Makefile2' has modification time 17 s in the future
+make[2]: Warning: File `CMakeFiles/obstacle.dir/flags.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target obstacle
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/obstacle.dir/flags.make' has modification time 17 s in the future
+[0m[100%] [32mBuilding CXX object CMakeFiles/obstacle.dir/src/obstacle.cpp.o
+[0m[31m[1mLinking CXX executable /nfs/home/matthew/DDSA-ROS/devel/lib/obstacle_detection/obstacle
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[100%] Built target obstacle
+make[1]: warning:  Clock skew detected.  Your build may be incomplete.
+make: warning:  Clock skew detected.  Your build may be incomplete.
