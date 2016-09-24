@@ -28,12 +28,19 @@
 #include <ros/ros.h>
 #include <signal.h>
 
+#include <vector>
+#include <algorithm> // for sort
 #include <queue>
 #include <stack>
 #include <string>
 #include "DDSAController.h"
 
+#include <sstream> // for conversion to strings
+
 using namespace std;
+
+// Store the names of all the rovers so we can assign numbers
+// to them based on lexical order
 
 //Random number generator
 random_numbers::RandomNumberGenerator* rng;	
@@ -61,13 +68,15 @@ bool targetCollected = false;
 
 //mobility (package) rover (message type) rover (name of object of message that contains two members a bool MoveToNest and string roverName.
 mobility::rover rover; //used to published the rovers names and count the rovers.
-bool moveToNest = false;
+bool moveToNest = true;
 bool setSpiralLocation = false;
 bool setObstacleAvoidance = false;
 bool doneWithCollision = false;
 std::priority_queue<string, std::vector<string>, std::greater<string> > roversQ;
 int numberOfRovers = 0; //count the number of rovers running
-int robotNumber;
+int ddsaRoverIndex;
+
+std::vector<string> roverNames;
 
 // state machine states
 #define STATE_MACHINE_TRANSFORM	0
@@ -172,6 +181,8 @@ int main(int argc, char **argv) {
   wristAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/wristAngle"), 1, true);
   infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);
   roverCountPublish = mNH.advertise<mobility::rover>("/numberofrovers",10,true);
+
+  
   
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   //killSwitchTimer = mNH.createTimer(ros::Duration(killSwitchTimeout), killSwitchTimerEventHandler);
@@ -183,9 +194,20 @@ int main(int argc, char **argv) {
   rover.moveToNest = false;
   rover.roverName = publishedName;
   roverCountPublish.publish(rover);
-  roverCountTimer = mNH.createTimer(ros::Duration(10.0), roverCountTimerEventHandler, true);
-  robotNumber = roverNameToIndex(publishedName);
+
+  // Wait for all the rovers to announce themselves
+  sendInfoLogMsg(publishedName + " is waiting 10 seconds for all the other rovers to announce themselves");
+
+  for (int i = 0; i < 100; i++ )
+  {
+    ros::spinOnce();
+    ros::Duration(0.1).sleep(); 
+  }
+
   
+  roverCountTimer = mNH.createTimer(ros::Duration(10.0), roverCountTimerEventHandler, true);
+
+    
   ros::spin();
   
   return EXIT_SUCCESS;
@@ -266,7 +288,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
               + "yaw: " + boost::lexical_cast<std::string>(goalLocation.theta);
           infoLogPublisher.publish(msg);
 
-          //if rover is down correcting inside ROTATING, then reset setObstacleAvoidance to false
+          //if rover is done correcting inside ROTATING, then reset setObstacleAvoidance to false
           if (doneWithCollision == true) {
             setObstacleAvoidance = false;
           }
@@ -288,8 +310,8 @@ void mobilityStateMachine(const ros::TimerEvent&) {
           if (moveToNest == false && hypot(0.0 - currentLocation.x, 0.0 - currentLocation.y) > 0.15 && peekQ.compare(publishedName)== 0){
 	  
             //Each rover will wait for 5 seconds before going to the center.
-            sendInfoLogMsg("Waiting 5 seconds...");
-            ros::Duration(5.0).sleep(); 
+            //sendInfoLogMsg("Waiting 5 seconds...");
+            //ros::Duration(5.0).sleep(); 
             
             
             //set center as goal position
@@ -301,7 +323,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
           //Distance to the center is < 0.15
           else if (moveToNest == false && peekQ.compare(publishedName)== 0){
 	 
-            // Makes are rover type of mobility class to tell the rover it is at the center
+            // 
             mobility::rover roverUpdate; 
             moveToNest = true;
             roverUpdate.roverName = publishedName;
@@ -629,6 +651,13 @@ void sigintEventHandler(int sig)
 //And counts the number of rovers runnning in stimulation.
 void roverCountHandler(const mobility::rover& message)
 {
+  roverNames.push_back(message.roverName);
+  ddsaRoverIndex = roverNameToIndex(publishedName);
+
+  stringstream ss;
+  ss << ddsaRoverIndex;
+  sendInfoLogMsg("Assigning " + publishedName + " the number " + ss.str());
+
   if(message.moveToNest == false){
     roversQ.push(message.roverName);
     numberOfRovers++;
@@ -654,35 +683,32 @@ void roverCountTimerEventHandler(const ros::TimerEvent& event)
   ROS_INFO_STREAM("Qorder: " << rovers);
 
   //Calls the ddsa controller to generate the pattern (circuits, rovers, robot ID).
-  ddsa_controller.generatePattern(10, numberOfRovers, robotNumber);
-  std_msgs::String msg;
-
-  //Publishes the pattern for each rover.
-  msg.data = "Spiral Pattern: " + ddsa_controller.getPath();
-  infoLogPublisher.publish(msg);
-      
+  stringstream ss;
+  ss << "N rovers=" <<  numberOfRovers << ", Rover Index = " << ddsaRoverIndex;
+  sendInfoLogMsg("Generating DDSA search pattern with " + ss.str());
+  ddsa_controller.generatePattern(10, numberOfRovers, ddsaRoverIndex);
+  //infoLogPublisher.publish(publishedName+ " Spiral Pattern: " + ddsa_controller.getPath());
+  
+  roverCountTimer.stop();
 }
-// Determines the unique ID based on the rover name. Only for sim rovers.
-int roverNameToIndex( string roverName ) {
 
-  if (publishedName.compare("achilles") == 0){
-    return 0;
-  }
-  else if (publishedName.compare("aeneas") == 0){
-    return 1;
-  }
-  else if (publishedName.compare("ajax") == 0){
-    return 2;
-  }
-  else if (publishedName.compare("diomedes") == 0){
-    return 3;
-  }
-  else if (publishedName.compare("hector") == 0){
-    return 4;
-  }
-  else{
-    return 5;
-  }
+// Assumes the names of all the rovers in the swarn have been added to
+// roverNames.
+int roverNameToIndex( string roverName ) {
+    // Sort the rover names and assign natural numbers to them based on lexigraphical order
+    std::sort(roverNames.begin(), roverNames.end());
+
+    // find our position in the sorted list and therefore our index
+
+    //for (int i = 0; i < roverNames.size(); i++) sendInfoLogMsg(publishedName + ":" + roverNames[i]);
+
+    stringstream ss;
+    ss << roverNames.size();
+    
+    sendInfoLogMsg(publishedName + " heard from " + ss.str() + " rovers");
+    
+    int index = 1 + find(roverNames.begin(), roverNames.end(), publishedName) - roverNames.begin();
+    return index;
 }
 
 void sendInfoLogMsg(string message) {
@@ -691,31 +717,3 @@ void sendInfoLogMsg(string message) {
   infoLogPublisher.publish(msg);
 }
 
-// Determines the unique ID based on the rover name. Only for sim rovers.
-int roverNameToIndex( string roverName ) {
-
-    if (publishedName.compare("achilles") == 0)
-    {
-        return 0;
-    }
-    else if (publishedName.compare("aeneas") == 0)
-    {
-        return 1;
-    }
-    else if (publishedName.compare("ajax") == 0)
-    {
-        return 2;
-    }
-    else if (publishedName.compare("diomedes") == 0)
-    {
-        return 3;
-    }
-    else if (publishedName.compare("hector") == 0)
-    {
-        return 4;
-    }
-    else
-    {
-        return 5;
-    }
-}

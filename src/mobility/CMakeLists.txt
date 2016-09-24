@@ -3,6 +3,7 @@ project(mobility)
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
+  message_generation 
   roscpp
   sensor_msgs
   std_msgs
