@@ -117,6 +117,7 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
 void mobilityStateMachine(const ros::TimerEvent&);
 void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void killSwitchTimerEventHandler(const ros::TimerEvent& event);
+void targetDetectedReset(const ros::TimerEvent& event);
 void roverCountHandler(const mobility::rover& message);
 void roverCountTimerEventHandler(const ros::TimerEvent& event);
 void roverPatternDelayTimerEventHandler(const ros::TimerEvent& event);
