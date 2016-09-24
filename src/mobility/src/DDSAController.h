@@ -12,7 +12,7 @@ struct GoalState
 
 class DDSAController
 {
- public: 
+  public: 
 
   DDSAController();
   DDSAController(int num_circuits, int num_robots, int robot_index);
@@ -22,9 +22,9 @@ class DDSAController
   void setX(float x);
   void setY(float y);
   std::string getPath();
-
+ 
   ~DDSAController();
-
+  
  private:
 
   GoalState getTargetN();
@@ -41,4 +41,5 @@ class DDSAController
   float y;
   float step_length;
   std::vector<char> pattern;
+  bool initialized;
 };

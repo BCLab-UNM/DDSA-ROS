@@ -1,25 +1,82 @@
 #include "Diagnostics.h"
+
+#include <string>
 #include <usb.h>
-#include <sys/stat.h>
+#include <sys/stat.h> // To check if a file exists
 #include <std_msgs/String.h> // For creating ROS string messages
 #include <ctime> // For time()
 
 using namespace std;
+using namespace gazebo;
 
 Diagnostics::Diagnostics(std::string name) {
+
   this->publishedName = name;
   diagLogPublisher = nodeHandle.advertise<std_msgs::String>("/diagsLog", 1, true);
+  diagnosticDataPublisher  = nodeHandle.advertise<std_msgs::Float32MultiArray>("/"+publishedName+"/diagnostics", 10);
+
+  // Initialize the variables we use to track the simulation update rate
+  prevRealTime = common::Time(0.0);
+  prevSimTime = common::Time(0.0);
+  simRate = 0.0f;
 
   // Setup sensor check timers
   sensorCheckTimer = nodeHandle.createTimer(ros::Duration(sensorCheckInterval), &Diagnostics::sensorCheckTimerEventHandler, this);
+  
+ simCheckTimer = nodeHandle.createTimer(ros::Duration(sensorCheckInterval), &Diagnostics::simCheckTimerEventHandler, this);
+
   if ( checkIfSimulatedRover() ) {
+    // For processing gazebo messages from the world stats topic.
+    // Used to gather information for simulated rovers
+
+    // Create fake argv and argc for the gazebo setup
+    char  arg0[] = "diagnostics";
+    char* argv[] = { &arg0[0], NULL };
+    int   argc   = (int)(sizeof(argv) / sizeof(argv[0])) - 1;
+    gazebo::setupClient(argc, argv);
+
+    // Create Gazebo node and init
+    gazebo::transport::NodePtr newNode(new gazebo::transport::Node());
+    gazeboNode = newNode;
+    gazeboNode->Init();
+    string worldStatsTopic = "/gazebo/default/world_stats";
+    worldStatsSubscriber = gazeboNode->Subscribe(worldStatsTopic, &Diagnostics::simWorldStatsEventHandler, this);
+ 
     simulated = true;
     publishInfoLogMessage("Diagnostic Package Started. Simulated Rover.");
   } else {
     simulated = false;
-    publishInfoLogMessage("Diagnostic Package Started. Physical Rover.");
+    publishInfoLogMessage("Diagnostic Package Started. Physical Rover. ");
+    
+    try {       
+      string name = wirelessDiags.setInterface();
+      publishInfoLogMessage("Monitoring wireless interface " + name);
+    } catch( exception &e ) {
+      publishErrorLogMessage("Error setting interface name for wireless diagnostics: " + string(e.what()));
+    }
   }
-  
+}
+
+void Diagnostics::publishDiagnosticData() {
+  if (!simulated) {
+  WirelessInfo info;
+
+  // Get info about the wireless interface
+  // Catch and display an error if there was an exception
+  try {
+    info = wirelessDiags.getInfo();
+  } catch( exception &e ){
+    publishErrorLogMessage(e.what());
+  return;
+}
+
+  std_msgs::Float32MultiArray rosMsg;
+  rosMsg.data.clear();
+  rosMsg.data.push_back(info.quality);
+  rosMsg.data.push_back(info.bandwidthUsed);
+  rosMsg.data.push_back(-1); // Sim update rate
+  diagnosticDataPublisher.publish(rosMsg);  
+  }
 }
 
 void Diagnostics::publishErrorLogMessage(std::string msg) {
@@ -58,12 +115,33 @@ string Diagnostics::getHumanFriendlyTime() {
 // sensor check timeout handler. This function is triggered periodically and calls the
 // sensor check functions.
 void Diagnostics::sensorCheckTimerEventHandler(const ros::TimerEvent& event) {
+
   if (!simulated) {
   checkIMU();
   checkGPS();
   checkSonar();
   checkCamera();
+  
+  publishDiagnosticData();
   }
+
+}
+
+void Diagnostics::simCheckTimerEventHandler(const ros::TimerEvent& event) {
+  
+  if (simulated) {
+    std_msgs::Float32MultiArray rosMsg;
+    rosMsg.data.clear();
+    rosMsg.data.push_back(0.0f);
+ rosMsg.data.push_back(0.0f);
+    rosMsg.data.push_back(checkSimRate());
+    diagnosticDataPublisher.publish(rosMsg);
+  }
+  
+}
+
+float Diagnostics::checkSimRate() {
+  return simRate;
 }
 
 void Diagnostics::checkIMU() {
@@ -147,6 +225,23 @@ bool Diagnostics::checkUSBDeviceExists(uint16_t vendorID, uint16_t productID){
   return false;
 }
 
+void Diagnostics::simWorldStatsEventHandler(ConstWorldStatisticsPtr &msg) {
+  
+  const msgs::Time simTimeMsg = msg->sim_time();
+  const msgs::Time realTimeMsg = msg->real_time();
+
+  common::Time simTime(simTimeMsg.sec(), simTimeMsg.nsec());
+  common::Time realTime(realTimeMsg.sec(), realTimeMsg.nsec());
+  
+  common::Time deltaSimTime = simTime - prevSimTime;
+  common::Time deltaRealTime = realTime - prevRealTime;
+
+  prevSimTime = simTime;
+  prevRealTime = realTime;
+
+  simRate = (deltaSimTime.Double())/(deltaRealTime.Double());
+}
+
 // Check whether a rover model file exists with the same name as this rover name
 // if not then we should be a physcial rover. Need a better method.
 bool Diagnostics::checkIfSimulatedRover() {
@@ -158,4 +253,6 @@ bool Diagnostics::checkIfSimulatedRover() {
 }
      
 Diagnostics::~Diagnostics() {
+  gazebo::shutdown();
 }
+

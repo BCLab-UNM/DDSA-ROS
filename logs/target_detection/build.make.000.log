@@ -1,0 +1,129 @@
+make: Warning: File `Makefile' has modification time 17 s in the future
+make[1]: Warning: File `CMakeFiles/Makefile2' has modification time 17 s in the future
+make[2]: Warning: File `CMakeFiles/shared_messages_generate_messages_py.dir/progress.make' has modification time 17 s in the future
+make[2]: Warning: File `CMakeFiles/sensor_msgs_generate_messages_lisp.dir/progress.make' has modification time 17 s in the future
+make[2]: Warning: File `CMakeFiles/camera.dir/flags.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target shared_messages_generate_messages_py
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target camera
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/shared_messages_generate_messages_py.dir/progress.make' has modification time 17 s in the future
+make[2]: Warning: File `CMakeFiles/sensor_msgs_generate_messages_lisp.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[0m[  0%] [  0%] Built target shared_messages_generate_messages_py
+Built target sensor_msgs_generate_messages_lisp
+make[2]: Warning: File `CMakeFiles/roscpp_generate_messages_cpp.dir/progress.make' has modification time 17 s in the future
+make[2]: Warning: File `CMakeFiles/sensor_msgs_generate_messages_cpp.dir/progress.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target roscpp_generate_messages_cpp
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[35m[1mScanning dependencies of target sensor_msgs_generate_messages_cpp
+make[2]: Warning: File `CMakeFiles/camera.dir/flags.make' has modification time 16 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/roscpp_generate_messages_cpp.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/sensor_msgs_generate_messages_cpp.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[0m[ 33%] [ 33%] Built target roscpp_generate_messages_cpp
+[ 33%] Built target sensor_msgs_generate_messages_cpp
+[32mBuilding CXX object CMakeFiles/camera.dir/src/camera.cpp.o
+make[2]: Warning: File `CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/progress.make' has modification time 17 s in the future
+[0m[ 66%] [32mBuilding CXX object CMakeFiles/camera.dir/src/usbCamera.cpp.o
+[0m[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_lisp
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target rosgraph_msgs_generate_messages_lisp
+make[2]: Warning: File `CMakeFiles/rosgraph_msgs_generate_messages_py.dir/progress.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_py
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/rosgraph_msgs_generate_messages_py.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target rosgraph_msgs_generate_messages_py
+make[2]: Warning: File `CMakeFiles/geometry_msgs_generate_messages_py.dir/progress.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_py
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/geometry_msgs_generate_messages_py.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target geometry_msgs_generate_messages_py
+make[2]: Warning: File `CMakeFiles/shared_messages_generate_messages_lisp.dir/progress.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target shared_messages_generate_messages_lisp
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/shared_messages_generate_messages_lisp.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target shared_messages_generate_messages_lisp
+make[2]: Warning: File `CMakeFiles/shared_messages_generate_messages_cpp.dir/progress.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target shared_messages_generate_messages_cpp
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/shared_messages_generate_messages_cpp.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target shared_messages_generate_messages_cpp
+make[2]: Warning: File `CMakeFiles/geometry_msgs_generate_messages_lisp.dir/progress.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_lisp
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/geometry_msgs_generate_messages_lisp.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target geometry_msgs_generate_messages_lisp
+make[2]: Warning: File `CMakeFiles/sensor_msgs_generate_messages_py.dir/progress.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_py
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/sensor_msgs_generate_messages_py.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target sensor_msgs_generate_messages_py
+make[2]: Warning: File `CMakeFiles/std_msgs_generate_messages_lisp.dir/progress.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target std_msgs_generate_messages_lisp
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/std_msgs_generate_messages_lisp.dir/progress.make' has modification time 17 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target std_msgs_generate_messages_lisp
+make[2]: Warning: File `CMakeFiles/geometry_msgs_generate_messages_cpp.dir/progress.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_cpp
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/geometry_msgs_generate_messages_cpp.dir/progress.make' has modification time 16 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target geometry_msgs_generate_messages_cpp
+make[2]: Warning: File `CMakeFiles/std_msgs_generate_messages_cpp.dir/progress.make' has modification time 17 s in the future
+[35m[1mScanning dependencies of target std_msgs_generate_messages_cpp
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/std_msgs_generate_messages_cpp.dir/progress.make' has modification time 16 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target std_msgs_generate_messages_cpp
+make[2]: Warning: File `CMakeFiles/roscpp_generate_messages_py.dir/progress.make' has modification time 16 s in the future
+[35m[1mScanning dependencies of target roscpp_generate_messages_py
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/roscpp_generate_messages_py.dir/progress.make' has modification time 16 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target roscpp_generate_messages_py
+make[2]: Warning: File `CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/progress.make' has modification time 16 s in the future
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_cpp
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/progress.make' has modification time 16 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target rosgraph_msgs_generate_messages_cpp
+make[2]: Warning: File `CMakeFiles/std_msgs_generate_messages_py.dir/progress.make' has modification time 16 s in the future
+[35m[1mScanning dependencies of target std_msgs_generate_messages_py
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/std_msgs_generate_messages_py.dir/progress.make' has modification time 16 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target std_msgs_generate_messages_py
+make[2]: Warning: File `CMakeFiles/roscpp_generate_messages_lisp.dir/progress.make' has modification time 16 s in the future
+[35m[1mScanning dependencies of target roscpp_generate_messages_lisp
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/roscpp_generate_messages_lisp.dir/progress.make' has modification time 16 s in the future
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[ 66%] Built target roscpp_generate_messages_lisp
+make[2]: Warning: File `CMakeFiles/target.dir/flags.make' has modification time 16 s in the future
+[35m[1mScanning dependencies of target target
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+make[2]: Warning: File `CMakeFiles/target.dir/flags.make' has modification time 16 s in the future
+[0m[100%] [32mBuilding CXX object CMakeFiles/target.dir/src/target.cpp.o
+[0m[31m[1mLinking CXX executable /nfs/home/matthew/DDSA-ROS/devel/lib/target_detection/camera
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[100%] Built target camera
+[31m[1mLinking CXX executable /nfs/home/matthew/DDSA-ROS/devel/lib/target_detection/target
+make[2]: warning:  Clock skew detected.  Your build may be incomplete.
+[0m[100%] Built target target
+make[1]: warning:  Clock skew detected.  Your build may be incomplete.
+make: warning:  Clock skew detected.  Your build may be incomplete.

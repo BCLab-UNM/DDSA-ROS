@@ -1,3 +1,6 @@
+
+
+
 #include "DDSAController.h"
 #include <cmath>
 #include <algorithm>
@@ -9,13 +12,15 @@ DDSAController::DDSAController()
   step_length = 0.5;
   x = 0;
   y = 0;
+  initialized = false;
 }
 
 DDSAController::DDSAController( int num_circuits, int num_robots, int robot_index )
 {
-  step_length = 0.25; // .5 meters
+  step_length = 0.5; 
   x = 0;
   y = 0;
+  initialized = false;
   generatePattern(num_circuits, num_robots, robot_index);
 }
 
@@ -33,10 +38,20 @@ GoalState DDSAController::calcNextGoalState()
 {
   GoalState gs;
 
+   if (!initialized)
+    {
+      initialized = true;
+      gs.x = 0;
+      gs.y = 0;
+      gs.yaw = 0;
+      gs.dir = 'H';
+      return gs;
+    }
+
   if (pattern.size() > 0) 
     {
         char curDir = pattern [pattern.size()-1];
-	pattern.pop_back();
+	      pattern.pop_back();
         switch(curDir)
         {
             case 'N':
@@ -56,9 +71,9 @@ GoalState DDSAController::calcNextGoalState()
   else
     {
       gs.dir = '0';
-      gs.x = '0';
-      gs.y = '0';
-      gs.yaw = '0';
+      gs.x   = 0;
+      gs.y   = 0;
+      gs.yaw = 0;
     }
 
   return gs;
@@ -200,7 +215,7 @@ void DDSAController::reversePattern (string ith_pattern)
 string DDSAController::getPath()
 {
   string path = "";
-  for (int i = 0; i<pattern.size(); i++)
+  for (int i = pattern.size(); i>0; i--)
     {
       path += pattern[i];
     }
