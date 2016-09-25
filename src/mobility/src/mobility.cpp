@@ -79,6 +79,9 @@ bool ddsaPatternGenerated = false; // So the rovers dont move until they know wh
 
 std::vector<string> roverNames;
 
+// PID variables
+float prevAngleError = 0.0;;
+
 // state machine states
 #define STATE_MACHINE_TRANSFORM	0
 #define STATE_MACHINE_ROTATE	1
@@ -148,12 +151,7 @@ int main(int argc, char **argv) {
   string hostname(host);
   
   rng = new random_numbers::RandomNumberGenerator(); //instantiate random number generator
-  goalLocation.theta = rng->uniformReal(0, 2 * M_PI); //set initial random heading
-  
-  //select initial search position 50 cm from center (0,0)
-  goalLocation.x = 0.5 * cos(goalLocation.theta);
-  goalLocation.y = 0.5 * sin(goalLocation.theta);
-  
+    
   if (argc >= 2) {
     publishedName = argv[1];
     cout << "Welcome to the world of tomorrow " << publishedName << "!  Mobility module started." << endl;
@@ -228,7 +226,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
   //ss << currentMode;
   //  sendInfoLogMsg("Mode: " + ss.str());
   /*
-  if (currentMode == 2 || currentMode == 3) { //Robot is in automode
+  
 
     switch (stateMachineState){
       case STATE_MACHINE_TRANSFORM: sendInfoLogMsg("Transforming");
@@ -239,6 +237,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
     }
   */
   
+  if (currentMode == 2 || currentMode == 3) { //Robot is in automode
     switch(stateMachineState) {
       
       //Select rotation or translation based on required adjustment
@@ -273,8 +272,6 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             
             //reset flag
             targetCollected = false;
-            
-            goalLocation.theta = rng->uniformReal(0, 2 * M_PI);
           }
         }
         //If no targets have been detected, assign a new goal
@@ -291,7 +288,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
           ss << dist;
           
           sendInfoLogMsg("Dist to goal: " + ss.str());
-          if (dist < 0.5) { // if within half a meter set a new goal
+          if (dist < 0.1) { // if within 10 centimeters set a new goal
             
             // DDSA Controller needs to know the current location in order to calculate the next goal state
             ddsa_controller.setX(currentLocation.x);
@@ -304,7 +301,8 @@ void mobilityStateMachine(const ros::TimerEvent&) {
                 + "dir: " + boost::lexical_cast<std::string>(gs.dir);
             sendInfoLogMsg(msg);
             
-            goalLocation.theta = gs.yaw;
+            //goalLocation.theta = gs.yaw;
+	    goalLocation.theta = atan2(0-currentLocation.y, 0-currentLocation.x); // yaw has to be the direction to the goal
             goalLocation.x = gs.x;
             goalLocation.y = gs.y;
           }
@@ -318,28 +316,62 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         //Stay in this state until angle is minimized
       case STATE_MACHINE_ROTATE: {
         stateMachineMsg.data = "ROTATING";
-        if (angles::shortest_angular_distance(currentLocation.theta, goalLocation.theta) > 0.1) {
-          setVelocity(0.0, 0.2); //rotate left
-        }
-        else if (angles::shortest_angular_distance(currentLocation.theta, goalLocation.theta) < -0.1) {
-          setVelocity(0.0, -0.2); //rotate right
-        }
-        else {
-          setVelocity(0.0, 0.0); //stop
+	
+	// check if the current goal has been reached
+	float xDiff = goalLocation.x-currentLocation.x;
+	float yDiff = goalLocation.y-currentLocation.y;
+	float x2 = xDiff*xDiff;
+	float y2 = yDiff*yDiff;
+	float dist = sqrt(x2+y2);
+	float goalAngle = atan2(goalLocation.x - currentLocation.x, goalLocation.y - currentLocation.y);
+
+	float angleError = angles::shortest_angular_distance(currentLocation.theta, goalAngle);
+	
+	if (fabs(angleError) > 0.05) {
+
+	  // Use a PID for more accurate rotations
+	  float Pk = 0.5;
+	  float Dk = 0.01;
+	  float deltaAngleError = fabs(prevAngleError-angleError);
+	  prevAngleError = angleError;
+	  float cmdVel = Pk*angleError+Dk*deltaAngleError;
+	  
+	  setVelocity(0.0, cmdVel);
+	  stringstream ss;
+	  ss << currentLocation.theta << ", " << ", " << goalAngle << ", " << angleError << " (" << goalLocation.x << ", "<< goalLocation.y << "), (" << currentLocation.x << ", " << currentLocation.y << ") " << dist << "|" << cmdVel;
+	  sendInfoLogMsg("Rotating: " + ss.str());
+	} else {
+	  sendInfoLogMsg("Rotating: stop");
+	  setVelocity(0.0, 0.0);
           stateMachineState = STATE_MACHINE_TRANSLATE; //move to translate step
+	  prevAngleError = 0.0;
         }
         break;
       }
-        
+	 
         //Calculate angle between currentLocation.x/y and goalLocation.x/y
         //Drive forward
         //Stay in this state until angle is at least PI/2
       case STATE_MACHINE_TRANSLATE: {
         stateMachineMsg.data = "TRANSLATING";
-        if (fabs(angles::shortest_angular_distance(currentLocation.theta, atan2(goalLocation.y - currentLocation.y, goalLocation.x - currentLocation.x))) < M_PI_2) {
+
+	// check if the current goal has been reached
+	float xDiff = goalLocation.x-currentLocation.x;
+	float yDiff = goalLocation.y-currentLocation.y;
+	float x2 = xDiff*xDiff;
+	float y2 = yDiff*yDiff;
+	float dist = sqrt(x2+y2);
+        
+	float angleError = angles::shortest_angular_distance(currentLocation.theta, atan2(goalLocation.y - currentLocation.y, goalLocation.x - currentLocation.x));
+	stringstream ss;
+	ss << angleError << " (" << goalLocation.x << ", "<< goalLocation.y << "), (" << currentLocation.x << ", " << currentLocation.y << ") " << dist;
+	
+        if (fabs(angleError) < M_PI_2) {
+	  sendInfoLogMsg("Translating: " + ss.str());
           setVelocity(0.3, 0.0);
         }
         else {
+	  sendInfoLogMsg("Translating: stop");
           setVelocity(0.0, 0.0); //stop
           
           //close fingers
@@ -351,26 +383,25 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         }
         break;
       }
-        
-      default: {
+	
+    default: {
         break;
-      }
+    }
     }
   }
-  
   else { // mode is NOT auto
     // publish current state for the operator to see
     stateMachineMsg.data = "WAITING";
-}
-
-// publish state machine string for user, only if it has changed, though
-if (strcmp(stateMachineMsg.data.c_str(), prev_state_machine) != 0) {
-
-  //infoLogPublisher.publish(stateMachineMsg);
-        
-  stateMachinePublish.publish(stateMachineMsg);
-  sprintf(prev_state_machine, "%s", stateMachineMsg.data.c_str());
-}
+  }
+  
+  // publish state machine string for user, only if it has changed, though
+  if (strcmp(stateMachineMsg.data.c_str(), prev_state_machine) != 0) {
+    
+    //infoLogPublisher.publish(stateMachineMsg);
+    
+    stateMachinePublish.publish(stateMachineMsg);
+    sprintf(prev_state_machine, "%s", stateMachineMsg.data.c_str());
+  }
 }
 
 void setVelocity(double linearVel, double angularVel) 
@@ -391,7 +422,7 @@ void setVelocity(double linearVel, double angularVel)
  ************************/
 
 void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& message) {
-  
+ 
   // If in manual mode do not try to automatically pick up the target
   if (currentMode == 1) return;
   
@@ -425,7 +456,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
       }
       
       //if this is the goal target
-      if (message->detections[0].id == 256) {
+      if (message->detections[0].id == 256 && targetCollected) {
         //open fingers to drop off target
         std_msgs::Float32 angle;
         angle.data = M_PI_2;
