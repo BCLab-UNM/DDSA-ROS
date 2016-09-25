@@ -75,6 +75,7 @@ bool doneWithCollision = false;
 std::priority_queue<string, std::vector<string>, std::greater<string> > roversQ;
 int numberOfRovers = 0; //count the number of rovers running
 int ddsaRoverIndex;
+bool ddsaPatternGenerated = false; // So the rovers dont move until they know where they are going
 
 std::vector<string> roverNames;
 
@@ -214,217 +215,122 @@ int main(int argc, char **argv) {
 }
 
 void mobilityStateMachine(const ros::TimerEvent&) {
+
+  // Don't move until we know where we are going
+  //if (!ddsaPatternGenerated) {
+  //  sendInfoLogMsg("Waiting for DDSA pattern");
+  //  return;
+  // }
+    
   std_msgs::String stateMachineMsg;
 
-  //How accurate the rover turns are.
-  float angle_tol = 0.01;
+  //stringstream ss;
+  //ss << currentMode;
+  //  sendInfoLogMsg("Mode: " + ss.str());
+  /*
+  if (currentMode == 2 || currentMode == 3) { //Robot is in automode
+
+    switch (stateMachineState){
+      case STATE_MACHINE_TRANSFORM: sendInfoLogMsg("Transforming");
+        break;
+      case STATE_MACHINE_TRANSLATE: sendInfoLogMsg("Translating");
+        break;
+      case STATE_MACHINE_ROTATE: sendInfoLogMsg("Rotating");
+    }
+  */
   
-  if (currentMode == 2 || currentMode == 3 ) { //Robot is in automode
-    // ROS_INFO_STREAM("RUNNING");
     switch(stateMachineState) {
-	
+      
       //Select rotation or translation based on required adjustment
       //If no adjustment needed, select new goal
       case STATE_MACHINE_TRANSFORM: {
         stateMachineMsg.data = "TRANSFORMING";
         //If angle between current and goal is significant
-        if (fabs(angles::shortest_angular_distance(currentLocation.theta, goalLocation.theta)) > angle_tol) { // Radians
-          ROS_INFO_STREAM("LT ROTATE");
+        if (fabs(angles::shortest_angular_distance(currentLocation.theta, goalLocation.theta)) > 0.1) {
           stateMachineState = STATE_MACHINE_ROTATE; //rotate
         }
-        // else if (doneWithCollision == true && setObstacleAvoidance == false){
-        // 	  ROS_INFO_STREAM("LT INSIDE 220");
-        // 	  if (setSpiralLocation == true){
-        // 	    goalLocation = spiralPosition;
-        // 	    goalLocation.theta = atan2(spiralPosition.y-currentLocation.y, spiralPosition.x-currentLocation.x);
-        // 	    std_msgs::String msg;
-        // 	    msg.data = "After obstacle avoidence spiralLocation x: " + boost::lexical_cast<std::string>(spiralPosition.x) + ", " 
-        // 	      + "y: " + boost::lexical_cast<std::string>(spiralPosition.y) + ", "
-        // 	      + "theta: " + boost::lexical_cast<std::string>(spiralPosition.theta);
-        // 	    infoLogPublisher.publish(msg);
-        // 	  }
-  
-        // 	  else{
-        // 	    goalLocation.theta = atan2(beforeCollisionPosition.y-currentLocation.y, beforeCollisionPosition.x-currentLocation.x);
-        // 	    goalLocation = beforeCollisionPosition;
-        // 	  }
-
-        // stateMachineState = STATE_MACHINE_TRANSFORM;// move to translate step
-        //	stateMachineState = STATE_MACHINE_ROTATE;
-  
         //If goal has not yet been reached
         else if (fabs(angles::shortest_angular_distance(currentLocation.theta, atan2(goalLocation.y - currentLocation.y, goalLocation.x - currentLocation.x))) < M_PI_2) {
-          ROS_INFO_STREAM("LT TRANSLATE");
           stateMachineState = STATE_MACHINE_TRANSLATE; //translate
-	
         }
         //If returning with a target
-        else if (targetDetected) {
+        else if (targetCollected) {
           //If goal has not yet been reached
           if (hypot(0.0 - currentLocation.x, 0.0 - currentLocation.y) > 0.5) {
             //set angle to center as goal heading
             goalLocation.theta = M_PI + atan2(currentLocation.y, currentLocation.x);
-					    
+            
             //set center as goal position
             goalLocation.x = 0.0;
             goalLocation.y = 0.0;
           }
-          //Otherwise, reset target and select new random uniform heading
+          //Otherwise, drop off target and select new random uniform heading
           else {
-            targetDetected = false;
-            //goalLocation.theta = rng->uniformReal(0, 2 * M_PI);  // What is this doing ???? <-----
+            //open fingers
+            std_msgs::Float32 angle;
+            angle.data = M_PI_2;
+            fingerAnglePublish.publish(angle);
+            
+            //reset flag
+            targetCollected = false;
+            
+            goalLocation.theta = rng->uniformReal(0, 2 * M_PI);
           }
         }
-        //Overrides goalLocation to be goalLocation before the collision happened.
-        else if (setObstacleAvoidance==true){
-          ROS_INFO_STREAM("LT resetAfterCollision");
-          //	goalLocation.theta = atan2(beforeCollisionPosition.y-currentLocation.y, beforeCollisionPosition.x-currentLocation.x);
-          goalLocation = beforeCollisionPosition;
-          std_msgs::String msg;
-          msg.data = "After Obstacle avoidence";
-          infoLogPublisher.publish(msg); 
-          msg.data = "Goal x: " + boost::lexical_cast<std::string>(goalLocation.x) + ", " 
-              + "y: " + boost::lexical_cast<std::string>(goalLocation.y) + ", "
-              + "yaw: " + boost::lexical_cast<std::string>(goalLocation.theta);
-          infoLogPublisher.publish(msg);
-
-          //if rover is done correcting inside ROTATING, then reset setObstacleAvoidance to false
-          if (doneWithCollision == true) {
-            setObstacleAvoidance = false;
-          }
-      	
-        }
-      
-        //Otherwise, assign a new goal
-        else {
-          ROS_INFO_STREAM("LT NEW GOAL");
-          string peekQ; 
-          //Handles the situation when the priority queue is empty
-          if (roversQ.empty()){
-            peekQ = "test"; 
-          }
-          else{
-            peekQ = roversQ.top();
-          }
-	
-          if (moveToNest == false && hypot(0.0 - currentLocation.x, 0.0 - currentLocation.y) > 0.15 && peekQ.compare(publishedName)== 0){
-	  
-            //Each rover will wait for 5 seconds before going to the center.
-            //sendInfoLogMsg("Waiting 5 seconds...");
-            //ros::Duration(5.0).sleep(); 
+        //If no targets have been detected, assign a new goal
+        else if (!targetDetected) {
+          
+          // check if the current goal has been reached
+          float xDiff = goalLocation.x-currentLocation.x;
+          float yDiff = goalLocation.y-currentLocation.y;
+          float x2 = xDiff*xDiff;
+          float y2 = yDiff*yDiff;
+          float dist = sqrt(x2+y2);
+          
+          stringstream ss;
+          ss << dist;
+          
+          sendInfoLogMsg("Dist to goal: " + ss.str());
+          if (dist < 0.5) { // if within half a meter set a new goal
             
-            
-            //set center as goal position
-            goalLocation.x = 0.0;
-            goalLocation.y = 0.0;
-            goalLocation.theta = atan2(0.0-currentLocation.y, 0.0-currentLocation.x);
-
-          }
-          //Distance to the center is < 0.15
-          else if (moveToNest == false && peekQ.compare(publishedName)== 0){
-	 
-            // 
-            mobility::rover roverUpdate; 
-            moveToNest = true;
-            roverUpdate.roverName = publishedName;
-            roverUpdate.moveToNest = moveToNest;
-	  
-            //Publish the name and the moveToNest status.
-            roverCountPublish.publish(roverUpdate);
-          }
-      
-          //Will be called once the rovers finish prioritizing movements to the center at the start
-          else if (moveToNest == true){
-
             // DDSA Controller needs to know the current location in order to calculate the next goal state
             ddsa_controller.setX(currentLocation.x);
             ddsa_controller.setY(currentLocation.y);
             
-            //select new goal state that follows the spiral pattern			      
-            float goalDiffTol = 1.5;//The distance tolerance between goal and spiral to check if rover got back to spiral.
-            if(fabs(goalLocation.x - spiralPosition.x) || fabs(goalLocation.y - spiralPosition.y) <= goalDiffTol){
-              setSpiralLocation = false;//rover is done reaching spiral.
-            }
-	  
-            //feel like ddsa gets next location all the time even when the rover is moving to back and forth to collect the food. 
-            //Want to only get next position when down with a pile or cluster. 
             GoalState gs = ddsa_controller.calcNextGoalState();
-            std_msgs::String msg;
-            msg.data = "x: " + boost::lexical_cast<std::string>(goalLocation.x) + ", " 
+            string msg = "x: " + boost::lexical_cast<std::string>(goalLocation.x) + ", " 
                 + "y: " + boost::lexical_cast<std::string>(goalLocation.y) + ", "
                 + "theta: " + boost::lexical_cast<std::string>(goalLocation.theta) + ", "
                 + "dir: " + boost::lexical_cast<std::string>(gs.dir);
-            infoLogPublisher.publish(msg);
+            sendInfoLogMsg(msg);
+            
             goalLocation.theta = gs.yaw;
             goalLocation.x = gs.x;
             goalLocation.y = gs.y;
-	  
           }
-	  
-          // std_msgs::String msg;
-          // msg.data = "x: " + boost::lexical_cast<std::string>(goalLocation.x) + ", " 
-          //   + "y: " + boost::lexical_cast<std::string>(goalLocation.y) + ", "
-          //   + "theta: " + boost::lexical_cast<std::string>(goalLocation.theta);
-          // + "dir: " + boost::lexical_cast<std::string>(gs.dir);
-          // infoLogPublisher.publish(msg);
-	
-          else{
-
-            if( hypot(0.0 - currentLocation.x, 0.0 - currentLocation.y) < 1.5) {
-              //The distance which the rovers move away from its starting position at the start of the stimulation.
-              float radialDistance = 2*hypot(0.0-currentLocation.x, 0.0-currentLocation.y);
-              goalLocation.theta = atan2(currentLocation.y, currentLocation.x);
-              goalLocation.x = radialDistance*cos(goalLocation.theta);
-              goalLocation.y = radialDistance*sin(goalLocation.theta);
-            }
-            else{	 
-              //rovers will face the center once they moved radialDistance away.
-              // goalLocation.theta = atan2(0.0-currentLocation.y, 0.0-currentLocation.x);
-              // goalLocation.x = currentLocation.x;
-              // goalLocation.y = currentLocation.y;
-	   
-              //Rovers stops when the rover is not in the priority queue.
-              setVelocity(0.0, 0.0);
-            }
-          }
-	
         }
-      }
+	
         //Purposefully fall through to next case without breaking
-			
+      }
+        
         //Calculate angle between currentLocation.theta and goalLocation.theta
         //Rotate left or right depending on sign of angle
         //Stay in this state until angle is minimized
       case STATE_MACHINE_ROTATE: {
         stateMachineMsg.data = "ROTATING";
-        float p_k = 0.25;  
-        float angle_error = angles::shortest_angular_distance(currentLocation.theta, goalLocation.theta);
-        // float unknown_angle_error = fabs(angles::shortest_angular_distance(currentLocation.theta, atan2(goalLocation.y - currentLocation.y, goalLocation.x - currentLocation.x)));
-        // float diff_x = currentLocation.x - goalLocation.x;
-        // float diff_y = currentLocation.y - goalLocation.y;
-        // float diff_x2 = diff_x*diff_x;
-        // float diff_y2 = diff_y*diff_y;
-
-        float command_vel = p_k*angle_error;
-        if (fabs(angle_error) > angle_tol) {
-          
-          // std_msgs::String msg;
-          // msg.data = "Angle Error: " + boost::lexical_cast<std::string>(angle_error)
-          // + ", Unknown Angle Error: " + boost::lexical_cast<std::string>(unknown_angle_error) 
-          // + ", Dist: " + boost::lexical_cast<std::string>(sqrt(diff_x2+diff_y2));
-          // infoLogPublisher.publish(msg);
-          // setObstacleAvoidance = false;
-          setVelocity(0.0, command_vel); //rotate
+        if (angles::shortest_angular_distance(currentLocation.theta, goalLocation.theta) > 0.1) {
+          setVelocity(0.0, 0.2); //rotate left
         }
-		    	
+        else if (angles::shortest_angular_distance(currentLocation.theta, goalLocation.theta) < -0.1) {
+          setVelocity(0.0, -0.2); //rotate right
+        }
         else {
-          doneWithCollision= true;//rover got out of collision
-          setVelocity(0.0, 0.0); //stop	
-          stateMachineState = STATE_MACHINE_TRANSLATE;
-        }   
-      
+          setVelocity(0.0, 0.0); //stop
+          stateMachineState = STATE_MACHINE_TRANSLATE; //move to translate step
+        }
         break;
       }
+        
         //Calculate angle between currentLocation.x/y and goalLocation.x/y
         //Drive forward
         //Stay in this state until angle is at least PI/2
@@ -435,27 +341,26 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         }
         else {
           setVelocity(0.0, 0.0); //stop
-					
+          
           //close fingers
           std_msgs::Float32 angle;
           angle.data = 0;
           fingerAnglePublish.publish(angle);
-					
+          
           stateMachineState = STATE_MACHINE_TRANSFORM; //move back to transform step
         }
         break;
       }
-		
+        
       default: {
         break;
       }
     }
-}
-else { // mode is NOT auto
-
-  // publish current state for the operator to see
-  stateMachineMsg.data = "WAITING";
-	
+  }
+  
+  else { // mode is NOT auto
+    // publish current state for the operator to see
+    stateMachineMsg.data = "WAITING";
 }
 
 // publish state machine string for user, only if it has changed, though
@@ -670,6 +575,7 @@ void roverCountHandler(const mobility::rover& message)
 void roverCountTimerEventHandler(const ros::TimerEvent& event)
 {
   //Prints out the priority queue in which the rovers are expected to head to the center at the start of algorithm.
+  /*
   std::priority_queue<string, std::vector<string>, std::greater<string> > roversQTemp = roversQ;
   string rovers;
  
@@ -682,13 +588,15 @@ void roverCountTimerEventHandler(const ros::TimerEvent& event)
   rovers += ")";
   ROS_INFO_STREAM("Qorder: " << rovers);
 
+  */
+  
   //Calls the ddsa controller to generate the pattern (circuits, rovers, robot ID).
   stringstream ss;
   ss << "N rovers=" <<  numberOfRovers << ", Rover Index = " << ddsaRoverIndex;
   sendInfoLogMsg("Generating DDSA search pattern with " + ss.str());
   ddsa_controller.generatePattern(10, numberOfRovers, ddsaRoverIndex);
   //infoLogPublisher.publish(publishedName+ " Spiral Pattern: " + ddsa_controller.getPath());
-  
+  ddsaPatternGenerated = true;
   roverCountTimer.stop();
 }
 
