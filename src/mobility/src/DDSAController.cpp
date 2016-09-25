@@ -7,9 +7,9 @@
 
 using namespace std;
 
-DDSAController::DDSAController()
+DDSAController::DDSAController( float gap )
 {
-  step_length = 0.5;
+  step_length = gap;
   x = 0;
   y = 0;
   initialized = false;

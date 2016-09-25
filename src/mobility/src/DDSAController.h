@@ -14,7 +14,7 @@ class DDSAController
 {
   public: 
 
-  DDSAController();
+  DDSAController(float);
   DDSAController(int num_circuits, int num_robots, int robot_index);
 
   void generatePattern(int num_circuits, int num_robots, int robot_index);
