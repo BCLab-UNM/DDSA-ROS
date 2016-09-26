@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
   modeSubscriber = mNH.subscribe((publishedName + "/mode"), 1, modeHandler);
   targetSubscriber = mNH.subscribe((publishedName + "/targets"), 10, targetHandler);
   obstacleSubscriber = mNH.subscribe((publishedName + "/obstacle"), 10, obstacleHandler);
-  odometrySubscriber = mNH.subscribe((publishedName + "/odom"), 10, odometryHandler);
+  odometrySubscriber = mNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
   roverCountSubscriber = mNH.subscribe("/numberofrovers", 10, roverCountHandler);
   
   status_publisher = mNH.advertise<std_msgs::String>((publishedName + "/status"), 1, true);
