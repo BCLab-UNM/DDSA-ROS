@@ -232,7 +232,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
     geometry_msgs::Pose2D nextLocation;
 
     if (isAvoidingCollision) {
-      //sendInfoLogMsg("Avoiding collision");
+      sendInfoLogMsg("Avoiding collision");
       nextLocation = collisionAvoidanceLocation;
     } else { 
       //sendInfoLogMsg("Following spiral");
@@ -257,7 +257,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 	  // reached goal
 	  if (isAvoidingCollision) { // Temp goal used to avoid collision
 	    isAvoidingCollision = false;
-	    //sendInfoLogMsg("Finished Avoiding Collision");
+	    sendInfoLogMsg("Finished Avoiding Collision");
 	  } else { // Ask the DDSA for a new location
 	    
             // DDSA Controller needs to know the current location in order to calculate the next goal state
@@ -266,8 +266,8 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             
             GoalState gs = ddsa_controller.calcNextGoalState();
 	    
-	    string msg = "Following spiral: " + boost::lexical_cast<std::string>(gs.dir);
-	    //sendInfoLogMsg(msg);
+	    string msg = "New spiral position: " + boost::lexical_cast<std::string>(gs.dir);
+	    sendInfoLogMsg(msg);
             
 	    spiralLocation.x = gs.x;
             spiralLocation.y = gs.y;
@@ -294,17 +294,19 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         //Stay in this state until angle is minimized
       case STATE_MACHINE_ROTATE: {
         stateMachineMsg.data = "ROTATING";
-	//	sendInfoLogMsg("Rotating");
+	//sendInfoLogMsg("Rotating");
 	
 	float angleError = angles::shortest_angular_distance(currentLocation.theta, angleToNextLocation);
 	
 	// Use a PID for more accurate rotations
-	float Pk = 1.5;
+	float Pk = 0.2;
 	float Dk = 0.0;
 	float deltaAngleError = prevAngleError-angleError;
 	prevAngleError = angleError;
 	float cmdVel = Pk*angleError+Dk*deltaAngleError;
-	
+
+	if (fabs(cmdVel) < 0.12 ) cmdVel = 0.12*boost::math::sign(cmdVel);
+      
 	setVelocity(0.0, cmdVel);
 	  
 	stateMachineState = STATE_MACHINE_TRANSFORM; //move back to transform step      
@@ -334,9 +336,12 @@ void mobilityStateMachine(const ros::TimerEvent&) {
       
       float cmdVel = Pk*positionError+Dk*deltaPositionError;
       
+      // Minimum value that actuates the wheels
+      if (fabs(cmdVel) < 0.12 ) cmdVel = 0.12*boost::math::sign(cmdVel);
+      
       // velocity cap
       if (cmdVel > 0.5) cmdVel = 0.5;
-      if (cmdVel < -0.5) cmdVel = -0.5;
+      if (cmdVel < -0.5) cmdVel = -0.5;      
 
       /*      
       stringstream ss;
@@ -400,36 +405,37 @@ void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
 
 void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
   
-  if (!isAvoidingCollision)
-  if (message->data > 0) {
-    // don't forget the original goal
-    // when multiple collisions occur
-    
-    //if (!isAvoidingCollision) sendInfoLogMsg("Avoiding Collision");
-    
-    isAvoidingCollision = true;     
+  if (!isAvoidingCollision )
+    if (message->data > 0) 
+      if (message->data != 2) { // Ignore collisions from the center Ultrasound
+	// don't forget the original goal
+	// when multiple collisions occur
+	
+	//if (!isAvoidingCollision) sendInfoLogMsg("Avoiding Collision");
+	
+	isAvoidingCollision = true;     
 
-    float avoidanceAngle = 0;
-
-    //obstacle on right side
-    if (message->data == 1) {
-      //select new heading to the left
-      avoidanceAngle = M_PI_4+0.05; 
-      // multiple collision
-    }
-    //obstacle in front or on left side
-    else if (message->data == 2) {
-      //select new heading to the right
-      avoidanceAngle = -M_PI_4; // Add asymmetry
-    }
-    							
-    //select new position 10 cm from current location
-    collisionAvoidanceLocation.x = currentLocation.x + (0.5 * cos(currentLocation.theta+avoidanceAngle));
-    collisionAvoidanceLocation.y = currentLocation.y + (0.5 * sin(currentLocation.theta+avoidanceAngle));
-
-    //switch to transform state to trigger collision avoidance
-    stateMachineState = STATE_MACHINE_TRANSFORM;
-  }
+	float avoidanceAngle = 0;
+	
+	//obstacle on right side
+	if (message->data == 1) {
+	  //select new heading to the left
+	  avoidanceAngle = M_PI_4+0.05; 
+	  // multiple collision
+	}
+	//obstacle on left side
+	else if (message->data == 3) {
+	  //select new heading to the right
+	  avoidanceAngle = -M_PI_4; // Add asymmetry
+	}
+    	
+	//select new position 10 cm from current location
+	collisionAvoidanceLocation.x = currentLocation.x + (0.5 * cos(currentLocation.theta+avoidanceAngle));
+	collisionAvoidanceLocation.y = currentLocation.y + (0.5 * sin(currentLocation.theta+avoidanceAngle));
+	
+	//switch to transform state to trigger collision avoidance
+	stateMachineState = STATE_MACHINE_TRANSFORM;
+      }
 }
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
