@@ -11,7 +11,7 @@
 using namespace std;
 
 //Globals
-double collisionDistance = 0.4; //meters the ultrasonic detectors will flag obstacles
+double collisionDistance = 0.75; //meters the ultrasonic detectors will flag obstacles
 string publishedName;
 char host[128];
 

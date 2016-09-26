@@ -54,9 +54,11 @@ void closeFingers();// Close fingers to 0 degrees
 void raiseWrist();  // Return wrist back to 0 degrees
 void lowerWrist();  // Lower wrist to 50 degrees
 
-//Numeric Variables
+// Goal positions
 geometry_msgs::Pose2D currentLocation;
-geometry_msgs::Pose2D goalLocation;
+geometry_msgs::Pose2D spiralLocation;
+geometry_msgs::Pose2D collisionAvoidanceLocation;
+
 int currentMode = 0;
 float mobilityLoopTimeStep = 0.1; //time between the mobility loop calls
 float status_publish_interval = 5;
@@ -144,8 +146,7 @@ int roverNameToIndex(string name);
 // Create the DDSA Controller
 float ddsaGap = 1.0;
 DDSAController ddsa_controller(ddsaGap);
-geometry_msgs::Pose2D spiralPosition;
-geometry_msgs::Pose2D goalBeforeCollision;
+
 
 float positionErrorTol = 0.1; //meters // How close to try and get to goal locations
 float angleErrorTol = 0.05;  //rad
@@ -186,7 +187,9 @@ int main(int argc, char **argv) {
   infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);
   roverCountPublish = mNH.advertise<mobility::rover>("/numberofrovers",10,true);
 
-  
+  spiralLocation.x = 0;
+  spiralLocation.y = 0;
+  spiralLocation.theta = 0;
   
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   //killSwitchTimer = mNH.createTimer(ros::Duration(killSwitchTimeout), killSwitchTimerEventHandler);
@@ -209,14 +212,8 @@ int main(int argc, char **argv) {
   }
 
   
-  roverCountTimer = mNH.createTimer(ros::Duration(1.0), roverCountTimerEventHandler, true);
-
-  
-  //set center as goal position
-  goalLocation.x = 0.0;
-  goalLocation.y = 0.0;
-  goalLocation.theta = 0;
-
+  roverCountTimer = mNH.createTimer(ros::Duration(1.0), roverCountTimerEventHandler, true); 
+   
   ros::spin();
   
   return EXIT_SUCCESS;
@@ -225,83 +222,56 @@ int main(int argc, char **argv) {
 // The state machine handles movement toward goal positions
 void mobilityStateMachine(const ros::TimerEvent&) {
 
-  // Don't move until we know where we are going
-  //if (!ddsaPatternGenerated) {
-  //  sendInfoLogMsg("Waiting for DDSA pattern");
-  //  return;
-  // }
-    
   std_msgs::String stateMachineMsg;
-
-  //stringstream ss;
-  //ss << currentMode;
-  //  sendInfoLogMsg("Mode: " + ss.str());
-  /*
-  
-
-    switch (stateMachineState){
-      case STATE_MACHINE_TRANSFORM: sendInfoLogMsg("Transforming");
-        break;
-      case STATE_MACHINE_TRANSLATE: sendInfoLogMsg("Translating");
-        break;
-      case STATE_MACHINE_ROTATE: sendInfoLogMsg("Rotating");
-    }
-  */
   
   if (currentMode == 2 || currentMode == 3) { //Robot is in automode
-
     // Update the goalLocation target angle. We want the goal location to point towards the goal x, y coords
-    float angleToGoalLocation = atan2(goalLocation.y - currentLocation.y, goalLocation.x - currentLocation.x);
+    
     // Calculate positional and angle error
-    float xDiff = goalLocation.x-currentLocation.x;
-    float yDiff = goalLocation.y-currentLocation.y;
-      float x2 = xDiff*xDiff;
-      float y2 = yDiff*yDiff;
-      float positionError = sqrt(x2+y2);
-      
-      float angleError = angles::shortest_angular_distance(currentLocation.theta, angleToGoalLocation);
-      
-      stringstream ss;
-      ss << "Cx: " << currentLocation.x << ", Cy: " << currentLocation.y << ", Ctheta: " << currentLocation.theta  << ", Gx: " << goalLocation.x << " Gy: " << goalLocation.y << " Angle to goal location:" << angleToGoalLocation << ", Angle error: " << angleError << ", Position error: " << positionError;
-      //sendInfoLogMsg(ss.str());
-      
+    
+    geometry_msgs::Pose2D nextLocation;
+
+    if (isAvoidingCollision) {
+      //sendInfoLogMsg("Avoiding collision");
+      nextLocation = collisionAvoidanceLocation;
+    } else { 
+      //sendInfoLogMsg("Following spiral");
+      nextLocation = spiralLocation; 
+    }
+
+    float angleToNextLocation = atan2(nextLocation.y - currentLocation.y, nextLocation.x - currentLocation.x);
+
+    float xDiff = nextLocation.x-currentLocation.x;
+    float yDiff = nextLocation.y-currentLocation.y;
+    float x2 = xDiff*xDiff;
+    float y2 = yDiff*yDiff;
+    float positionError = sqrt(x2+y2);
+    
+    float angleError = angles::shortest_angular_distance(currentLocation.theta, angleToNextLocation);
+    
     switch(stateMachineState) {
-  
-      //Select rotation or translation based on required adjustment
-      //If no adjustment needed, select new goal
       
     case STATE_MACHINE_TRANSFORM: {
 	if (positionError < positionErrorTol)  { // Current goal reached
-
+	  //sendInfoLogMsg("Transform");
 	  // reached goal
 	  if (isAvoidingCollision) { // Temp goal used to avoid collision
-
 	    isAvoidingCollision = false;
-	    sendInfoLogMsg("Finished Avoiding Collision");
-
-	    // goal before collision should always be a non-collision avoidance goal
-	    goalLocation = goalBeforeCollision;
-
+	    //sendInfoLogMsg("Finished Avoiding Collision");
 	  } else { // Ask the DDSA for a new location
-	   
+	    
             // DDSA Controller needs to know the current location in order to calculate the next goal state
             ddsa_controller.setX(currentLocation.x);
             ddsa_controller.setY(currentLocation.y);
             
             GoalState gs = ddsa_controller.calcNextGoalState();
-	    /*
-            string msg = "x: " + boost::lexical_cast<std::string>(goalLocation.x) + ", " 
-                + "y: " + boost::lexical_cast<std::string>(goalLocation.y) + ", "
-                + "theta: " + boost::lexical_cast<std::string>(goalLocation.theta) + ", "
-                + "dir: " + 
-	    */
-
-	    string msg = "Setting new goal: " + boost::lexical_cast<std::string>(gs.dir);
-	    sendInfoLogMsg(msg);
+	    
+	    string msg = "Following spiral: " + boost::lexical_cast<std::string>(gs.dir);
+	    //sendInfoLogMsg(msg);
             
-	    goalLocation.x = gs.x;
-            goalLocation.y = gs.y;
-	    goalLocation.theta = atan2(goalLocation.y - currentLocation.y, goalLocation.x - currentLocation.x);
+	    spiralLocation.x = gs.x;
+            spiralLocation.y = gs.y;
+	    spiralLocation.theta = atan2(spiralLocation.y - currentLocation.y, spiralLocation.x - currentLocation.x);
 	  }
 
 	stateMachineMsg.data = "TRANSFORMING";
@@ -310,7 +280,6 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         //If angle between current and goal is significant
       } else if (fabs(angleError) > angleErrorTol) {
 	  stateMachineState = STATE_MACHINE_ROTATE; //rotate
-        
         //If goal has not yet been reached
       } else if (positionError > positionErrorTol) {
 	  stateMachineState = STATE_MACHINE_TRANSLATE; //translate
@@ -325,33 +294,20 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         //Stay in this state until angle is minimized
       case STATE_MACHINE_ROTATE: {
         stateMachineMsg.data = "ROTATING";
+	//	sendInfoLogMsg("Rotating");
 	
-	// check if the current goal has been reached
-	float xDiff = goalLocation.x-currentLocation.x;
-	float yDiff = goalLocation.y-currentLocation.y;
-	float x2 = xDiff*xDiff;
-	float y2 = yDiff*yDiff;
-	float dist = sqrt(x2+y2);
-	//float goalAngle = atan2(goalLocation.x - currentLocation.x, goalLocation.y - currentLocation.y);
-
-	float angleError = angles::shortest_angular_distance(currentLocation.theta, angleToGoalLocation);
+	float angleError = angles::shortest_angular_distance(currentLocation.theta, angleToNextLocation);
 	
 	// Use a PID for more accurate rotations
-	  float Pk = 1.5;
-	  float Dk = 0.0;
-	  float deltaAngleError = prevAngleError-angleError;
-	  prevAngleError = angleError;
-	  float cmdVel = Pk*angleError+Dk*deltaAngleError;
-       
-	  setVelocity(0.0, cmdVel);
+	float Pk = 1.5;
+	float Dk = 0.0;
+	float deltaAngleError = prevAngleError-angleError;
+	prevAngleError = angleError;
+	float cmdVel = Pk*angleError+Dk*deltaAngleError;
+	
+	setVelocity(0.0, cmdVel);
 	  
-	  /*
-	  stringstream ss;
-	  ss << cmdVel;
-	  sendInfoLogMsg("Rotating: " + ss.str());
-	  */
-
-	  stateMachineState = STATE_MACHINE_TRANSFORM; //move back to transform step      
+	stateMachineState = STATE_MACHINE_TRANSFORM; //move back to transform step      
       }
 
 	break;
@@ -361,16 +317,17 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         //Stay in this state until angle is at least PI/2
     case STATE_MACHINE_TRANSLATE: {
       stateMachineMsg.data = "TRANSLATING";
+      //sendInfoLogMsg("Translating");
 
       // check if the current goal has been reached
-      float xDiff = goalLocation.x-currentLocation.x;
-      float yDiff = goalLocation.y-currentLocation.y;
+      float xDiff = nextLocation.x-currentLocation.x;
+      float yDiff = nextLocation.y-currentLocation.y;
       float x2 = xDiff*xDiff;
       float y2 = yDiff*yDiff;
       float positionError = sqrt(x2+y2);
       
       // Use a PID for more accurate rotations
-      float Pk = 0.75;
+      float Pk = 1.5;
       float Dk = 0.0;
       float deltaPositionError = prevPositionError-positionError;
       prevPositionError = positionError;
@@ -434,80 +391,6 @@ void setVelocity(double linearVel, double angularVel)
 
 void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& message) {
  
-  return;
-  // If in manual mode do not try to automatically pick up the target
-  if (currentMode == 1) return;
-  
-  // If we saw a target and are not returning to the spiral
-  if (message->detections.size() > 0 && setSpiralLocation == false) {
-    
-    geometry_msgs::PoseStamped tagPose = message->detections[0].pose;
-    
-    //if target is close enough
-    if (hypot(hypot(tagPose.pose.position.x, tagPose.pose.position.y), tagPose.pose.position.z) < 0.2) {
-      //assume target has been picked up by gripper
-      targetCollected = true;
-      
-      //lower wrist to avoid ultrasound sensors
-      std_msgs::Float32 angle;
-      angle.data = M_PI_2/4;
-      wristAnglePublish.publish(angle);
-    }
-    
-    else {
-      tagPose.header.stamp = ros::Time(0);
-      geometry_msgs::PoseStamped odomPose;
-      
-      try {
-        tfListener->waitForTransform(publishedName + "/odom", publishedName + "/camera_link", ros::Time(0), ros::Duration(1.0));
-        tfListener->transformPose(publishedName + "/odom", tagPose, odomPose);
-      }
-      
-      catch(tf::TransformException& ex) {
-        ROS_INFO("Received an exception trying to transform a point from \"odom\" to \"camera_link\": %s", ex.what());
-      }
-      
-      //if this is the goal target
-      if (message->detections[0].id == 256 && targetCollected) {
-        //open fingers to drop off target
-        std_msgs::Float32 angle;
-        angle.data = M_PI_2;
-        fingerAnglePublish.publish(angle);
-        goalLocation = spiralPosition;
-        goalLocation.theta = atan2(spiralPosition.y-currentLocation.y, spiralPosition.x-currentLocation.x);
-      }
-      
-      //Otherwise, if no target has been collected, set target pose as goal
-      else if (!targetCollected) {
-        //set goal heading
-        goalLocation.theta = atan2(odomPose.pose.position.y - currentLocation.y, odomPose.pose.position.x - currentLocation.x);
-        
-        //set goal position
-        goalLocation.x = odomPose.pose.position.x - (0.26 * cos(goalLocation.theta));
-        goalLocation.y = odomPose.pose.position.y - (0.26 * sin(goalLocation.theta));
-        
-        //set gripper
-        std_msgs::Float32 angle;
-        //open fingers
-        angle.data = M_PI_2;
-        fingerAnglePublish.publish(angle);
-        //lower wrist
-        angle.data = 0.8;
-        wristAnglePublish.publish(angle);
-        
-        //set state and timeout
-        targetDetected = true;
-        targetDetectedTimer.setPeriod(ros::Duration(5.0));
-        //targetDetectedTimer.start();
-
-        // Assume we picked up the target
-        spiralPosition = currentLocation;
-
-        //switch to transform state to trigger return to center
-        stateMachineState = STATE_MACHINE_TRANSFORM;
-      }
-    }
-  }
 }
 
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
@@ -517,31 +400,33 @@ void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
 
 void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
   
-  if (!targetDetected && (message->data > 0)) {
+  if (!isAvoidingCollision)
+  if (message->data > 0) {
     // don't forget the original goal
     // when multiple collisions occur
-    if (!isAvoidingCollision) { 
-      sendInfoLogMsg("Avoiding Collision");
-      goalBeforeCollision = goalLocation;
-    }
-    isAvoidingCollision = true; 
     
+    //if (!isAvoidingCollision) sendInfoLogMsg("Avoiding Collision");
+    
+    isAvoidingCollision = true;     
+
+    float avoidanceAngle = 0;
+
     //obstacle on right side
     if (message->data == 1) {
-      //select new heading 0.2 radians to the left
-      goalLocation.theta = currentLocation.theta + 0.2;
+      //select new heading to the left
+      avoidanceAngle = M_PI_4+0.05; 
+      // multiple collision
     }
-    
     //obstacle in front or on left side
     else if (message->data == 2) {
-      //select new heading 0.2 radians to the right
-      goalLocation.theta = currentLocation.theta - 0.2;
+      //select new heading to the right
+      avoidanceAngle = -M_PI_4; // Add asymmetry
     }
-							
-    //select new position 50 cm from current location
-    goalLocation.x = currentLocation.x + (0.5 * cos(goalLocation.theta));
-    goalLocation.y = currentLocation.y + (0.5 * sin(goalLocation.theta));
-		
+    							
+    //select new position 10 cm from current location
+    collisionAvoidanceLocation.x = currentLocation.x + (0.5 * cos(currentLocation.theta+avoidanceAngle));
+    collisionAvoidanceLocation.y = currentLocation.y + (0.5 * sin(currentLocation.theta+avoidanceAngle));
+
     //switch to transform state to trigger collision avoidance
     stateMachineState = STATE_MACHINE_TRANSFORM;
   }
@@ -642,10 +527,10 @@ void roverCountTimerEventHandler(const ros::TimerEvent& event)
   stringstream ss;
   ss << "N rovers=" <<  numberOfRovers << ", Rover Index = " << ddsaRoverIndex;
   ddsa_controller.generatePattern(10, numberOfRovers, ddsaRoverIndex);
-  ss << " Spiral Pattern: " << ddsa_controller.getPath();
+  ss << " Spiral Pattern for " << " index " << ddsaRoverIndex << ": " << ddsa_controller.getPath();
   ddsaPatternGenerated = true;
   roverCountTimer.stop();
-  //sendInfoLogMsg("Generating DDSA search pattern with " + ss.str());
+  sendInfoLogMsg(ss.str());
 }
 
 // Assumes the names of all the rovers in the swarn have been added to
