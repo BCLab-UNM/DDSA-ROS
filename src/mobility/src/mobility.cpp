@@ -54,7 +54,7 @@ mobility::rover rover; //used to published the rovers names and count the rovers
 bool moveToNest = false;
 bool setSpiralLocation = false;
 bool setObstacleAvoidance = false;
-bool doneWithCollision = false;
+bool setObstalceAvoidanceSpiral = false;
 std::priority_queue<string, std::vector<string>, std::greater<string> > roversQ;
 int numberOfRovers = 0; //count the number of rovers running
 int robotNumber;
@@ -121,7 +121,7 @@ int roverNameToIndex(string name);
 DDSAController ddsa_controller;
 geometry_msgs::Pose2D spiralPosition;
 geometry_msgs::Pose2D beforeCollisionPosition;
-
+geometry_msgs::Pose2D beforeCollisionPositionSpiral;
 int main(int argc, char **argv) {
 
   gethostname(host, sizeof (host));
@@ -187,7 +187,6 @@ void mobilityStateMachine(const ros::TimerEvent&) {
   float angle_tol = 0.01;
   
   if (currentMode == 2 || currentMode == 3 ) { //Robot is in automode
-    // ROS_INFO_STREAM("RUNNING");
     switch(stateMachineState) {
 	
       //Select rotation or translation based on required adjustment
@@ -199,32 +198,35 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 	ROS_INFO_STREAM("LT ROTATE");
 	stateMachineState = STATE_MACHINE_ROTATE; //rotate
       }
-      // else if (doneWithCollision == true && setObstacleAvoidance == false){
-      // 	  ROS_INFO_STREAM("LT INSIDE 220");
-      // 	  if (setSpiralLocation == true){
-      // 	    goalLocation = spiralPosition;
-      // 	    goalLocation.theta = atan2(spiralPosition.y-currentLocation.y, spiralPosition.x-currentLocation.x);
-      // 	    std_msgs::String msg;
-      // 	    msg.data = "After obstacle avoidence spiralLocation x: " + boost::lexical_cast<std::string>(spiralPosition.x) + ", " 
-      // 	      + "y: " + boost::lexical_cast<std::string>(spiralPosition.y) + ", "
-      // 	      + "theta: " + boost::lexical_cast<std::string>(spiralPosition.theta);
-      // 	    infoLogPublisher.publish(msg);
-      // 	  }
-  
-      // 	  else{
-      // 	    goalLocation.theta = atan2(beforeCollisionPosition.y-currentLocation.y, beforeCollisionPosition.x-currentLocation.x);
-      // 	    goalLocation = beforeCollisionPosition;
-      // 	  }
 
-      // stateMachineState = STATE_MACHINE_TRANSFORM;// move to translate step
-      //	stateMachineState = STATE_MACHINE_ROTATE;
-  
       //If goal has not yet been reached
       else if (fabs(angles::shortest_angular_distance(currentLocation.theta, atan2(goalLocation.y - currentLocation.y, goalLocation.x - currentLocation.x))) < M_PI_2) {
 	ROS_INFO_STREAM("LT TRANSLATE");
 	stateMachineState = STATE_MACHINE_TRANSLATE; //translate
 	
       }
+
+      // //Overrides goalLocation to be goalLocation before the collision happened.
+      else if (setObstacleAvoidance==true){
+      	ROS_INFO_STREAM("LT resetAfterCollision");
+      	goalLocation = beforeCollisionPosition;
+      	std_msgs::String msg;
+      	msg.data = "After Obstacle avoidence";
+      	infoLogPublisher.publish(msg); 
+      	msg.data = "Goal x: " + boost::lexical_cast<std::string>(goalLocation.x) + ", " 
+      	  + "y: " + boost::lexical_cast<std::string>(goalLocation.y) + ", "
+      	  + "yaw: " + boost::lexical_cast<std::string>(goalLocation.theta);
+      	infoLogPublisher.publish(msg);
+      	setObstacleAvoidance = false;
+
+      	if(fabs(spiralPosition.x - beforeCollisionPosition.x) || fabs(spiralPosition.y -beforeCollisionPosition.y) <= 1.5){
+      	  ROS_INFO_STREAM("LT inside 244");
+      	  setObstalceAvoidanceSpiral = true;
+      	  beforeCollisionPositionSpiral = goalLocation;
+      	}
+      	stateMachineState = STATE_MACHINE_ROTATE; //translate
+      }
+      
       //If returning with a target
       else if (targetDetected.data != -1) {
 	//If goal has not yet been reached
@@ -242,26 +244,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 	  //goalLocation.theta = rng->uniformReal(0, 2 * M_PI);  // What is this doing ???? <-----
 	}
       }
-      //Overrides goalLocation to be goalLocation before the collision happened.
-      else if (setObstacleAvoidance==true){
-	ROS_INFO_STREAM("LT resetAfterCollision");
-      	//	goalLocation.theta = atan2(beforeCollisionPosition.y-currentLocation.y, beforeCollisionPosition.x-currentLocation.x);
-      	goalLocation = beforeCollisionPosition;
-	std_msgs::String msg;
-	msg.data = "After Obstacle avoidence";
-	infoLogPublisher.publish(msg); 
-	msg.data = "Goal x: " + boost::lexical_cast<std::string>(goalLocation.x) + ", " 
-	  + "y: " + boost::lexical_cast<std::string>(goalLocation.y) + ", "
-	  + "yaw: " + boost::lexical_cast<std::string>(goalLocation.theta);
-	infoLogPublisher.publish(msg);
-
-	//if rover is down correcting inside ROTATING, then reset setObstacleAvoidance to false
-	if (doneWithCollision == true) {
-	  setObstacleAvoidance = false;
-	}
-      	
-      }
-      
+     
       //Otherwise, assign a new goal
       else {
  	ROS_INFO_STREAM("LT NEW GOAL");
@@ -307,12 +290,15 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             
 	  //select new goal state that follows the spiral pattern			      
 	  float goalDiffTol = 1.5;//The distance tolerance between goal and spiral to check if rover got back to spiral.
+       
+	  if(setObstalceAvoidanceSpiral){
+	    goalLocation = beforeCollisionPositionSpiral;
+	    setObstalceAvoidanceSpiral = false;
+	  }
 	  if(fabs(goalLocation.x - spiralPosition.x) || fabs(goalLocation.y - spiralPosition.y) <= goalDiffTol){
 	    setSpiralLocation = false;//rover is done reaching spiral.
 	  }
-	  
-	  //feel like ddsa gets next location all the time even when the rover is moving to back and forth to collect the food. 
-	  //Want to only get next position when down with a pile or cluster. 
+	   
 	  GoalState gs = ddsa_controller.calcNextGoalState();
 	  std_msgs::String msg;
 	  msg.data = "x: " + boost::lexical_cast<std::string>(goalLocation.x) + ", " 
@@ -384,7 +370,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
       }
 		    	
       else {
-	doneWithCollision= true;//rover got out of collision
+	//doneWithCollision= true;//rover got out of collision
 	setVelocity(0.0, 0.0); //stop	
 	stateMachineState = STATE_MACHINE_TRANSLATE;
       }   
@@ -519,6 +505,12 @@ void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
 void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
   if (message->data > 0) {
     beforeCollisionPosition = goalLocation;
+
+    // if(fabs(beforeCollisionPosition.x - spiralPosition.x) || fabs(beforeCollisionPosition.y - spiralPosition.y) <= 1.5){
+    //   // setSpiralLocation = false;//rover is done reaching spiral.
+    //   beforeCollisionPosition = goalLocation;
+    // }
+	  
 
     std_msgs::String msg;
     msg.data = "Reached Obstacle";
@@ -676,3 +668,4 @@ int roverNameToIndex( string roverName ) {
     return 5;
   }
 }
+
