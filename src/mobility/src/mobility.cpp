@@ -472,7 +472,7 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
 	  //select new heading to the left
 	  //	  sendInfoLogMsg("Avoiding collision");
 	  isAvoidingCollision = true;     
-	  avoidanceAngle = 0; 
+	  avoidanceAngle = 0.2; 
 	  sendInfoLogMsg("Avoiding collision in front"); 
 	  // multiple collision
 	}
@@ -490,8 +490,8 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
 	    isAvoidingCollision = false;     
 	  }
 	//select new position 10 cm from current location
-	collisionAvoidanceLocation.x = currentLocation.x + (0.12 * cos(currentLocation.theta+avoidanceAngle));
-	collisionAvoidanceLocation.y = currentLocation.y + (0.12 * sin(currentLocation.theta+avoidanceAngle));
+	collisionAvoidanceLocation.x = currentLocation.x + (0.5 * cos(currentLocation.theta+avoidanceAngle));
+	collisionAvoidanceLocation.y = currentLocation.y + (0.5 * sin(currentLocation.theta+avoidanceAngle));
 	
 	//switch to transform state to trigger collision avoidance
 	stateMachineState = STATE_MACHINE_TRANSFORM;
