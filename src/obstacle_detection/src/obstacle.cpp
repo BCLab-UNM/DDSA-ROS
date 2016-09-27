@@ -55,7 +55,7 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 	if (sonarRight->range < collisionDistance) {
 	  obstacleMode.data = 1; //collision on right side
 	}
-	else if (sonarLeft->range > collisionDistance) {
+	else if (sonarLeft->range < collisionDistance) {
 	  obstacleMode.data = 3; //collision in the left
 	}
 	else if (sonarCenter->range < collisionDistance) {

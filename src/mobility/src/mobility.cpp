@@ -79,6 +79,8 @@ int numberOfRovers = 0; //count the number of rovers running
 int ddsaRoverIndex;
 bool ddsaPatternGenerated = false; // So the rovers dont move until they know where they are going
 
+bool singleSearchingForCollectionPointMsgFlag = false;
+
 std::vector<string> roverNames;
 
 // PID variables
@@ -147,6 +149,8 @@ int roverNameToIndex(string name);
 float ddsaGap = 1.0;
 DDSAController ddsa_controller(ddsaGap);
 
+bool isCollectionPointFound = false;
+geometry_msgs::Pose2D nestLocation;
 
 float positionErrorTol = 0.1; //meters // How close to try and get to goal locations
 float angleErrorTol = 0.05;  //rad
@@ -175,7 +179,7 @@ int main(int argc, char **argv) {
   joySubscriber = mNH.subscribe((publishedName + "/joystick"), 10, joyCmdHandler);
   modeSubscriber = mNH.subscribe((publishedName + "/mode"), 1, modeHandler);
   targetSubscriber = mNH.subscribe((publishedName + "/targets"), 10, targetHandler);
-  obstacleSubscriber = mNH.subscribe((publishedName + "/obstacle"), 10, obstacleHandler);
+  obstacleSubscriber = mNH.subscribe((publishedName + "/obstacle"), 1, obstacleHandler);
   odometrySubscriber = mNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
   roverCountSubscriber = mNH.subscribe("/numberofrovers", 10, roverCountHandler);
   
@@ -225,14 +229,29 @@ void mobilityStateMachine(const ros::TimerEvent&) {
   std_msgs::String stateMachineMsg;
   
   if (currentMode == 2 || currentMode == 3) { //Robot is in automode
+
+ 
     // Update the goalLocation target angle. We want the goal location to point towards the goal x, y coords
     
     // Calculate positional and angle error
     
     geometry_msgs::Pose2D nextLocation;
 
+    // Turn until the central collection point (nest) is located.
+    // isCollectionPointFound is set to true when an april tag is
+    // found with ID 255. The nest location is set to the location of
+    // that tag.
+    if (!isCollectionPointFound) {
+      if (!singleSearchingForCollectionPointMsgFlag){
+	singleSearchingForCollectionPointMsgFlag = true;
+	sendInfoLogMsg("Searching for collection point...");
+      }
+      setVelocity(0,0.2);
+      return;
+    }
+
     if (isAvoidingCollision) {
-      sendInfoLogMsg("Avoiding collision");
+      //sendInfoLogMsg("Avoiding collision");
       nextLocation = collisionAvoidanceLocation;
     } else { 
       //sendInfoLogMsg("Following spiral");
@@ -328,7 +347,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
       float y2 = yDiff*yDiff;
       float positionError = sqrt(x2+y2);
       
-      // Use a PID for more accurate rotations
+      // Use a PID for more accurate movement
       float Pk = 1.5;
       float Dk = 0.0;
       float deltaPositionError = prevPositionError-positionError;
@@ -340,8 +359,8 @@ void mobilityStateMachine(const ros::TimerEvent&) {
       if (fabs(cmdVel) < 0.12 ) cmdVel = 0.12*boost::math::sign(cmdVel);
       
       // velocity cap
-      if (cmdVel > 0.5) cmdVel = 0.5;
-      if (cmdVel < -0.5) cmdVel = -0.5;      
+      if (cmdVel > 0.3) cmdVel = 0.3;
+      if (cmdVel < -0.3) cmdVel = -0.3;      
 
       /*      
       stringstream ss;
@@ -395,7 +414,36 @@ void setVelocity(double linearVel, double angularVel)
  ************************/
 
 void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& message) {
- 
+  
+  //if this is the goal target
+  if (message->detections.size() > 0)  
+    if (message->detections[0].id == 256 && !isCollectionPointFound) {
+      geometry_msgs::PoseStamped tagPose = message->detections[0].pose;
+            
+      tagPose.header.stamp = ros::Time(0);
+      geometry_msgs::PoseStamped odomPose;
+      
+      // Transform from the camera coordinate system to the odometry coordinate system 
+
+      try {
+	tfListener->waitForTransform(publishedName + "/odom", publishedName + "/camera_link", ros::Time(0), ros::Duration(1.0));
+	tfListener->transformPose(publishedName + "/odom", tagPose, odomPose);
+      }
+      
+      catch(tf::TransformException& ex) {
+	ROS_INFO("Received an exception trying to transform a point from \"odom\" to \"camera_link\": %s", ex.what());
+      }
+
+      float collection_point_x  = currentLocation.x + odomPose.pose.position.x;
+      float collection_point_y  = currentLocation.y + odomPose.pose.position.y;
+
+      ddsa_controller.setCollectionPoint(collection_point_x, collection_point_y);
+      isCollectionPointFound = true;
+
+      stringstream ss;
+      ss << "Collection point: x=" << collection_point_x << ", y=" << collection_point_y;
+      sendInfoLogMsg( ss.str() );
+    }  
 }
 
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
@@ -404,34 +452,46 @@ void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
 }
 
 void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
-  
-  if (!isAvoidingCollision )
-    if (message->data > 0) 
-      if (message->data != 2) { // Ignore collisions from the center Ultrasound
+ 
+  //if (!isAvoidingCollision )
+    if (message->data > 0) { // Ignore collisions from the center Ultrasound
 	// don't forget the original goal
 	// when multiple collisions occur
 	
 	//if (!isAvoidingCollision) sendInfoLogMsg("Avoiding Collision");
-	
-	isAvoidingCollision = true;     
 
 	float avoidanceAngle = 0;
 	
 	//obstacle on right side
-	if (message->data == 1) {
+	if (message->data == 2) {
+	  isAvoidingCollision = true;     
+	  avoidanceAngle = 0.2;
+	  sendInfoLogMsg("Avoiding collision on the right"); 
+	}
+	else if (message->data == 1) {
 	  //select new heading to the left
-	  avoidanceAngle = M_PI_4+0.05; 
+	  //	  sendInfoLogMsg("Avoiding collision");
+	  isAvoidingCollision = true;     
+	  avoidanceAngle = 0; 
+	  sendInfoLogMsg("Avoiding collision in front"); 
 	  // multiple collision
 	}
 	//obstacle on left side
 	else if (message->data == 3) {
 	  //select new heading to the right
-	  avoidanceAngle = -M_PI_4; // Add asymmetry
+	  //sendInfoLogMsg("Avoiding collision");
+	  isAvoidingCollision = true;     
+	  avoidanceAngle = -0.2; // Add asymmetry
+	  sendInfoLogMsg("Avoiding collision on the left"); 
 	}
-    	
+    	else // no collision
+	  {
+	    sendInfoLogMsg("No collision"); 
+	    isAvoidingCollision = false;     
+	  }
 	//select new position 10 cm from current location
-	collisionAvoidanceLocation.x = currentLocation.x + (0.5 * cos(currentLocation.theta+avoidanceAngle));
-	collisionAvoidanceLocation.y = currentLocation.y + (0.5 * sin(currentLocation.theta+avoidanceAngle));
+	collisionAvoidanceLocation.x = currentLocation.x + (0.12 * cos(currentLocation.theta+avoidanceAngle));
+	collisionAvoidanceLocation.y = currentLocation.y + (0.12 * sin(currentLocation.theta+avoidanceAngle));
 	
 	//switch to transform state to trigger collision avoidance
 	stateMachineState = STATE_MACHINE_TRANSFORM;

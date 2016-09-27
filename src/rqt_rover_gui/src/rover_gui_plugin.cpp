@@ -1343,7 +1343,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
 
     emit sendInfoLogMessage("Adding collection disk...");
     float collection_disk_radius = 0.5; // meters
-    sim_mgr.addModel("collection_disk", "collection_disk", 0, 0, 0, collection_disk_radius);
+    sim_mgr.addModel("collection_disk", "collection_disk", 0.0, 0.0, 0, collection_disk_radius);
 
     int n_rovers_created = 0;
     int n_rovers = 3;
@@ -1361,7 +1361,9 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
     progress_dialog.show();
 
     QString rovers[6] = {"achilles", "aeneas", "ajax", "diomedes", "hector", "paris"};
-    QPoint rover_positions[6] = {QPoint(0,1), QPoint(1,1), QPoint(1,0), QPoint(-1,0), QPoint(0,-1), QPoint(-1,-1)};
+
+    // Using sqrt(1/2.0) to make the distance from the center equal to 1
+    QPointF rover_positions[6] = {QPointF(0,1.0), QPointF(1.0,0), QPointF(-1.0,0), QPointF(sqrt(1/2.0),sqrt(1/2.0)), QPointF(0,-1.0), QPointF(-sqrt(1/2.0),-sqrt(1/2.0))};
 
     // Add rovers to the simulation and start the associated ROS nodes
     for (int i = 0; i < n_rovers; i++)
