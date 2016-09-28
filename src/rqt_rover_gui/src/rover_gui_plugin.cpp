@@ -962,7 +962,9 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
     // TODO: replace with a proper message type so we don't need to use in stream flags like this.
     if ( sim_rate < 0 )
       {
-	// Change the color of the text based on the link quality. These numbers are from
+        if (sim_rate > 1.0) sim_rate = 1.0;
+        
+        // Change the color of the text based on the link quality. These numbers are from
 	// experience but need tuning. The raw quality value is scaled into a new range to make the colors more meaningful
 	int quality_max = 70;
 	int quality_min = 0;
@@ -975,7 +977,10 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
 	int green = 255 * scaled_wireless_quality/static_cast<float>(scaled_range);
 	int red = 255 * (2*scaled_range - (scaled_wireless_quality))/static_cast<float>(2*scaled_range);
 	int blue = 0;
-	
+
+        if (blue > 255) blue = 255;
+        if (green > 255) green = 255;
+        if (red > 255) red = 255;
 	item->setTextColor(QColor(red, green, blue));
       }
     else
@@ -988,9 +993,17 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
 	else
 	  sim_rate_str = sim_rate_str.erase(sim_rate_str.find("."),string::npos);
 
-	item->setTextColor(QColor(255*(1-sim_rate),255*sim_rate,0));
+        int red = 255*(1-sim_rate);
+        int green = 255*sim_rate;
+        int blue = 0;
+        
+        if (blue > 255) blue = 255;
+        if (green > 255) green = 255;
+        if (red > 255) red = 255;
 
-	diagnostic_display = sim_rate_str + " sim rate";
+	item->setTextColor(QColor(red,green,blue));
+
+        diagnostic_display = sim_rate_str + " sim rate";
       }
 
     item->setText(QString::fromStdString(diagnostic_display));

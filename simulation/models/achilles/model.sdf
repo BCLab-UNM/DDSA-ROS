@@ -745,6 +745,7 @@
 			<rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
 			<headingDrift>0.0</headingDrift>
 			<headingGaussianNoise>0.0</headingGaussianNoise>
+			<yawOffset>-0.1530654</yawOffset>
 		</plugin>
 
 	</model>

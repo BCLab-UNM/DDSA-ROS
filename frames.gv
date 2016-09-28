@@ -1,0 +1,14 @@
+digraph G {
+"aeneas/base_link" -> "aeneas/camera_link"[label="Broadcaster: /aeneas_BASE2CAM\nAverage rate: 10.005 Hz\nMost recent transform: 1864.210 ( -0.025 sec old)\nBuffer length: 9.595 sec\n"];
+"aeneas/odom" -> "aeneas/base_link"[label="Broadcaster: /aeneas_ODOM\nAverage rate: 10.105 Hz\nMost recent transform: 1864.000 ( 0.185 sec old)\nBuffer length: 9.500 sec\n"];
+"aeneas/map" -> "aeneas/odom"[label="Broadcaster: /aeneas_MAP\nAverage rate: 10.211 Hz\nMost recent transform: 1864.000 ( 0.185 sec old)\nBuffer length: 9.500 sec\n"];
+"achilles/base_link" -> "achilles/camera_link"[label="Broadcaster: /achilles_BASE2CAM\nAverage rate: 10.016 Hz\nMost recent transform: 1864.277 ( -0.092 sec old)\nBuffer length: 9.585 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1864.185"[ shape=plaintext ] ;
+ }->"aeneas/map";
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1864.185"[ shape=plaintext ] ;
+ }->"achilles/base_link";
+}
