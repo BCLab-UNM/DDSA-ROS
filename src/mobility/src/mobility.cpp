@@ -56,15 +56,17 @@ void lowerWrist();  // Lower wrist to 50 degrees
 
 // Goal positions
 geometry_msgs::Pose2D currentLocation;
-geometry_msgs::Pose2D spiralLocation;
-geometry_msgs::Pose2D collisionAvoidanceLocation;
+geometry_msgs::Pose2D spiralWaypoint;
+geometry_msgs::Pose2D collisionAvoidanceWaypoint;
+geometry_msgs::Pose2D targetCollectionWaypoint;
+
 
 int currentMode = 0;
 float mobilityLoopTimeStep = 0.1; //time between the mobility loop calls
 float status_publish_interval = 5;
 float killSwitchTimeout = 10;
-bool targetDetected = false;
-bool targetCollected = false;
+bool isTargetDetected = false;
+bool isTargetCollected = false;
 
 //DDSA Numeric Variables
 
@@ -73,6 +75,9 @@ mobility::rover rover; //used to published the rovers names and count the rovers
 bool moveToNest = true;
 bool setSpiralLocation = false;
 bool isAvoidingCollision = false;
+bool isFollowingSpiral = false;
+bool isHeadingToNest = false;
+bool isCollectingTarget = false;
 bool doneWithCollision = false;
 std::priority_queue<string, std::vector<string>, std::greater<string> > roversQ;
 int numberOfRovers = 0; //count the number of rovers running
@@ -197,9 +202,9 @@ int main(int argc, char **argv) {
   infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);
   roverCountPublish = mNH.advertise<mobility::rover>("/numberofrovers",10,true);
 
-  spiralLocation.x = 0;
-  spiralLocation.y = 0;
-  spiralLocation.theta = 0;
+  spiralWaypoint.x = 0;
+  spiralWaypoint.y = 0;
+  spiralWaypoint.theta = 0;
   
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   //killSwitchTimer = mNH.createTimer(ros::Duration(killSwitchTimeout), killSwitchTimerEventHandler);
@@ -246,6 +251,13 @@ void mobilityStateMachine(const ros::TimerEvent&) {
     // Update the goalLocation target angle. We want the goal location to point towards the goal x, y coords
     
     // Calculate positional and angle error
+
+    // Uses two distinct paradigms for control. (Bad?)
+    // A switch statement tells the rover when to rotate and translate in order to read the next goal location
+    // Booleans provide levels of bevahiours with different priorities.
+    // The least immediate concern and the default behaviour is following the spiral, then comes collecting targets. The most immediate behaviours
+    // that get priority over everything else are avoiding collisions followed by taking collected targets to the nest.
+    // follow spiral < pick up targets < take collected target to the nest < avoid collisions 
     
     geometry_msgs::Pose2D nextLocation;
 
@@ -261,15 +273,22 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         setVelocity(0,0.3);
         return;
     }
-    
+
+    // These behaviours should be ordered by immediacy (a sort of poor mans subsumption archetecture)
     if (isAvoidingCollision) {
       //sendInfoLogMsg("Avoiding collision");
-      nextLocation = collisionAvoidanceLocation;
-    } else { 
+      nextLocation = collisionAvoidanceWaypoint;
+    } else if (isHeadingToNest) {
+      nextLocation = nestLocation;
+    } else if (isCollectingTarget) {
+      nextLocation = targetCollectionWaypoint;
+    } else if (isFollowingSpiral) { 
       //sendInfoLogMsg("Following spiral");
-      nextLocation = spiralLocation; 
+      nextLocation = spiralWaypoint; 
+    } else {
+      sendInfoLogMsg("Error: No behaviour indicated.");
     }
-
+    
     float angleToNextLocation = atan2(nextLocation.y - currentLocation.y, nextLocation.x - currentLocation.x);
 
     float xDiff = nextLocation.x-currentLocation.x;
@@ -287,35 +306,57 @@ void mobilityStateMachine(const ros::TimerEvent&) {
     switch(stateMachineState) {
       
       case STATE_MACHINE_TRANSFORM: {
+        stateMachineMsg.data = "TRANSFORMING";
+        
 	if (positionError < positionErrorTol)  { // Current goal reached
-	  //sendInfoLogMsg("Transform");
-	  // reached goal
-          //stateMachineState = STATE_MACHINE_TRANSFORM;
+	
 	  if (isAvoidingCollision) { // Temp goal used to avoid collision
-	    isAvoidingCollision = false;
+
+            isAvoidingCollision = false;
             sendInfoLogMsg("Reached Collision Waypoint");
-	  } else { // Ask the DDSA for a new location
+
+          } else if (isHeadingToNest) {
+            sendInfoLogMsg("Reached Nest");
+            isHeadingToNest = false;
+            isFollowingSpiral = true;
+            //if this is the goal target
+
+            //open fingers to drop off target
+            std_msgs::Float32 angle;
+            angle.data = M_PI_2;
+            fingerAnglePublish.publish(angle);
+            
+          } else if (isCollectingTarget) {
+            sendInfoLogMsg("Reached Target Collection Waypoint");
+            isCollectingTarget = false;
+            
+            if (isTargetCollected) { // Return to the nest
+              sendInfoLogMsg("Target Collected");
+              isHeadingToNest = true;
+              isFollowingSpiral = false;
+            }
+            
+	  } else if (isFollowingSpiral) { // Ask the DDSA for a new location
+
 	    sendInfoLogMsg("Reached Spiral Waypoint");
-            // DDSA Controller needs to know the current location in order to calculate the next goal state
-            //ddsa_controller.setX(currentLocation.x);
-            //ddsa_controller.setY(currentLocation.y);
-            ddsa_controller.setX(currentLocation.x);
+            
+            ddsa_controller.setX(currentLocation.x); // Rename these functions to represent that they take the previous spiral position
+            // not necessarily the previous rover position
             ddsa_controller.setY(currentLocation.y);
 
-            
-            
             GoalState gs = ddsa_controller.calcNextGoalState();
 	    
 	    string msg = "New spiral position: " + boost::lexical_cast<std::string>(gs.dir);
 	    sendInfoLogMsg(msg);
             
-	    spiralLocation.x = gs.x;
-            spiralLocation.y = gs.y;
-	    spiralLocation.theta = atan2(spiralLocation.y - currentLocation.y, spiralLocation.x - currentLocation.x);
+	    spiralWaypoint.x = gs.x;
+            spiralWaypoint.y = gs.y;
+	    spiralWaypoint.theta = atan2(spiralWaypoint.y - currentLocation.y, spiralWaypoint.x - currentLocation.x);
 	  }
-
-	stateMachineMsg.data = "TRANSFORMING";
-	
+          else {
+            sendInfoLogMsg("Error: reached goal but no further behaviour indicated.");
+          }
+         // End of case where a waypoint goal has been reached
 	//	sendInfoLogMsg("Transforming: " + ss.str());
         //If angle between current and goal is significant
         } else if (fabs(angleError) > angleErrorTol) {
@@ -482,7 +523,65 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
       stringstream ss;
       ss << "Collection point: x=" << collection_point_x << ", y=" << collection_point_y << "Dist: " << dist;
       sendInfoLogMsg( ss.str() );
-    }  
+    } else if (message->detections[0].id == 0) {
+      // Assume we are seeing a target and try to pick it up.
+      geometry_msgs::PoseStamped tagPose = message->detections[0].pose;
+      
+      //if target is close enough
+      if (hypot(hypot(tagPose.pose.position.x, tagPose.pose.position.y), tagPose.pose.position.z) < 0.2) {
+        //assume target has been picked up by gripper
+        isTargetCollected = true;
+	
+        //lower wrist to avoid ultrasound sensors
+        std_msgs::Float32 angle;
+        angle.data = M_PI_2/4;
+        wristAnglePublish.publish(angle);
+      }
+      
+      else {
+        tagPose.header.stamp = ros::Time(0);
+        geometry_msgs::PoseStamped odomPose;
+        
+        try {
+          tfListener->waitForTransform(publishedName + "/odom", publishedName + "/camera_link", ros::Time(0), ros::Duration(1.0));
+          tfListener->transformPose(publishedName + "/odom", tagPose, odomPose);
+        }
+        
+        catch(tf::TransformException& ex) {
+          ROS_INFO("Received an exception trying to transform a point from \"odom\" to \"camera_link\": %s", ex.what());
+        }
+        
+        //If no target has been collected, set target pose as goal
+        if (!isTargetCollected) {
+          //set goal heading
+          targetCollectionWaypoint.theta = atan2(odomPose.pose.position.y - currentLocation.y, odomPose.pose.position.x - currentLocation.x);
+          
+          //set goal position
+          targetCollectionWaypoint.x = odomPose.pose.position.x - (0.26 * cos(targetCollectionWaypoint.theta));
+          targetCollectionWaypoint.y = odomPose.pose.position.y - (0.26 * sin(targetCollectionWaypoint.theta));
+          
+          //set gripper
+          std_msgs::Float32 angle;
+          //open fingers
+          angle.data = M_PI_2;
+          fingerAnglePublish.publish(angle);
+          //lower wrist
+          angle.data = 0.8;
+          wristAnglePublish.publish(angle);
+          
+          //set state and timeout
+          isTargetDetected = true;
+          targetDetectedTimer.setPeriod(ros::Duration(5.0));
+          targetDetectedTimer.start();
+          
+          //switch to transform state to trigger return to center
+          stateMachineState = STATE_MACHINE_TRANSFORM;
+        }
+      }
+    } else {
+      sendInfoLogMsg("Saw an unknown april tag!");
+    }
+  
 }
 
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
@@ -499,8 +598,8 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
 	  isAvoidingCollision = true;     
 	  avoidanceAngle = 0.2;
 	  //sendInfoLogMsg("Avoiding collision on the right");
-          collisionAvoidanceLocation.x = currentLocation.x + (0.2 * cos(currentLocation.theta+avoidanceAngle));
-          collisionAvoidanceLocation.y = currentLocation.y + (0.2 * sin(currentLocation.theta+avoidanceAngle));
+          collisionAvoidanceWaypoint.x = currentLocation.x + (0.2 * cos(currentLocation.theta+avoidanceAngle));
+          collisionAvoidanceWaypoint.y = currentLocation.y + (0.2 * sin(currentLocation.theta+avoidanceAngle));
 	}
 	else if (message->data == 1) {
 	  //select new heading to the left
@@ -509,8 +608,8 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
 	  avoidanceAngle = 0.2; 
 	  //sendInfoLogMsg("Avoiding collision in front"); 
 	  // multiple collision
-          collisionAvoidanceLocation.x = currentLocation.x + (0.2 * cos(currentLocation.theta+avoidanceAngle));
-          collisionAvoidanceLocation.y = currentLocation.y + (0.2 * sin(currentLocation.theta+avoidanceAngle));
+          collisionAvoidanceWaypoint.x = currentLocation.x + (0.2 * cos(currentLocation.theta+avoidanceAngle));
+          collisionAvoidanceWaypoint.y = currentLocation.y + (0.2 * sin(currentLocation.theta+avoidanceAngle));
 	}
 	//obstacle on left side
 	else if (message->data == 3) {
@@ -518,8 +617,8 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
 	  //sendInfoLogMsg("Avoiding collision");
 	  isAvoidingCollision = true;     
 	  avoidanceAngle = -0.2;
-          collisionAvoidanceLocation.x = currentLocation.x + (0.2 * cos(currentLocation.theta+avoidanceAngle));
-          collisionAvoidanceLocation.y = currentLocation.y + (0.2 * sin(currentLocation.theta+avoidanceAngle));	
+          collisionAvoidanceWaypoint.x = currentLocation.x + (0.2 * cos(currentLocation.theta+avoidanceAngle));
+          collisionAvoidanceWaypoint.y = currentLocation.y + (0.2 * sin(currentLocation.theta+avoidanceAngle));	
 	  //sendInfoLogMsg("Avoiding collision on the left"); 
 	}
     	else // no collision
@@ -573,7 +672,7 @@ void killSwitchTimerEventHandler(const ros::TimerEvent& t)
 }
 
 void targetDetectedReset(const ros::TimerEvent& event) {
-  targetDetected = false;
+  isTargetDetected = false;
 	
   std_msgs::Float32 angle;
   angle.data = 0;
