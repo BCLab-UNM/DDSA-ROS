@@ -258,7 +258,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 	singleSearchingForCollectionPointMsgFlag = true;
 	sendInfoLogMsg("Searching for collection point...");
         }
-        setVelocity(0,0.2);
+        setVelocity(0,0.3);
         return;
     }
     
@@ -297,8 +297,12 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 	  } else { // Ask the DDSA for a new location
 	    sendInfoLogMsg("Reached Spiral Waypoint");
             // DDSA Controller needs to know the current location in order to calculate the next goal state
+            //ddsa_controller.setX(currentLocation.x);
+            //ddsa_controller.setY(currentLocation.y);
             ddsa_controller.setX(currentLocation.x);
             ddsa_controller.setY(currentLocation.y);
+
+            
             
             GoalState gs = ddsa_controller.calcNextGoalState();
 	    
@@ -350,7 +354,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         stringstream ss;
         ss << "AC: " << isAvoidingCollision << ", nx:" << nextLocation.x << ", ny:" << nextLocation.y << ", A:" << angleError << ", D: " << positionError << "C: " << 0.0 << ", " << cmdVel;
         
-        sendInfoLogMsg(ss.str());
+        //sendInfoLogMsg(ss.str());
 	setVelocity(0.0, cmdVel);
 	  
 	stateMachineState = STATE_MACHINE_TRANSFORM; //move back to transform step      
@@ -396,7 +400,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 
       stringstream ss;
       ss << "AC: " << isAvoidingCollision << "nx: " << nextLocation.x << ", ny: " << nextLocation.y << ", A: " << angleError << ", D: " << positionError << "C: " << cmdVel << ", " << 0.0;
-      sendInfoLogMsg(ss.str());
+      //sendInfoLogMsg(ss.str());
       setVelocity(cmdVel, 0.0);
       
       stateMachineState = STATE_MACHINE_TRANSFORM; //move back to transform step
