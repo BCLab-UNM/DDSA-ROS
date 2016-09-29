@@ -613,7 +613,7 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
           collisionAvoidanceWaypoint.x = currentLocation.x + (0.21 * cos(currentLocation.theta+avoidanceAngle));
           collisionAvoidanceWaypoint.y = currentLocation.y + (0.21 * sin(currentLocation.theta+avoidanceAngle));
 	}
-	else if (message->data == 1) {
+	else if (message->data == 1 && !isTargetCollected) { // Check that a target is not causing the middle sensor reading
 	  //select new heading to the left
 	  //	  sendInfoLogMsg("Avoiding collision");
 	  isAvoidingCollision = true;     
