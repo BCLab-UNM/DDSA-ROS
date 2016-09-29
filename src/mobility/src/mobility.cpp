@@ -161,7 +161,7 @@ DDSAController ddsa_controller(ddsaGap);
 bool isCollectionPointFound = false;
 geometry_msgs::Pose2D nestLocation;
 
-float positionErrorTol = 0.05; //meters // How close to try and get to goal locations
+float positionErrorTol = 0.1; //meters // How close to try and get to goal locations
 float angleErrorTol = 0.1;  //rad
 
 int main(int argc, char **argv) {
@@ -563,8 +563,9 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
             targetCollectionWaypoint.theta = atan2(odomPose.pose.position.y - currentLocation.y, odomPose.pose.position.x - currentLocation.x);
             
             //set goal position
-            targetCollectionWaypoint.x = odomPose.pose.position.x - (0.20 * cos(targetCollectionWaypoint.theta));
-            targetCollectionWaypoint.y = odomPose.pose.position.y - (0.20 * sin(targetCollectionWaypoint.theta));
+            float gripperOffset = 0.25; //m distance between the gripper and the position of the rover base link
+            targetCollectionWaypoint.x = odomPose.pose.position.x - ((gripperOffset-positionErrorTol) * cos(targetCollectionWaypoint.theta));
+            targetCollectionWaypoint.y = odomPose.pose.position.y - ((gripperOffset-positionErrorTol) * sin(targetCollectionWaypoint.theta));
 
             stringstream ss;
             ss << target_dist; // << ", nx: " << nestLocation.x << ", ny: " << nestLocation.y << ", tx: " << tagPose.pose.position.x << ", ty: " << tagPose.pose.position.y;   
