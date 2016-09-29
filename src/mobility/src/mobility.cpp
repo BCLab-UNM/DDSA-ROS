@@ -606,14 +606,14 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
     	float avoidanceAngle = 0;
 	
 	//obstacle on right side
-	if (message->data == 2) {
+	if (message->data == 1) {
 	  isAvoidingCollision = true;     
 	  avoidanceAngle = 0.2;
 	  //sendInfoLogMsg("Avoiding collision on the right");
           collisionAvoidanceWaypoint.x = currentLocation.x + (0.21 * cos(currentLocation.theta+avoidanceAngle));
           collisionAvoidanceWaypoint.y = currentLocation.y + (0.21 * sin(currentLocation.theta+avoidanceAngle));
 	}
-	else if (message->data == 1 && !isTargetCollected) { // Check that a target is not causing the middle sensor reading
+	else if (message->data == 2 && !isTargetCollected) { // Check that a target is not causing the middle sensor reading
 	  //select new heading to the left
 	  //	  sendInfoLogMsg("Avoiding collision");
 	  isAvoidingCollision = true;     
@@ -622,7 +622,7 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
 	  // multiple collision
           collisionAvoidanceWaypoint.x = currentLocation.x + (0.2 * cos(currentLocation.theta+avoidanceAngle));
           collisionAvoidanceWaypoint.y = currentLocation.y + (0.2 * sin(currentLocation.theta+avoidanceAngle));
-	}
+          }
 	//obstacle on left side
 	else if (message->data == 3) {
 	  //select new heading to the right
