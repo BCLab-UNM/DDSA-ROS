@@ -274,14 +274,15 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 
     // These behaviours should be ordered by immediacy (a sort of poor mans subsumption archetecture)
     if (isAvoidingCollision) {
-      //sendInfoLogMsg("Avoiding collision");
+      sendInfoLogMsg("Avoiding collision");
       nextLocation = collisionAvoidanceWaypoint;
     } else if (isTargetCollected) {
+      sendInfoLogMsg("Heading to nest");
       nextLocation = nestLocation;
     } else if (isCollectingTarget) {
       nextLocation = targetCollectionWaypoint;
     } else { // Always follow the spiral if no more pressing behaviour needed
-      //sendInfoLogMsg("Following spiral");
+      sendInfoLogMsg("Following spiral");
       nextLocation = spiralWaypoint; 
     }
     
@@ -609,8 +610,8 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
 	  isAvoidingCollision = true;     
 	  avoidanceAngle = 0.2;
 	  //sendInfoLogMsg("Avoiding collision on the right");
-          collisionAvoidanceWaypoint.x = currentLocation.x + (0.2 * cos(currentLocation.theta+avoidanceAngle));
-          collisionAvoidanceWaypoint.y = currentLocation.y + (0.2 * sin(currentLocation.theta+avoidanceAngle));
+          collisionAvoidanceWaypoint.x = currentLocation.x + (0.21 * cos(currentLocation.theta+avoidanceAngle));
+          collisionAvoidanceWaypoint.y = currentLocation.y + (0.21 * sin(currentLocation.theta+avoidanceAngle));
 	}
 	else if (message->data == 1) {
 	  //select new heading to the left
