@@ -142,12 +142,13 @@
       <pose>0 1 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>418 855000000</sim_time>
-      <real_time>78 385388789</real_time>
-      <wall_time>1473436894 854119210</wall_time>
+      <sim_time>547 578000000</sim_time>
+      <real_time>66 370998021</real_time>
+      <wall_time>1475151869 738841361</wall_time>
       <model name='at0'>
+        <pose>1.99779 2.00748 0.025 0 -0 0</pose>
         <link name='link'>
-          <pose>0 0 0.025 0 -0 0</pose>
+          <pose>1.99779 2.00748 0.025 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -165,7 +166,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>8.21659 -1.53769 13.5697 0.023649 0.904931 2.71349</pose>
+        <pose>5.42509 0.027906 4.16239 0.023649 0.904931 2.71349</pose>
         <view_controller>orbit</view_controller>
       </camera>
     </gui>
