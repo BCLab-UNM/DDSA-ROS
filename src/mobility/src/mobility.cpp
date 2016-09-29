@@ -75,7 +75,6 @@ mobility::rover rover; //used to published the rovers names and count the rovers
 bool moveToNest = true;
 bool setSpiralLocation = false;
 bool isAvoidingCollision = false;
-bool isHeadingToNest = false;
 bool isCollectingTarget = false;
 bool doneWithCollision = false;
 std::priority_queue<string, std::vector<string>, std::greater<string> > roversQ;
@@ -208,7 +207,7 @@ int main(int argc, char **argv) {
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   //killSwitchTimer = mNH.createTimer(ros::Duration(killSwitchTimeout), killSwitchTimerEventHandler);
   stateMachineTimer = mNH.createTimer(ros::Duration(mobilityLoopTimeStep), mobilityStateMachine);
-  targetDetectedTimer = mNH.createTimer(ros::Duration(0), targetDetectedReset, true);
+  targetDetectedTimer = mNH.createTimer(ros::Duration(0), targetDetectedReset, false, false);
   
   tfListener = new tf::TransformListener();
   
@@ -277,8 +276,9 @@ void mobilityStateMachine(const ros::TimerEvent&) {
     if (isAvoidingCollision) {
       //sendInfoLogMsg("Avoiding collision");
       nextLocation = collisionAvoidanceWaypoint;
-    } else if (isHeadingToNest) {
+    } else if (isTargetCollected) {
       nextLocation = nestLocation;
+      sendInfoLogMsg("Heading to nest");
     } else if (isCollectingTarget) {
       nextLocation = targetCollectionWaypoint;
     } else { // Always follow the spiral if no more pressing behaviour needed
@@ -312,9 +312,9 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             isAvoidingCollision = false;
             sendInfoLogMsg("Reached Collision Waypoint");
 
-          } else if (isHeadingToNest) {
+          } else if (isTargetCollected) {
             sendInfoLogMsg("Reached Nest");
-            isHeadingToNest = false;
+            isTargetCollected = false;
 	    //if this is the goal target
 
             //open fingers to drop off target
@@ -326,10 +326,6 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             sendInfoLogMsg("Reached Target Collection Waypoint");
             isCollectingTarget = false;
             
-            if (isTargetCollected) { // Return to the nest
-              sendInfoLogMsg("Target Collected");
-              isHeadingToNest = true;
-	    }
             // If not any of the above then return to the spiral
 	  } else { // Ask the DDSA for a new location
 
@@ -482,8 +478,9 @@ void setVelocity(double linearVel, double angularVel)
 void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& message) {
   
   //if this is the goal target
-  if (message->detections.size() > 0)  
-    if (message->detections[0].id == 256) {
+  if (message->detections.size() > 0){  
+    if (message->detections[0].id == 256){
+      if (!isCollectionPointFound) {
       geometry_msgs::PoseStamped tagPose = message->detections[0].pose;
             
       tagPose.header.stamp = ros::Time(0);
@@ -503,6 +500,9 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
       float collection_point_x  = currentLocation.x + odomPose.pose.position.x;
       float collection_point_y  = currentLocation.y + odomPose.pose.position.y;
 
+      nestLocation.x = collection_point_x;
+      nestLocation.y = collection_point_y;
+      
       ddsa_controller.setCollectionPoint(collection_point_x, collection_point_y);
       isCollectionPointFound = true;
 
@@ -515,7 +515,9 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
       stringstream ss;
       ss << "Collection point: x=" << collection_point_x << ", y=" << collection_point_y << "Dist: " << dist;
       sendInfoLogMsg( ss.str() );
-    } else if (message->detections[0].id == 0 && !isHeadingToNest) {
+      }
+    } else if (message->detections[0].id == 0){
+      if(!isTargetCollected) {
       isCollectingTarget = true;
       
       // Assume we are seeing a target and try to pick it up.
@@ -534,7 +536,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
       //if target is close enough
       if (dist < 0.15) {
         //assume target has been picked up by gripper
-        isTargetCollected = true;
+        //isTargetCollected = true;
 	
         //lower wrist to avoid ultrasound sensors
         std_msgs::Float32 angle;
@@ -579,17 +581,16 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
           isTargetDetected = true;
           targetDetectedTimer.setPeriod(ros::Duration(5.0));
           targetDetectedTimer.start();
-          
-        }
+        } 
+      }
       }
     } else {
       stringstream ss;
       ss << message->detections[0].id; 
       sendInfoLogMsg("Saw an unknown april tag!: " + ss.str());
     }
-  
+  }
 }
-
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
   currentMode = message->data;
   setVelocity(0.0, 0.0);
@@ -680,6 +681,7 @@ void killSwitchTimerEventHandler(const ros::TimerEvent& t)
 void targetDetectedReset(const ros::TimerEvent& event) {
   isTargetDetected = false;
 
+  isTargetCollected = true;
   sendInfoLogMsg("Picking up target");
   std_msgs::Float32 angle;
   angle.data = 0;
