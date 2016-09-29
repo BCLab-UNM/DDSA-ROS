@@ -83,7 +83,7 @@
     <model name='at0'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -114,7 +114,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -144,7 +144,7 @@
     <model name='at0_0'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -175,7 +175,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -205,7 +205,7 @@
     <model name='at0_1'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -236,7 +236,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -266,7 +266,7 @@
     <model name='at0_2'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -297,7 +297,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -327,7 +327,7 @@
     <model name='at0_3'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -358,7 +358,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -388,7 +388,7 @@
     <model name='at0_4'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -419,7 +419,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -449,7 +449,7 @@
     <model name='at0_5'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -480,7 +480,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -510,7 +510,7 @@
     <model name='at0_6'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -541,7 +541,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -571,7 +571,7 @@
     <model name='at0_7'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -602,7 +602,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -632,7 +632,7 @@
     <model name='at0_8'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -663,7 +663,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -693,7 +693,7 @@
     <model name='at0_9'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -724,7 +724,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -754,7 +754,7 @@
     <model name='at0_10'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -785,7 +785,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -815,7 +815,7 @@
     <model name='at0_11'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -846,7 +846,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -876,7 +876,7 @@
     <model name='at0_12'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -907,7 +907,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -937,7 +937,7 @@
     <model name='at0_13'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -968,7 +968,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -998,7 +998,7 @@
     <model name='at0_14'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1029,7 +1029,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1059,7 +1059,7 @@
     <model name='at0_15'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1090,7 +1090,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1120,7 +1120,7 @@
     <model name='at0_16'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1151,7 +1151,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1181,7 +1181,7 @@
     <model name='at0_17'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1212,7 +1212,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1242,7 +1242,7 @@
     <model name='at0_18'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1273,7 +1273,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1303,7 +1303,7 @@
     <model name='at0_19'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1334,7 +1334,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1364,7 +1364,7 @@
     <model name='at0_20'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1395,7 +1395,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1425,7 +1425,7 @@
     <model name='at0_21'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1456,7 +1456,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1486,7 +1486,7 @@
     <model name='at0_22'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1517,7 +1517,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1547,7 +1547,7 @@
     <model name='at0_23'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1578,7 +1578,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1608,7 +1608,7 @@
     <model name='at0_24'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1639,7 +1639,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1669,7 +1669,7 @@
     <model name='at0_25'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -1700,7 +1700,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -1734,7 +1734,7 @@
       <model name='at0'>
         <pose>-1.54043 2.592 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1.54043 2.592 0.025 0 -0 0</pose>
+          <pose>-1.54043 2.592 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1743,7 +1743,7 @@
       <model name='at0_0'>
         <pose>-2 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 2 0.025 0 -0 0</pose>
+          <pose>-2 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1752,7 +1752,7 @@
       <model name='at0_1'>
         <pose>-2 2.50634 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 2.50634 0.025 0 -0 0</pose>
+          <pose>-2 2.50634 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1761,7 +1761,7 @@
       <model name='at0_10'>
         <pose>0 2.48596 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0 2.48596 0.025 0 -0 0</pose>
+          <pose>0 2.48596 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1770,7 +1770,7 @@
       <model name='at0_11'>
         <pose>-0.501759 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-0.501759 2 0.025 0 -0 0</pose>
+          <pose>-0.501759 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1779,7 +1779,7 @@
       <model name='at0_12'>
         <pose>-0.514878 2.51621 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-0.514878 2.51621 0.025 0 -0 0</pose>
+          <pose>-0.514878 2.51621 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1788,7 +1788,7 @@
       <model name='at0_13'>
         <pose>0 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0 2 0.025 0 -0 0</pose>
+          <pose>0 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1797,7 +1797,7 @@
       <model name='at0_14'>
         <pose>1 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 3 0.025 0 -0 0</pose>
+          <pose>1 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1806,7 +1806,7 @@
       <model name='at0_15'>
         <pose>0.510168 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0.510168 3 0.025 0 -0 0</pose>
+          <pose>0.510168 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1815,7 +1815,7 @@
       <model name='at0_16'>
         <pose>1 2.49709 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 2.49709 0.025 0 -0 0</pose>
+          <pose>1 2.49709 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1824,7 +1824,7 @@
       <model name='at0_17'>
         <pose>0.522175 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0.522175 2 0.025 0 -0 0</pose>
+          <pose>0.522175 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1833,7 +1833,7 @@
       <model name='at0_18'>
         <pose>0.508937 2.51354 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0.508937 2.51354 0.025 0 -0 0</pose>
+          <pose>0.508937 2.51354 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1842,7 +1842,7 @@
       <model name='at0_19'>
         <pose>1 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 2 0.025 0 -0 0</pose>
+          <pose>1 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1851,7 +1851,7 @@
       <model name='at0_2'>
         <pose>-2 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 3 0.025 0 -0 0</pose>
+          <pose>-2 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1860,7 +1860,7 @@
       <model name='at0_20'>
         <pose>2 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 3 0.025 0 -0 0</pose>
+          <pose>2 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1869,7 +1869,7 @@
       <model name='at0_21'>
         <pose>2 2.49507 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 2.49507 0.025 0 -0 0</pose>
+          <pose>2 2.49507 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1878,7 +1878,7 @@
       <model name='at0_22'>
         <pose>2 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 2 0.025 0 -0 0</pose>
+          <pose>2 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1887,7 +1887,7 @@
       <model name='at0_23'>
         <pose>1.45955 2.48181 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.45955 2.48181 0.025 0 -0 0</pose>
+          <pose>1.45955 2.48181 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1896,7 +1896,7 @@
       <model name='at0_24'>
         <pose>1.5195 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.5195 3 0.025 0 -0 0</pose>
+          <pose>1.5195 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1905,7 +1905,7 @@
       <model name='at0_25'>
         <pose>1.4729 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.4729 2 0.025 0 -0 0</pose>
+          <pose>1.4729 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1914,7 +1914,7 @@
       <model name='at0_3'>
         <pose>-1.43683 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1.43683 3 0.025 0 -0 0</pose>
+          <pose>-1.43683 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1923,7 +1923,7 @@
       <model name='at0_31'>
         <pose>-2.54804 2.46299 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.54804 2.46299 0.025 0 -0 0</pose>
+          <pose>-2.54804 2.46299 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1932,7 +1932,7 @@
       <model name='at0_32'>
         <pose>-2.57592 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.57592 3 0.025 0 -0 0</pose>
+          <pose>-2.57592 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1941,7 +1941,7 @@
       <model name='at0_33'>
         <pose>-3 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 3 0.025 0 -0 0</pose>
+          <pose>-3 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1950,7 +1950,7 @@
       <model name='at0_34'>
         <pose>-3 2.46463 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 2.46463 0.025 0 -0 0</pose>
+          <pose>-3 2.46463 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1959,7 +1959,7 @@
       <model name='at0_35'>
         <pose>-3 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 2 0.025 0 -0 0</pose>
+          <pose>-3 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1968,7 +1968,7 @@
       <model name='at0_36'>
         <pose>-2.56355 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.56355 2 0.025 0 -0 0</pose>
+          <pose>-2.56355 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1977,7 +1977,7 @@
       <model name='at0_37'>
         <pose>-3 1.46995 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 1.46995 0.025 0 -0 0</pose>
+          <pose>-3 1.46995 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1986,7 +1986,7 @@
       <model name='at0_38'>
         <pose>-2.56503 1.48297 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.56503 1.48297 0.025 0 -0 0</pose>
+          <pose>-2.56503 1.48297 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1995,7 +1995,7 @@
       <model name='at0_39'>
         <pose>-2 1.54031 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 1.54031 0.025 0 -0 0</pose>
+          <pose>-2 1.54031 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2004,7 +2004,7 @@
       <model name='at0_4'>
         <pose>-1 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1 3 0.025 0 -0 0</pose>
+          <pose>-1 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2013,7 +2013,7 @@
       <model name='at0_40'>
         <pose>-3 1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 1 0.025 0 -0 0</pose>
+          <pose>-3 1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2022,7 +2022,7 @@
       <model name='at0_41'>
         <pose>-2.50795 1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.50795 1 0.025 0 -0 0</pose>
+          <pose>-2.50795 1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2031,7 +2031,7 @@
       <model name='at0_42'>
         <pose>-2 1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 1 0.025 0 -0 0</pose>
+          <pose>-2 1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2040,7 +2040,7 @@
       <model name='at0_43'>
         <pose>-3 0.43108 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 0.43108 0.025 0 -0 0</pose>
+          <pose>-3 0.43108 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2049,7 +2049,7 @@
       <model name='at0_44'>
         <pose>-2 0.428911 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 0.428911 0.025 0 -0 0</pose>
+          <pose>-2 0.428911 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2058,7 +2058,7 @@
       <model name='at0_45'>
         <pose>-2.5236 0.48832 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.5236 0.48832 0.025 0 -0 0</pose>
+          <pose>-2.5236 0.48832 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2067,7 +2067,7 @@
       <model name='at0_46'>
         <pose>-3 0 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 0 0.025 0 -0 0</pose>
+          <pose>-3 0 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2076,7 +2076,7 @@
       <model name='at0_47'>
         <pose>-2.43718 0 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.43718 0 0.025 0 -0 0</pose>
+          <pose>-2.43718 0 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2085,7 +2085,7 @@
       <model name='at0_48'>
         <pose>-2 0 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 0 0.025 0 -0 0</pose>
+          <pose>-2 0 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2094,7 +2094,7 @@
       <model name='at0_49'>
         <pose>-3 -0.519168 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 -0.519168 0.025 0 -0 0</pose>
+          <pose>-3 -0.519168 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2103,7 +2103,7 @@
       <model name='at0_5'>
         <pose>-1 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1 2 0.025 0 -0 0</pose>
+          <pose>-1 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2112,7 +2112,7 @@
       <model name='at0_50'>
         <pose>-2 -0.506447 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 -0.506447 0.025 0 -0 0</pose>
+          <pose>-2 -0.506447 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2121,7 +2121,7 @@
       <model name='at0_51'>
         <pose>-2.526 -0.49148 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.526 -0.49148 0.025 0 -0 0</pose>
+          <pose>-2.526 -0.49148 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2130,7 +2130,7 @@
       <model name='at0_52'>
         <pose>-3 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 -1 0.025 0 -0 0</pose>
+          <pose>-3 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2139,7 +2139,7 @@
       <model name='at0_53'>
         <pose>-2 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 -1 0.025 0 -0 0</pose>
+          <pose>-2 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2148,7 +2148,7 @@
       <model name='at0_54'>
         <pose>-2.49812 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.49812 -1 0.025 0 -0 0</pose>
+          <pose>-2.49812 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2157,7 +2157,7 @@
       <model name='at0_55'>
         <pose>-3 -1.55768 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 -1.55768 0.025 0 -0 0</pose>
+          <pose>-3 -1.55768 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2166,7 +2166,7 @@
       <model name='at0_56'>
         <pose>-2 -1.54565 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 -1.54565 0.025 0 -0 0</pose>
+          <pose>-2 -1.54565 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2175,7 +2175,7 @@
       <model name='at0_57'>
         <pose>-2.4992 -1.51508 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.4992 -1.51508 0.025 0 -0 0</pose>
+          <pose>-2.4992 -1.51508 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2184,7 +2184,7 @@
       <model name='at0_58'>
         <pose>-3 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-3 -2 0.025 0 -0 0</pose>
+          <pose>-3 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2193,7 +2193,7 @@
       <model name='at0_59'>
         <pose>-2.51498 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2.51498 -2 0.025 0 -0 0</pose>
+          <pose>-2.51498 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2202,7 +2202,7 @@
       <model name='at0_6'>
         <pose>-1 2.50258 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1 2.50258 0.025 0 -0 0</pose>
+          <pose>-1 2.50258 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2211,7 +2211,7 @@
       <model name='at0_60'>
         <pose>-2 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-2 -2 0.025 0 -0 0</pose>
+          <pose>-2 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2220,7 +2220,7 @@
       <model name='at0_61'>
         <pose>-1.50494 -1.53229 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1.50494 -1.53229 0.025 0 -0 0</pose>
+          <pose>-1.50494 -1.53229 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2229,7 +2229,7 @@
       <model name='at0_62'>
         <pose>-1 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1 -1 0.025 0 -0 0</pose>
+          <pose>-1 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2238,7 +2238,7 @@
       <model name='at0_63'>
         <pose>-1.50402 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1.50402 -1 0.025 0 -0 0</pose>
+          <pose>-1.50402 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2247,7 +2247,7 @@
       <model name='at0_64'>
         <pose>-1 -1.51892 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1 -1.51892 0.025 0 -0 0</pose>
+          <pose>-1 -1.51892 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2256,7 +2256,7 @@
       <model name='at0_65'>
         <pose>-1.49158 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1.49158 -2 0.025 0 -0 0</pose>
+          <pose>-1.49158 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2265,7 +2265,7 @@
       <model name='at0_66'>
         <pose>-1 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1 -2 0.025 0 -0 0</pose>
+          <pose>-1 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2274,7 +2274,7 @@
       <model name='at0_67'>
         <pose>0 -1.49236 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0 -1.49236 0.025 0 -0 0</pose>
+          <pose>0 -1.49236 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2283,7 +2283,7 @@
       <model name='at0_68'>
         <pose>0 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0 -1 0.025 0 -0 0</pose>
+          <pose>0 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2292,7 +2292,7 @@
       <model name='at0_69'>
         <pose>0 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0 -2 0.025 0 -0 0</pose>
+          <pose>0 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2301,7 +2301,7 @@
       <model name='at0_7'>
         <pose>-1.46869 2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-1.46869 2 0.025 0 -0 0</pose>
+          <pose>-1.46869 2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2310,7 +2310,7 @@
       <model name='at0_70'>
         <pose>-0.495944 -1.50566 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-0.495944 -1.50566 0.025 0 -0 0</pose>
+          <pose>-0.495944 -1.50566 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2319,7 +2319,7 @@
       <model name='at0_71'>
         <pose>-0.494747 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-0.494747 -1 0.025 0 -0 0</pose>
+          <pose>-0.494747 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2328,7 +2328,7 @@
       <model name='at0_72'>
         <pose>-0.482795 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-0.482795 -2 0.025 0 -0 0</pose>
+          <pose>-0.482795 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2337,7 +2337,7 @@
       <model name='at0_73'>
         <pose>0.499588 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0.499588 -1 0.025 0 -0 0</pose>
+          <pose>0.499588 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2346,7 +2346,7 @@
       <model name='at0_74'>
         <pose>1 -1.50988 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 -1.50988 0.025 0 -0 0</pose>
+          <pose>1 -1.50988 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2355,7 +2355,7 @@
       <model name='at0_75'>
         <pose>1 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 -1 0.025 0 -0 0</pose>
+          <pose>1 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2364,7 +2364,7 @@
       <model name='at0_76'>
         <pose>0.512938 -1.52291 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0.512938 -1.52291 0.025 0 -0 0</pose>
+          <pose>0.512938 -1.52291 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2373,7 +2373,7 @@
       <model name='at0_77'>
         <pose>0.540566 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0.540566 -2 0.025 0 -0 0</pose>
+          <pose>0.540566 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2382,7 +2382,7 @@
       <model name='at0_78'>
         <pose>1 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 -2 0.025 0 -0 0</pose>
+          <pose>1 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2391,7 +2391,7 @@
       <model name='at0_79'>
         <pose>1.47803 -1.5108 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.47803 -1.5108 0.025 0 -0 0</pose>
+          <pose>1.47803 -1.5108 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2400,7 +2400,7 @@
       <model name='at0_8'>
         <pose>-0.469874 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>-0.469874 3 0.025 0 -0 0</pose>
+          <pose>-0.469874 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2409,7 +2409,7 @@
       <model name='at0_80'>
         <pose>1.50851 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.50851 -1 0.025 0 -0 0</pose>
+          <pose>1.50851 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2418,7 +2418,7 @@
       <model name='at0_81'>
         <pose>2 -1.5119 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 -1.5119 0.025 0 -0 0</pose>
+          <pose>2 -1.5119 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2427,7 +2427,7 @@
       <model name='at0_82'>
         <pose>2 -1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 -1 0.025 0 -0 0</pose>
+          <pose>2 -1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2436,7 +2436,7 @@
       <model name='at0_83'>
         <pose>1.50595 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.50595 -2 0.025 0 -0 0</pose>
+          <pose>1.50595 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2445,7 +2445,7 @@
       <model name='at0_84'>
         <pose>2 -2 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 -2 0.025 0 -0 0</pose>
+          <pose>2 -2 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2454,7 +2454,7 @@
       <model name='at0_85'>
         <pose>1 1.44395 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 1.44395 0.025 0 -0 0</pose>
+          <pose>1 1.44395 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2463,7 +2463,7 @@
       <model name='at0_86'>
         <pose>1.44213 1.4433 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.44213 1.4433 0.025 0 -0 0</pose>
+          <pose>1.44213 1.4433 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2472,7 +2472,7 @@
       <model name='at0_87'>
         <pose>2 1.50045 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 1.50045 0.025 0 -0 0</pose>
+          <pose>2 1.50045 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2481,7 +2481,7 @@
       <model name='at0_88'>
         <pose>1 1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 1 0.025 0 -0 0</pose>
+          <pose>1 1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2490,7 +2490,7 @@
       <model name='at0_89'>
         <pose>1.49956 1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.49956 1 0.025 0 -0 0</pose>
+          <pose>1.49956 1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2499,7 +2499,7 @@
       <model name='at0_9'>
         <pose>0 3 0 0 -0 0</pose>
         <link name='link'>
-          <pose>0 3 0.025 0 -0 0</pose>
+          <pose>0 3 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2508,7 +2508,7 @@
       <model name='at0_90'>
         <pose>2 1 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 1 0.025 0 -0 0</pose>
+          <pose>2 1 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2517,7 +2517,7 @@
       <model name='at0_91'>
         <pose>1 0.49393 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 0.49393 0.025 0 -0 0</pose>
+          <pose>1 0.49393 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2526,7 +2526,7 @@
       <model name='at0_92'>
         <pose>1.46882 0.492561 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.46882 0.492561 0.025 0 -0 0</pose>
+          <pose>1.46882 0.492561 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2535,7 +2535,7 @@
       <model name='at0_93'>
         <pose>2 0.491234 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 0.491234 0.025 0 -0 0</pose>
+          <pose>2 0.491234 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2544,7 +2544,7 @@
       <model name='at0_94'>
         <pose>1 0 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 0 0.025 0 -0 0</pose>
+          <pose>1 0 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2553,7 +2553,7 @@
       <model name='at0_95'>
         <pose>1.49658 0 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.49658 0 0.025 0 -0 0</pose>
+          <pose>1.49658 0 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2562,7 +2562,7 @@
       <model name='at0_96'>
         <pose>2 0 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 0 0.025 0 -0 0</pose>
+          <pose>2 0 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2571,7 +2571,7 @@
       <model name='at0_97'>
         <pose>1 -0.529783 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1 -0.529783 0.025 0 -0 0</pose>
+          <pose>1 -0.529783 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2580,7 +2580,7 @@
       <model name='at0_98'>
         <pose>1.51006 -0.487352 0 0 -0 0</pose>
         <link name='link'>
-          <pose>1.51006 -0.487352 0.025 0 -0 0</pose>
+          <pose>1.51006 -0.487352 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2589,7 +2589,7 @@
       <model name='at0_99'>
         <pose>2 -0.5182 0 0 -0 0</pose>
         <link name='link'>
-          <pose>2 -0.5182 0.025 0 -0 0</pose>
+          <pose>2 -0.5182 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -2608,7 +2608,7 @@
     <model name='at0_31'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -2639,7 +2639,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -2669,7 +2669,7 @@
     <model name='at0_32'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -2700,7 +2700,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -2730,7 +2730,7 @@
     <model name='at0_33'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -2761,7 +2761,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -2791,7 +2791,7 @@
     <model name='at0_34'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -2822,7 +2822,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -2852,7 +2852,7 @@
     <model name='at0_35'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -2883,7 +2883,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -2913,7 +2913,7 @@
     <model name='at0_36'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -2944,7 +2944,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -2974,7 +2974,7 @@
     <model name='at0_37'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3005,7 +3005,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3035,7 +3035,7 @@
     <model name='at0_38'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3066,7 +3066,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3096,7 +3096,7 @@
     <model name='at0_39'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3127,7 +3127,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3157,7 +3157,7 @@
     <model name='at0_40'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3188,7 +3188,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3218,7 +3218,7 @@
     <model name='at0_41'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3249,7 +3249,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3279,7 +3279,7 @@
     <model name='at0_42'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3310,7 +3310,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3340,7 +3340,7 @@
     <model name='at0_43'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3371,7 +3371,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3401,7 +3401,7 @@
     <model name='at0_44'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3432,7 +3432,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3462,7 +3462,7 @@
     <model name='at0_45'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3493,7 +3493,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3523,7 +3523,7 @@
     <model name='at0_46'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3554,7 +3554,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3584,7 +3584,7 @@
     <model name='at0_47'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3615,7 +3615,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3645,7 +3645,7 @@
     <model name='at0_48'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3676,7 +3676,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3706,7 +3706,7 @@
     <model name='at0_49'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3737,7 +3737,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3767,7 +3767,7 @@
     <model name='at0_50'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3798,7 +3798,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3828,7 +3828,7 @@
     <model name='at0_51'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3859,7 +3859,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3889,7 +3889,7 @@
     <model name='at0_52'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3920,7 +3920,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -3950,7 +3950,7 @@
     <model name='at0_53'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -3981,7 +3981,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4011,7 +4011,7 @@
     <model name='at0_54'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4042,7 +4042,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4072,7 +4072,7 @@
     <model name='at0_55'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4103,7 +4103,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4133,7 +4133,7 @@
     <model name='at0_56'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4164,7 +4164,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4194,7 +4194,7 @@
     <model name='at0_57'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4225,7 +4225,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4255,7 +4255,7 @@
     <model name='at0_58'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4286,7 +4286,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4316,7 +4316,7 @@
     <model name='at0_59'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4347,7 +4347,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4377,7 +4377,7 @@
     <model name='at0_60'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4408,7 +4408,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4438,7 +4438,7 @@
     <model name='at0_61'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4469,7 +4469,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4499,7 +4499,7 @@
     <model name='at0_62'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4530,7 +4530,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4560,7 +4560,7 @@
     <model name='at0_63'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4591,7 +4591,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4621,7 +4621,7 @@
     <model name='at0_64'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4652,7 +4652,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4682,7 +4682,7 @@
     <model name='at0_65'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4713,7 +4713,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4743,7 +4743,7 @@
     <model name='at0_66'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4774,7 +4774,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4804,7 +4804,7 @@
     <model name='at0_67'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4835,7 +4835,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4865,7 +4865,7 @@
     <model name='at0_68'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4896,7 +4896,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4926,7 +4926,7 @@
     <model name='at0_69'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -4957,7 +4957,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -4987,7 +4987,7 @@
     <model name='at0_70'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5018,7 +5018,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5048,7 +5048,7 @@
     <model name='at0_71'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5079,7 +5079,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5109,7 +5109,7 @@
     <model name='at0_72'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5140,7 +5140,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5170,7 +5170,7 @@
     <model name='at0_73'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5201,7 +5201,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5231,7 +5231,7 @@
     <model name='at0_74'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5262,7 +5262,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5292,7 +5292,7 @@
     <model name='at0_75'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5323,7 +5323,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5353,7 +5353,7 @@
     <model name='at0_76'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5384,7 +5384,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5414,7 +5414,7 @@
     <model name='at0_77'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5445,7 +5445,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5475,7 +5475,7 @@
     <model name='at0_78'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5506,7 +5506,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5536,7 +5536,7 @@
     <model name='at0_79'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5567,7 +5567,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5597,7 +5597,7 @@
     <model name='at0_80'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5628,7 +5628,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5658,7 +5658,7 @@
     <model name='at0_81'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5689,7 +5689,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5719,7 +5719,7 @@
     <model name='at0_82'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5750,7 +5750,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5780,7 +5780,7 @@
     <model name='at0_83'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5811,7 +5811,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5841,7 +5841,7 @@
     <model name='at0_84'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5872,7 +5872,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5902,7 +5902,7 @@
     <model name='at0_85'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5933,7 +5933,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -5963,7 +5963,7 @@
     <model name='at0_86'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -5994,7 +5994,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6024,7 +6024,7 @@
     <model name='at0_87'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6055,7 +6055,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6085,7 +6085,7 @@
     <model name='at0_88'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6116,7 +6116,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6146,7 +6146,7 @@
     <model name='at0_89'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6177,7 +6177,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6207,7 +6207,7 @@
     <model name='at0_90'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6238,7 +6238,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6268,7 +6268,7 @@
     <model name='at0_91'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6299,7 +6299,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6329,7 +6329,7 @@
     <model name='at0_92'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6360,7 +6360,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6390,7 +6390,7 @@
     <model name='at0_93'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6421,7 +6421,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6451,7 +6451,7 @@
     <model name='at0_94'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6482,7 +6482,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6512,7 +6512,7 @@
     <model name='at0_95'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6543,7 +6543,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6573,7 +6573,7 @@
     <model name='at0_96'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6604,7 +6604,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6634,7 +6634,7 @@
     <model name='at0_97'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6665,7 +6665,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6695,7 +6695,7 @@
     <model name='at0_98'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6726,7 +6726,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>
@@ -6756,7 +6756,7 @@
     <model name='at0_99'>
       <static>0</static>
       <link name='link'>
-        <pose>0 0 0.025 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -6787,7 +6787,7 @@
           <pose>0 0 -0.0125 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.025</size>
+              <size>0.05 0.05 0.05</size>
             </box>
           </geometry>
           <surface>

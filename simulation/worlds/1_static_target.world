@@ -146,9 +146,9 @@
       <real_time>66 370998021</real_time>
       <wall_time>1475151869 738841361</wall_time>
       <model name='at0'>
-        <pose>1.99779 2.00748 0.025 0 -0 0</pose>
+        <pose>1.99779 2.00748 0.05 0 -0 0</pose>
         <link name='link'>
-          <pose>1.99779 2.00748 0.025 0 -0 0</pose>
+          <pose>1.99779 2.00748 0.05 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
