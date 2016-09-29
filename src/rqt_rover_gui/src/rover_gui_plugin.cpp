@@ -962,7 +962,6 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
     // TODO: replace with a proper message type so we don't need to use in stream flags like this.
     if ( sim_rate < 0 )
       {
-        if (sim_rate > 1.0) sim_rate = 1.0;
         
         // Change the color of the text based on the link quality. These numbers are from
 	// experience but need tuning. The raw quality value is scaled into a new range to make the colors more meaningful
@@ -979,9 +978,13 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
 	int blue = 0;
 
         if (blue > 255) blue = 255;
+        if (blue < 0) blue = 0;
         if (green > 255) green = 255;
+        if (green < 0) green = 0;
         if (red > 255) red = 255;
-	item->setTextColor(QColor(red, green, blue));
+        if (red < 0) red = 0;
+
+        item->setTextColor(QColor(red, green, blue));
       }
     else
       {
@@ -998,8 +1001,11 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
         int blue = 0;
         
         if (blue > 255) blue = 255;
+        if (blue < 0) blue = 0;
         if (green > 255) green = 255;
+        if (green < 0) green = 0;
         if (red > 255) red = 255;
+        if (red < 0) red = 0;
 
 	item->setTextColor(QColor(red,green,blue));
 
