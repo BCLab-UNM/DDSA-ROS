@@ -162,7 +162,7 @@ bool isCollectionPointFound = false;
 geometry_msgs::Pose2D nestLocation;
 
 float positionErrorTol = 0.1; //meters // How close to try and get to goal locations
-float angleErrorTol = 0.1;  //rad
+float angleErrorTol = 0.05;  //rad
 
 int main(int argc, char **argv) {
 
@@ -274,15 +274,15 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 
     // These behaviours should be ordered by immediacy (a sort of poor mans subsumption archetecture)
     if (isAvoidingCollision) {
-      sendInfoLogMsg("Avoiding collision");
+      //sendInfoLogMsg("Avoiding collision");
       nextLocation = collisionAvoidanceWaypoint;
     } else if (isTargetCollected) {
-      sendInfoLogMsg("Heading to nest");
+      //sendInfoLogMsg("Heading to nest");
       nextLocation = nestLocation;
     } else if (isCollectingTarget) {
       nextLocation = targetCollectionWaypoint;
     } else { // Always follow the spiral if no more pressing behaviour needed
-      sendInfoLogMsg("Following spiral");
+      //sendInfoLogMsg("Following spiral");
       nextLocation = spiralWaypoint; 
     }
     
@@ -310,7 +310,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 	  if (isAvoidingCollision) { // Temp goal used to avoid collision
 
             isAvoidingCollision = false;
-            sendInfoLogMsg("Reached Collision Waypoint");
+            //sendInfoLogMsg("Reached Collision Waypoint");
 
           } else if (isTargetCollected) {
             sendInfoLogMsg("Reached Nest");
@@ -371,8 +371,8 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 	float angleError = angles::shortest_angular_distance(currentLocation.theta, angleToNextLocation);
 	
 	// Use a PID for more accurate rotations
-	float Pk = 0.2;
-	float Dk = 0.0;
+	float Pk = 0.3;
+	float Dk = 0.01;
 	float deltaAngleError = prevAngleError-angleError;
 	prevAngleError = angleError;
 	float cmdVel = Pk*angleError+Dk*deltaAngleError;
@@ -410,7 +410,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
       
       // Use a PID for more accurate movement
       float Pk = 1.5;
-      float Dk = 0.0;
+      float Dk = 0.02;
       float deltaPositionError = prevPositionError-positionError;
       prevPositionError = positionError;
       
@@ -563,13 +563,13 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
             targetCollectionWaypoint.theta = atan2(odomPose.pose.position.y - currentLocation.y, odomPose.pose.position.x - currentLocation.x);
             
             //set goal position
-            float gripperOffset = 0.25; //m distance between the gripper and the position of the rover base link
+            float gripperOffset = 0.20; //m distance between the gripper and the position of the rover base link
             targetCollectionWaypoint.x = odomPose.pose.position.x - ((gripperOffset-positionErrorTol) * cos(targetCollectionWaypoint.theta));
             targetCollectionWaypoint.y = odomPose.pose.position.y - ((gripperOffset-positionErrorTol) * sin(targetCollectionWaypoint.theta));
 
             stringstream ss;
             ss << target_dist; // << ", nx: " << nestLocation.x << ", ny: " << nestLocation.y << ", tx: " << tagPose.pose.position.x << ", ty: " << tagPose.pose.position.y;   
-            sendInfoLogMsg("Target dist " + ss.str());
+            //sendInfoLogMsg("Target dist " + ss.str());
             
             //set gripper
             std_msgs::Float32 angle;
@@ -588,7 +588,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
       } else {
         stringstream ss;
         ss << nest_dist; // << ", nx: " << nestLocation.x << ", ny: " << nestLocation.y << ", tx: " << tagPose.pose.position.x << ", ty: " << tagPose.pose.position.y;   
-        sendInfoLogMsg("Saw target at the collection point. ("+ ss.str() +") Ignoring.");
+        if (!isTargetCollected) sendInfoLogMsg("Saw target at the collection point. ("+ ss.str() +") Ignoring.");
       }
     } else {
       stringstream ss;
