@@ -172,7 +172,7 @@
           </material>
         </visual>
         <collision name='collision'>
-          <pose>0 0 -0.0125 0 -0 0</pose>
+          <pose>0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.05 0.05 0.05</size>
@@ -233,7 +233,7 @@
           </material>
         </visual>
         <collision name='collision'>
-          <pose>0 0 -0.0125 0 -0 0</pose>
+          <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.05 0.05 0.05</size>
@@ -294,7 +294,7 @@
           </material>
         </visual>
         <collision name='collision'>
-          <pose>0 0 -0.0125 0 -0 0</pose>
+          <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.05 0.05 0.05</size>
@@ -355,7 +355,7 @@
           </material>
         </visual>
         <collision name='collision'>
-          <pose>0 0 -0.0125 0 -0 0</pose>
+          <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.05 0.05 0.05</size>
@@ -416,7 +416,7 @@
           </material>
         </visual>
         <collision name='collision'>
-          <pose>0 0 -0.0125 0 -0 0</pose>
+          <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.05 0.05 0.05</size>
@@ -477,7 +477,7 @@
           </material>
         </visual>
         <collision name='collision'>
-          <pose>0 0 -0.0125 0 -0 0</pose>
+          <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.05 0.05 0.05</size>
@@ -538,7 +538,7 @@
           </material>
         </visual>
         <collision name='collision'>
-          <pose>0 0 -0.0125 0 -0 0</pose>
+          <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.05 0.05 0.05</size>
@@ -599,7 +599,7 @@
           </material>
         </visual>
         <collision name='collision'>
-          <pose>0 0 -0.0125 0 -0 0</pose>
+          <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.05 0.05 0.05</size>
@@ -660,7 +660,7 @@
           </material>
         </visual>
         <collision name='collision'>
-          <pose>0 0 -0.0125 0 -0 0</pose>
+          <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.05 0.05 0.05</size>
@@ -721,7 +721,7 @@
           </material>
         </visual>
         <collision name='collision'>
-          <pose>0 0 -0.0125 0 -0 0</pose>
+          <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
               <size>0.05 0.05 0.05</size>
