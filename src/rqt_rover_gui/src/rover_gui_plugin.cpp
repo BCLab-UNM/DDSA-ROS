@@ -1633,7 +1633,7 @@ QString RoverGUIPlugin::addUniformTargets()
         while (sim_mgr.isLocationOccupied(proposed_x, proposed_y, target_cluster_size_1_clearance));
 
         emit sendInfoLogMessage("<font color=green>Succeeded.</font>");
-        output = sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(i), proposed_x, proposed_y, 0, target_cluster_size_1_clearance);
+        output = sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(i), proposed_x, proposed_y, 0.025, target_cluster_size_1_clearance);
         progress_dialog.setValue(i*100.0f/256);
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
@@ -1681,7 +1681,7 @@ QString RoverGUIPlugin::addClusteredTargets()
             proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 8);
 
             for(int k = 0; k < 8; k++) {
-                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
+                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0.025, target_cluster_size_1_clearance);
                 proposed_x2 += target_cluster_size_1_clearance;
                 cube_index++;
                 progress_dialog.setValue(cube_index*100.0f/256);
@@ -1739,7 +1739,7 @@ QString RoverGUIPlugin::addPowerLawTargets()
         proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 8);
 
         for(int k = 0; k < 8; k++) {
-            output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
+            output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0.025, target_cluster_size_1_clearance);
             proposed_x2 += target_cluster_size_1_clearance;
             cube_index++;
             progress_dialog.setValue(cube_index*100.0f/256);
@@ -1769,7 +1769,7 @@ QString RoverGUIPlugin::addPowerLawTargets()
             proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 4);
 
             for(int k = 0; k < 4; k++) {
-                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
+                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0.025, target_cluster_size_1_clearance);
                 proposed_x2 += target_cluster_size_1_clearance;
                 cube_index++;
                 progress_dialog.setValue(cube_index*100.0f/256);
@@ -1801,7 +1801,7 @@ QString RoverGUIPlugin::addPowerLawTargets()
             proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 2);
 
             for(int k = 0; k < 2; k++) {
-                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
+                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0.025, target_cluster_size_1_clearance);
                 proposed_x2 += target_cluster_size_1_clearance;
                 cube_index++;
                 progress_dialog.setValue(cube_index*100.0f/256);
@@ -1830,7 +1830,7 @@ QString RoverGUIPlugin::addPowerLawTargets()
         progress_dialog.setValue(i*100.0f/256);
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         emit sendInfoLogMessage("<font color=green>Succeeded.</font>");
-        output+= sim_mgr.addModel(QString("at")+QString::number(0), QString("at")+QString::number(i), proposed_x, proposed_y, 0, target_cluster_size_1_clearance);
+        output+= sim_mgr.addModel(QString("at")+QString::number(0), QString("at")+QString::number(i), proposed_x, proposed_y, 0.025, target_cluster_size_1_clearance);
     }
 
     return output;
