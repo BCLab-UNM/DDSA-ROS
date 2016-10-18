@@ -275,8 +275,8 @@ void GripperPlugin::setFingerAngleHandler(const std_msgs::Float32ConstPtr& msg) 
 
   // Force drop static models when the gripper is open
   if (isAttached)
-    if (desiredFingerAngle > M_PI/2)
-      if (attachedTargetModel->IsStatic()) 
+    if (desiredFingerAngle >= M_PI/2)
+      //if (attachedTargetModel->IsStatic()) 
 	try { 
 	  detach(); 
 	} catch (exception &e) {

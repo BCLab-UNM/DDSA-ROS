@@ -7,21 +7,23 @@
 
 using namespace std;
 
-DDSAController::DDSAController()
+// x and y are coordinates of the collection point
+DDSAController::DDSAController( float gap )
 {
-  step_length = 0.5;
+  step_length = gap;
   x = 0;
   y = 0;
   initialized = false;
 }
 
-DDSAController::DDSAController( int num_circuits, int num_robots, int robot_index )
+DDSAController::DDSAController( int num_circuits, int num_robots, int robot_index, float gap )
 {
   step_length = 0.5; 
   x = 0;
   y = 0;
   initialized = false;
   generatePattern(num_circuits, num_robots, robot_index);
+  step_length = gap;
 }
 
 void DDSAController::setX(float x)
@@ -37,45 +39,52 @@ void DDSAController::setY(float y)
 GoalState DDSAController::calcNextGoalState()
 {
   GoalState gs;
+  gs.dir = '-';
 
-   if (!initialized)
-    {
-      initialized = true;
-      gs.x = 0;
-      gs.y = 0;
-      gs.yaw = 0;
-      gs.dir = 'H';
-      return gs;
-    }
+  // Return a default (0,0,-) next goal state if the
+  // central collection point has not been set.
+  if (!initialized) return gs;
 
   if (pattern.size() > 0) 
     {
         char curDir = pattern [pattern.size()-1];
-	      pattern.pop_back();
+	pattern.pop_back();
         switch(curDir)
-        {
-            case 'N':
-                return getTargetN();
-                break;
-            case 'S':
-                return getTargetS();
-                break;
-            case 'E':
-                return getTargetE();
-                break;
-            case 'W':
-                return getTargetW();
-                break;
+	  {
+	  case 'C':
+	    return getCollectionPointTarget();
+	  case 'N':
+	    return getTargetN();
+	    break;
+	  case 'S':
+	    return getTargetS();
+	    break;
+	  case 'E':
+	    return getTargetE();
+	    break;
+	  case 'W':
+	    return getTargetW();
+	    break;
         }
     }
   else
     {
-      gs.dir = '0';
+      gs.dir = '-';
       gs.x   = 0;
       gs.y   = 0;
       gs.yaw = 0;
     }
 
+  return gs;
+}
+
+GoalState DDSAController::getCollectionPointTarget()
+{
+  GoalState gs;
+  gs.yaw = 0.0;
+  gs.x = collection_point_x;
+  gs.y = collection_point_y;
+  gs.dir = 'C';
   return gs;
 }
 
@@ -127,6 +136,7 @@ void DDSAController::generatePattern(int N_circuits, int N_robots, int robot_ind
    
     for (int i_robot = 1; i_robot <= N_robots; i_robot++)
     {
+      ith_path = "C"; // C indicates move to the collection point.
         for (int i_circuit = 0; i_circuit < N_circuits; i_circuit++)
         {
             int n_steps_north = calcDistanceTravel(i_robot, i_circuit, N_robots,'N');
@@ -221,6 +231,12 @@ string DDSAController::getPath()
     }
 
   return path;
+}
+
+void DDSAController::setCollectionPoint(float x, float y) {
+  collection_point_x = x;
+  collection_point_y = y;
+  initialized = true;
 }
 
 DDSAController::~DDSAController()

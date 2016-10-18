@@ -14,9 +14,10 @@ class DDSAController
 {
   public: 
 
-  DDSAController();
-  DDSAController(int num_circuits, int num_robots, int robot_index);
+  DDSAController(float);
+  DDSAController(int num_circuits, int num_robots, int robot_index, float gap);
 
+  void setCollectionPoint(float x, float y);
   void generatePattern(int num_circuits, int num_robots, int robot_index);
   GoalState calcNextGoalState(); // Get the next target location
   void setX(float x);
@@ -27,6 +28,7 @@ class DDSAController
   
  private:
 
+  GoalState getCollectionPointTarget();
   GoalState getTargetN();
   GoalState getTargetS();
   GoalState getTargetE();
@@ -39,6 +41,8 @@ class DDSAController
 
   float x;
   float y;
+  float collection_point_x;
+  float collection_point_y;
   float step_length;
   std::vector<char> pattern;
   bool initialized;

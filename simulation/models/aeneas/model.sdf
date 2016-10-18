@@ -103,10 +103,10 @@
 				</material>
 			</visual>
 			<collision name="collision">
-				<pose>0.15 0 -0.022 0 0 1.57</pose>
+				<pose>0.16 0 -0.022 0 0 1.57</pose>
 				<geometry>
 					<box>
-						<size>0.07 0.05 0.065</size>
+						<size>0.10 0.05 0.065</size>
 					</box>
 				</geometry>
 			</collision>
@@ -497,7 +497,7 @@
 					</range>
 				</ray>
 				<plugin name="us" filename="libhector_gazebo_ros_sonar.so">
-					<gaussianNoise>0.005</gaussianNoise>
+					<gaussianNoise>0.0</gaussianNoise>
 					<topicName>/aeneas/sonarCenter</topicName>
 					<frameId>us_center_link</frameId>
 				</plugin>
@@ -537,7 +537,7 @@
 					</range>
 				</ray>
 				<plugin name="us" filename="libhector_gazebo_ros_sonar.so">
-					<gaussianNoise>0.005</gaussianNoise>
+					<gaussianNoise>0.0</gaussianNoise>
 					<topicName>/aeneas/sonarRight</topicName>
 					<frameId>us_center_link</frameId>
 				</plugin>
@@ -577,7 +577,7 @@
 					</range>
 				</ray>
 				<plugin name="us" filename="libhector_gazebo_ros_sonar.so">
-					<gaussianNoise>0.005</gaussianNoise>
+					<gaussianNoise>0.0</gaussianNoise>
 					<topicName>/aeneas/sonarLeft</topicName>
 					<frameId>us_center_link</frameId>
 				</plugin>
@@ -626,7 +626,7 @@
 					<noise>
 						<type>gaussian</type>
 						<mean>0.0</mean>
-						<stddev>0.007</stddev>
+						<stddev>0.0</stddev>
 					</noise>
 				</camera>
 				<plugin name="camera_controller" filename="libgazebo_ros_camera.so">
@@ -737,12 +737,13 @@
 			<xyzOffset>0 0 0</xyzOffset>
 			<rpyOffset>0 0 0</rpyOffset>
 			<gaussianNoise>0</gaussianNoise>  
-			<accelDrift>0.5 0.5 0.5</accelDrift>
-			<accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
-			<rateDrift>0.1 0.1 0.1</rateDrift>
-			<rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
-			<headingDrift>0.01</headingDrift>
-			<headingGaussianNoise>0.01</headingGaussianNoise>
+			<accelDrift>0.0 0.0 0.0</accelDrift>
+			<accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
+			<rateDrift>0.0 0.0 0.0</rateDrift>
+			<rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
+			<headingDrift>0.0</headingDrift>
+			<headingGaussianNoise>0.0</headingGaussianNoise>
+			<yawOffset>-0.075</yawOffset>
 		</plugin>
 
 	</model>

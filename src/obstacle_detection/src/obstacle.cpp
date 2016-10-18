@@ -52,14 +52,17 @@ int main(int argc, char** argv) {
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight) {
 	std_msgs::UInt8 obstacleMode;
 	
-	if ((sonarLeft->range > collisionDistance) && (sonarCenter->range > collisionDistance) && (sonarRight->range > collisionDistance)) {
-		obstacleMode.data = 0; //no collision
+	if (sonarRight->range < collisionDistance) {
+	  obstacleMode.data = 1; //collision on right side
 	}
-	else if ((sonarLeft->range > collisionDistance) && (sonarRight->range < collisionDistance)) {
-		obstacleMode.data = 1; //collision on right side
+	else if (sonarLeft->range < collisionDistance) {
+	  obstacleMode.data = 3; //collision in the left
+	}
+	else if (sonarCenter->range < collisionDistance) {
+	  obstacleMode.data = 2; //collision in the center
 	}
 	else {
-		obstacleMode.data = 2; //collision in front or on left side
+	  obstacleMode.data = 0; // No collision
 	}
 	
         obstaclePublish.publish(obstacleMode);

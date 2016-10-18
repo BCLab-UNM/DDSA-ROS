@@ -962,7 +962,8 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
     // TODO: replace with a proper message type so we don't need to use in stream flags like this.
     if ( sim_rate < 0 )
       {
-	// Change the color of the text based on the link quality. These numbers are from
+        
+        // Change the color of the text based on the link quality. These numbers are from
 	// experience but need tuning. The raw quality value is scaled into a new range to make the colors more meaningful
 	int quality_max = 70;
 	int quality_min = 0;
@@ -975,8 +976,15 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
 	int green = 255 * scaled_wireless_quality/static_cast<float>(scaled_range);
 	int red = 255 * (2*scaled_range - (scaled_wireless_quality))/static_cast<float>(2*scaled_range);
 	int blue = 0;
-	
-	item->setTextColor(QColor(red, green, blue));
+
+        if (blue > 255) blue = 255;
+        if (blue < 0) blue = 0;
+        if (green > 255) green = 255;
+        if (green < 0) green = 0;
+        if (red > 255) red = 255;
+        if (red < 0) red = 0;
+
+        item->setTextColor(QColor(red, green, blue));
       }
     else
       {
@@ -988,9 +996,20 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
 	else
 	  sim_rate_str = sim_rate_str.erase(sim_rate_str.find("."),string::npos);
 
-	item->setTextColor(QColor(255*(1-sim_rate),255*sim_rate,0));
+        int red = 255*(1-sim_rate);
+        int green = 255*sim_rate;
+        int blue = 0;
+        
+        if (blue > 255) blue = 255;
+        if (blue < 0) blue = 0;
+        if (green > 255) green = 255;
+        if (green < 0) green = 0;
+        if (red > 255) red = 255;
+        if (red < 0) red = 0;
 
-	diagnostic_display = sim_rate_str + " sim rate";
+	item->setTextColor(QColor(red,green,blue));
+
+        diagnostic_display = sim_rate_str + " sim rate";
       }
 
     item->setText(QString::fromStdString(diagnostic_display));
@@ -1343,7 +1362,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
 
     emit sendInfoLogMessage("Adding collection disk...");
     float collection_disk_radius = 0.5; // meters
-    sim_mgr.addModel("collection_disk", "collection_disk", 0, 0, 0, collection_disk_radius);
+    sim_mgr.addModel("collection_disk", "collection_disk", 0.0, 0.0, 0, collection_disk_radius);
 
     int n_rovers_created = 0;
     int n_rovers = 3;
@@ -1361,7 +1380,9 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
     progress_dialog.show();
 
     QString rovers[6] = {"achilles", "aeneas", "ajax", "diomedes", "hector", "paris"};
-    QPoint rover_positions[6] = {QPoint(0,1), QPoint(1,1), QPoint(1,0), QPoint(-1,0), QPoint(0,-1), QPoint(-1,-1)};
+
+    // Using sqrt(1/2.0) to make the distance from the center equal to 1
+    QPointF rover_positions[6] = {QPointF(0,1.0), QPointF(1.0,0), QPointF(-1.0,0), QPointF(sqrt(1/2.0),sqrt(1/2.0)), QPointF(0,-1.0), QPointF(-sqrt(1/2.0),-sqrt(1/2.0))};
 
     // Add rovers to the simulation and start the associated ROS nodes
     for (int i = 0; i < n_rovers; i++)
@@ -1612,7 +1633,7 @@ QString RoverGUIPlugin::addUniformTargets()
         while (sim_mgr.isLocationOccupied(proposed_x, proposed_y, target_cluster_size_1_clearance));
 
         emit sendInfoLogMessage("<font color=green>Succeeded.</font>");
-        output = sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(i), proposed_x, proposed_y, 0, target_cluster_size_1_clearance);
+        output = sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(i), proposed_x, proposed_y, 0.025, target_cluster_size_1_clearance);
         progress_dialog.setValue(i*100.0f/256);
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     }
@@ -1660,7 +1681,7 @@ QString RoverGUIPlugin::addClusteredTargets()
             proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 8);
 
             for(int k = 0; k < 8; k++) {
-                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
+                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0.025, target_cluster_size_1_clearance);
                 proposed_x2 += target_cluster_size_1_clearance;
                 cube_index++;
                 progress_dialog.setValue(cube_index*100.0f/256);
@@ -1718,7 +1739,7 @@ QString RoverGUIPlugin::addPowerLawTargets()
         proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 8);
 
         for(int k = 0; k < 8; k++) {
-            output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
+            output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0.025, target_cluster_size_1_clearance);
             proposed_x2 += target_cluster_size_1_clearance;
             cube_index++;
             progress_dialog.setValue(cube_index*100.0f/256);
@@ -1748,7 +1769,7 @@ QString RoverGUIPlugin::addPowerLawTargets()
             proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 4);
 
             for(int k = 0; k < 4; k++) {
-                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
+                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0.025, target_cluster_size_1_clearance);
                 proposed_x2 += target_cluster_size_1_clearance;
                 cube_index++;
                 progress_dialog.setValue(cube_index*100.0f/256);
@@ -1780,7 +1801,7 @@ QString RoverGUIPlugin::addPowerLawTargets()
             proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 2);
 
             for(int k = 0; k < 2; k++) {
-                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
+                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0.025, target_cluster_size_1_clearance);
                 proposed_x2 += target_cluster_size_1_clearance;
                 cube_index++;
                 progress_dialog.setValue(cube_index*100.0f/256);
@@ -1809,7 +1830,7 @@ QString RoverGUIPlugin::addPowerLawTargets()
         progress_dialog.setValue(i*100.0f/256);
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         emit sendInfoLogMessage("<font color=green>Succeeded.</font>");
-        output+= sim_mgr.addModel(QString("at")+QString::number(0), QString("at")+QString::number(i), proposed_x, proposed_y, 0, target_cluster_size_1_clearance);
+        output+= sim_mgr.addModel(QString("at")+QString::number(0), QString("at")+QString::number(i), proposed_x, proposed_y, 0.025, target_cluster_size_1_clearance);
     }
 
     return output;
