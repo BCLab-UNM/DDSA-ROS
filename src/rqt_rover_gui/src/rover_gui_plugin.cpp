@@ -10,7 +10,6 @@
 #include <QDir>
 #include <QtXml>
 #include <QFile>
-#include <QListWidget>
 #include <QScrollBar>
 #include <QProcess>
 #include <QPalette>
@@ -46,8 +45,15 @@ using boost::property_tree::ptree;
 
 namespace rqt_rover_gui 
 {
-  RoverGUIPlugin::RoverGUIPlugin() : rqt_gui_cpp::Plugin(), widget(0),
-      disconnect_threshold(5.0) // Rovers are marked as diconnected if they haven't sent a status message for 5 seconds
+  RoverGUIPlugin::RoverGUIPlugin() :
+      rqt_gui_cpp::Plugin(),
+      widget(0),
+      disconnect_threshold(5.0), // Rovers are marked as diconnected if they haven't sent a status message for 5 seconds
+      current_simulated_time_in_seconds(0.0),
+      last_current_time_update_in_seconds(0.0),
+      timer_start_time_in_seconds(0.0),
+      timer_stop_time_in_seconds(0.0),
+      is_timer_on(false)
   {
     setObjectName("RoverGUI");
     info_log_messages = "";
@@ -109,6 +115,7 @@ namespace rqt_rover_gui
     ui.rover_name->setText(rover_name_msg_qstr);
 
     // Setup QT message connections
+    connect(this, SIGNAL(sendDiagsDataUpdate(QString, QString, QColor)), this, SLOT(receiveDiagsDataUpdate(QString, QString,QColor)));
     connect(ui.rover_list, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(currentRoverChangedEventHandler(QListWidgetItem*,QListWidgetItem*)));
     connect(ui.rover_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(refocusKeyboardEventHandler()));
     connect(ui.rover_list, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(refocusKeyboardEventHandler()));
@@ -125,6 +132,7 @@ namespace rqt_rover_gui
     connect(ui.map_auto_radio_button, SIGNAL(toggled(bool)), this, SLOT(mapAutoRadioButtonEventHandler(bool)));
     connect(ui.map_manual_radio_button, SIGNAL(toggled(bool)), this, SLOT(mapManualRadioButtonEventHandler(bool)));
     connect(ui.map_popout_button, SIGNAL(pressed()), this, SLOT(mapPopoutButtonEventHandler()));
+    connect(this, SIGNAL(allStopButtonSignal()), this, SLOT(allStopButtonEventHandler()));
 
 
     // Joystick output display - Drive
@@ -139,14 +147,15 @@ namespace rqt_rover_gui
     connect(this, SIGNAL(joystickGripperFingersCloseUpdate(double)), ui.joy_lcd_gripper_close, SLOT(display(double)));
     connect(this, SIGNAL(joystickGripperFingersOpenUpdate(double)), ui.joy_lcd_gripper_open, SLOT(display(double)));
 
+    connect(this, SIGNAL(updateCurrentSimulationTimeLabel(QString)), ui.currentSimulationTimeLabel, SLOT(setText(QString)));
     connect(this, SIGNAL(updateObstacleCallCount(QString)), ui.perc_of_time_avoiding_obstacles, SLOT(setText(QString)));
-
+    connect(this, SIGNAL(updateNumberOfTagsCollected(QString)), ui.num_targets_collected_label, SLOT(setText(QString)));
+    connect(this, SIGNAL(updateNumberOfSatellites(QString)), ui.gps_numSV_label, SLOT(setText(QString)));
     connect(this, SIGNAL(sendInfoLogMessage(QString)), this, SLOT(receiveInfoLogMessage(QString)));
     connect(this, SIGNAL(sendDiagLogMessage(QString)), this, SLOT(receiveDiagLogMessage(QString)));
     connect(ui.custom_world_path_button, SIGNAL(pressed()), this, SLOT(customWorldButtonEventHandler()));
     connect(ui.custom_distribution_radio_button, SIGNAL(toggled(bool)), this, SLOT(customWorldRadioButtonEventHandler(bool)));
     connect(ui.override_num_rovers_checkbox, SIGNAL(toggled(bool)), this, SLOT(overrideNumRoversCheckboxToggledEventHandler(bool)));
-
 
     // Receive log messages from contained frames
     connect(ui.map_frame, SIGNAL(sendInfoLogMessage(QString)), this, SLOT(receiveInfoLogMessage(QString)));
@@ -200,7 +209,7 @@ namespace rqt_rover_gui
     info_log_subscriber = nh.subscribe("/infoLog", 10, &RoverGUIPlugin::infoLogMessageEventHandler, this);
     diag_log_subscriber = nh.subscribe("/diagsLog", 10, &RoverGUIPlugin::diagLogMessageEventHandler, this);
 
-
+    emit updateNumberOfSatellites("<font color='white'>Number of GPS Satellites: ---</font>");
   }
 
   void RoverGUIPlugin::shutdownPlugin()
@@ -222,7 +231,7 @@ void RoverGUIPlugin::restoreSettings(const qt_gui_cpp::Settings& plugin_settings
 }
 
 
-// Recieves messages from the ROS joystick driver and used them to articulate the gripper and drive the rover.
+// Receives messages from the ROS joystick driver and used them to articulate the gripper and drive the rover.
 void RoverGUIPlugin::joyEventHandler(const sensor_msgs::Joy::ConstPtr& joy_msg)
 {
      // Give the array values some helpful names:
@@ -404,6 +413,27 @@ void RoverGUIPlugin::GPSEventHandler(const ros::MessageEvent<const nav_msgs::Odo
     ui.map_frame->addToGPSRoverPath(rover_name, x, y);
 }
 
+void RoverGUIPlugin::GPSNavSolutionEventHandler(const ros::MessageEvent<const ublox_msgs::NavSOL> &event) {
+    const boost::shared_ptr<const ublox_msgs::NavSOL> msg = event.getMessage();
+
+    // Extract rover name from the message source. Publisher is in the format /*rover_name*_UBLOX
+    size_t found = event.getPublisherName().find("_UBLOX");
+    QString rover_name = event.getPublisherName().substr(1,found-1).c_str();
+
+    // Update the number of sattellites detected for the specified rover
+    rover_numSV_state[rover_name.toStdString()] = msg.get()->numSV;
+
+    // only update the label if a rover is selected by the user in the GUI
+    // and the number of detected satellites is > 0
+    if (selected_rover_name.compare("") != 0 && msg.get()->numSV > 0) {
+        // Update the label in the GUI with the selected rover's information
+        QString newLabelText = "Number of GPS Satellites: " + QString::number(rover_numSV_state[selected_rover_name]);
+        emit updateNumberOfSatellites("<font color='white'>" + newLabelText + "</font>");
+    } else {
+        emit updateNumberOfSatellites("<font color='white'>Number of GPS Satellites: ---</font>");
+    }
+}
+
  void RoverGUIPlugin::cameraEventHandler(const sensor_msgs::ImageConstPtr& image)
  {
      cv_bridge::CvImagePtr cv_image_ptr;
@@ -514,6 +544,52 @@ void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs
     }
 }
 
+// Takes the published score value from the ScorePlugin and updates the GUI
+void RoverGUIPlugin::scoreEventHandler(const ros::MessageEvent<const std_msgs::String> &event) {
+    const std::string& publisher_name = event.getPublisherName();
+    const ros::M_string& header = event.getConnectionHeader();
+    ros::Time receipt_time = event.getReceiptTime();
+
+    const std_msgs::StringConstPtr& msg = event.getMessage();
+    std::string tags_collected = msg->data;
+
+    emit updateNumberOfTagsCollected("<font color='white'>"+QString::fromStdString(tags_collected)+"</font>");
+}
+
+void RoverGUIPlugin::simulationTimerEventHandler(const rosgraph_msgs::Clock& msg) {
+
+    current_simulated_time_in_seconds = msg.clock.toSec();
+
+    bool updateTimeLabel = ((current_simulated_time_in_seconds - last_current_time_update_in_seconds) >= 1.0) ? (true) : (false);
+
+    // only update the current time once per second; faster update rates make the GUI unstable
+    // and in the worst cases it will hang and/or crash
+    if (updateTimeLabel == true) {
+        emit updateCurrentSimulationTimeLabel("<font color='white'>" +
+                                              QString::number(getHours(current_simulated_time_in_seconds)) + " hours, " +
+                                              QString::number(getMinutes(current_simulated_time_in_seconds)) + " minutes, " +
+                                              QString::number(floor(getSeconds(current_simulated_time_in_seconds))) + " seconds</font>");
+        last_current_time_update_in_seconds = current_simulated_time_in_seconds;
+    }
+
+    // this catches the case when the /clock timer is not running
+    // AKA: when we are not running a simulation
+    if (current_simulated_time_in_seconds <= 0.0) {
+        return;
+    }
+
+    if (is_timer_on == true) {
+        if (current_simulated_time_in_seconds >= timer_stop_time_in_seconds) {
+            is_timer_on = false;
+            emit allStopButtonSignal();
+            emit sendInfoLogMessage("\nSimulation timer complete at: " +
+                                    QString::number(getHours(current_simulated_time_in_seconds)) + " hours, " +
+                                    QString::number(getMinutes(current_simulated_time_in_seconds)) + " minutes, " +
+                                    QString::number(getSeconds(current_simulated_time_in_seconds)) + " seconds\n");
+        }
+    }
+}
+
 void RoverGUIPlugin::currentRoverChangedEventHandler(QListWidgetItem *current, QListWidgetItem *previous)
 {
     emit sendInfoLogMessage("Selcted Rover Changed");
@@ -594,6 +670,14 @@ void RoverGUIPlugin::currentRoverChangedEventHandler(QListWidgetItem *current, Q
         emit sendInfoLogMessage("Existing rover selected");
     }
 
+    // only update the number of satellites if a valid rover name has been selected
+    if (selected_rover_name.compare("") != 0 && rover_numSV_state[selected_rover_name] > 0) {
+        QString newLabelText = "Number of GPS Satellites: " + QString::number(rover_numSV_state[selected_rover_name]);
+        emit updateNumberOfSatellites("<font color='white'>" + newLabelText + "</font>");
+    } else {
+        emit updateNumberOfSatellites("<font color='white'>Number of GPS Satellites: ---</font>");
+    }
+
     // Enable control mode radio group now that a rover has been selected
     ui.autonomous_control_radio_button->setEnabled(true);
     ui.joystick_control_radio_button->setEnabled(true);
@@ -616,6 +700,7 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
         map_data->clear(*it);
         ui.map_frame->clear(*it);
         rover_control_state.erase(*it); // Remove the control state for orphaned rovers
+        rover_numSV_state.erase(*it);
         rover_statuses.erase(*it);
 
         // If the currently selected rover disconnected, shutdown its subscribers and publishers
@@ -638,13 +723,17 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
         status_subscribers[*it].shutdown();
         encoder_subscribers[*it].shutdown();
         gps_subscribers[*it].shutdown();
+        gps_nav_solution_subscribers[*it].shutdown();
         ekf_subscribers[*it].shutdown();
+        rover_diagnostic_subscribers[*it].shutdown();
 
         // Delete the subscribers
         status_subscribers.erase(*it);
         encoder_subscribers.erase(*it);
         gps_subscribers.erase(*it);
+        gps_nav_solution_subscribers.erase(*it);
         ekf_subscribers.erase(*it);
+        rover_diagnostic_subscribers.erase(*it);
         
         // Shudown Publishers
         control_mode_publishers[*it].shutdown();
@@ -659,6 +748,7 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
         //displayLogMessage("Waiting for rover to connect...");
         selected_rover_name = "";
         rover_control_state.clear();
+        rover_numSV_state.clear();
         rover_names.clear();        
         ui.rover_list->clearSelection();
         ui.rover_list->clear();
@@ -742,6 +832,7 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
         encoder_subscribers[*i] = nh.subscribe("/"+*i+"/odom/filtered", 10, &RoverGUIPlugin::encoderEventHandler, this);
         ekf_subscribers[*i] = nh.subscribe("/"+*i+"/odom/ekf", 10, &RoverGUIPlugin::EKFEventHandler, this);
         gps_subscribers[*i] = nh.subscribe("/"+*i+"/odom/navsat", 10, &RoverGUIPlugin::GPSEventHandler, this);
+        gps_nav_solution_subscribers[*i] = nh.subscribe("/"+*i+"/navsol", 10, &RoverGUIPlugin::GPSNavSolutionEventHandler, this);
         rover_diagnostic_subscribers[*i] = nh.subscribe("/"+*i+"/diagnostics", 10, &RoverGUIPlugin::diagnosticEventHandler, this);
 
         RoverStatus rover_status;
@@ -896,104 +987,109 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
     float byte_rate = msg->data[1]; // Bandwidth used by the wireless interface
     float sim_rate = msg->data[2]; // Simulation update rate
 
-    // Convert to strings
-
-    diagnostic_display = to_string(wireless_quality);
-
-    // Convert the byte rate into a string with units
-    // Rate in B/s
-       float rate = byte_rate;
-
-       // Conversion factors to make the rate human friendly
-       int KB = 1024;
-       int MB = 1024*1024;
-
-       string rate_str;
-       string units;
-       if (rate < KB) {
-         rate_str = to_string(rate);
-         units = "B/s";
-       } else if (rate < MB) {
-         rate = rate/KB;
-         units = "KB/s";
-       } else {
-         rate = rate/MB;
-         units = "MB/s";
-       }
-
-       rate_str = to_string(rate);
-       if (rate_str[rate_str.find(".")+1] != '0')
-         rate_str = rate_str.erase(rate_str.find(".")+2,string::npos);
-       else
-         rate_str = rate_str.erase(rate_str.find("."),string::npos);
-
-       diagnostic_display += " | " + rate_str + " " + units;
-
-    // Find the row in the rover list that corresponds to the rover that sent us the diagnostics message
-    // this is just to make sure the diagnostic data is displayed in the row that matches the rover
-    // it came from
-    int row = 0; // declare here so we can use it to index into the rover_diags_list
-    for(; row < ui.rover_list->count(); row++)
-    {
-        QListWidgetItem *item = ui.rover_list->item(row);
-
-        // Extract rover name
-        string rover_name_and_status = item->text().toStdString();
-
-        // Rover names start at the begining of the rover name and status string and end at the first space
-        size_t rover_name_length = rover_name_and_status.find_first_of(" ");
-        string ui_rover_name = rover_name_and_status.substr(0, rover_name_length);
-        if (ui_rover_name.compare(rover_name)==0) break; // We found a rover with the right name
-    }
-
-    // Check the the rover was found in the rover list
-    if (row >= ui.rover_list->count())
-    {
-        emit sendInfoLogMessage(QString::fromStdString("Received diagnostic data from an unknown rover: " + rover_name));
-        return;
-    }
-
-    // Update the UI
-    QListWidgetItem *item = ui.rover_diags_list->item(row);
-    // We don't want the user to interact with this display item so make non-selectable
-    item->setFlags(item->flags() & ~Qt::ItemIsSelectable);
+    // Declare the output colour variables
+    int red = 255;
+    int green = 255;
+    int blue = 255;
     
-    // Check whether there is sim update data. If so assume the diagnostic data is coming from a simulated rover.
+    // Check whether there is sim update data. Will be < 0 for the sim rate if a physical rover is sending the data.
+    // If so assume the diagnostic data is coming from a simulated rover.
     // TODO: replace with a proper message type so we don't need to use in stream flags like this.
     if ( sim_rate < 0 )
-      {
-	// Change the color of the text based on the link quality. These numbers are from
-	// experience but need tuning. The raw quality value is scaled into a new range to make the colors more meaningful
-	int quality_max = 70;
-	int quality_min = 0;
-	int scaled_max = 10;
-	int scaled_min = 0;
-	int quality_range = quality_max - quality_min; // Max minus min
-	int scaled_range = scaled_max - scaled_min; // Scaled to match the experimental quality of the connection. Below 30 should be red = bad
-	int scaled_wireless_quality = (((wireless_quality - quality_min)*static_cast<float>(scaled_range))/quality_range) + scaled_min; // scale the quality to the new range
-	
-	int green = 255 * scaled_wireless_quality/static_cast<float>(scaled_range);
-	int red = 255 * (2*scaled_range - (scaled_wireless_quality))/static_cast<float>(2*scaled_range);
-	int blue = 0;
-	
-	item->setTextColor(QColor(red, green, blue));
-      }
+    {
+        // Change the color of the text based on the link quality. These numbers are from
+        // experience but need tuning. The raw quality value is scaled into a new range to make the colors more meaningful
+        int quality_max = 70;
+        int quality_min = 0;
+        int scaled_max = 10;
+        int scaled_min = 0;
+        int quality_range = quality_max - quality_min; // Max minus min
+        int scaled_range = scaled_max - scaled_min; // Scaled to match the experimental quality of the connection. Below 30 should be red = bad
+        int scaled_wireless_quality = (((wireless_quality - quality_min)*static_cast<float>(scaled_range))/quality_range) + scaled_min; // scale the quality to the new range
+
+        if (scaled_range != 0)
+        {
+            green = 255 * scaled_wireless_quality/static_cast<float>(scaled_range);
+            red = 255 * (2*scaled_range - (scaled_wireless_quality))/static_cast<float>(2*scaled_range);
+        }
+        else
+        {
+            green = 0;
+            red = 0;
+        }
+
+        blue = 0;
+
+        // Make sure color is in a valid range
+        if (green > 255) green = 255;
+        if (blue > 255) blue = 255;
+        if (red > 255) red = 255;
+
+        if (green < 0) green = 0;
+        if (blue < 0) blue = 0;
+        if (red < 0) red = 0;
+
+        diagnostic_display = to_string(wireless_quality);
+
+        // Convert the byte rate into a string with units
+        // Rate in B/s
+        float rate = byte_rate;
+
+        // Conversion factors to make the rate human friendly
+        int KB = 1024;
+        int MB = 1024*1024;
+
+        string rate_str;
+        string units;
+        if (rate < KB) {
+            rate_str = to_string(rate);
+            units = "B/s";
+        } else if (rate < MB) {
+            rate = rate/KB;
+            units = "KB/s";
+        } else {
+            rate = rate/MB;
+            units = "MB/s";
+        }
+
+        rate_str = to_string(rate);
+
+        if (rate_str[rate_str.find(".")+1] != '0')
+            rate_str = rate_str.erase(rate_str.find(".")+2,string::npos);
+        else
+            rate_str = rate_str.erase(rate_str.find("."),string::npos);
+
+        diagnostic_display += " | " + rate_str + " " + units;
+
+    }
     else
-      {
-	string sim_rate_str = to_string(sim_rate);
+    {
+        string sim_rate_str = to_string(sim_rate);
 
-	// Truncate to 1 digit
-	if (sim_rate_str[sim_rate_str.find(".")+1] != '0')
-	  sim_rate_str = sim_rate_str.erase(sim_rate_str.find(".")+3,string::npos);
-	else
-	  sim_rate_str = sim_rate_str.erase(sim_rate_str.find("."),string::npos);
+        // Truncate to 1 digit
+        if (sim_rate_str[sim_rate_str.find(".")+1] != '0')
+            sim_rate_str = sim_rate_str.erase(sim_rate_str.find(".")+3,string::npos);
+        else
+            sim_rate_str = sim_rate_str.erase(sim_rate_str.find("."),string::npos);
 
-	item->setTextColor(QColor(255*(1-sim_rate),255*sim_rate,0));
+        red = 255*(1-sim_rate);
+        green = 255*sim_rate;
+        blue = 0;
 
-	diagnostic_display = sim_rate_str + " sim rate";
-      }
+        // Make sure color is in a valid range
+        if (green > 255) green = 255;
+        if (blue > 255) blue = 255;
+        if (red > 255) red = 255;
 
-    item->setText(QString::fromStdString(diagnostic_display));
+        if (green < 0) green = 0;
+        if (blue < 0) blue = 0;
+        if (red < 0) red = 0;
+
+        diagnostic_display = sim_rate_str + " sim rate";
+    }
+
+    emit sendDiagsDataUpdate(QString::fromStdString(rover_name), QString::fromStdString(diagnostic_display), QColor(red, green, blue));
+
 }
 
 // We use item changed signal as a proxy for the checkbox being clicked
@@ -1040,17 +1136,29 @@ void RoverGUIPlugin::displayDiagLogMessage(QString msg)
     if (msg == NULL) msg = "Message was a NULL pointer";
 
 
-    // replace new lines with <br> in the message
-    msg.replace("\n","<br>");
+     // replace new lines with <BR> in the message. Uppercase in order to differentiate from <br> below
+    msg.replace("\n","<BR>");
 
-    QString new_message = msg+"<br>";
-    diag_log_messages = diag_log_messages+new_message;
 
-    // Prevent the log from growning too large. Maintain a maximum specified size by removing characters from the beginning of the log
-    int overflow_size = diag_log_messages.size() - max_diag_log_length;
-    if (overflow_size > 0) diag_log_messages.remove(0, overflow_size);
+    // Prevent the log from growning too large. Maintain a maximum specified size
+    // by removing characters from the beginning of the log.
+    // Calculate the number of characters in the log. If the log size is larger than the max size specified
+    // then find the position of the first newline that reduces the log size to less than the max size.
+    // Delete all characters up to that position.
+    int overflow = diag_log_messages.size() - max_diag_log_length; 
+    
+    // Get the position of the the first newline after the overflow amount
+    int newline_pos = diag_log_messages.indexOf( "<br>", overflow, Qt::CaseSensitive );
+    
+    // If the max size is exceeded and the number of characters to remove is less than
+    // the size of the log remove those characters.
+    if ( overflow > 0 && newline_pos < diag_log_messages.size() ) {   
+      diag_log_messages.remove(0, newline_pos);
+    }
 
-    ui.diag_log->setText("<font color='white'>"+diag_log_messages+"</font>");
+    diag_log_messages += "<font color='white'>"+msg+"</font><br>";
+
+    ui.diag_log->setText(diag_log_messages);
 
     QScrollBar *sb = ui.diag_log->verticalScrollBar();
     sb->setValue(sb->maximum());
@@ -1061,18 +1169,29 @@ void RoverGUIPlugin::displayInfoLogMessage(QString msg)
     if (msg.isEmpty()) msg = "Message is empty";
     if (msg == NULL) msg = "Message was a NULL pointer";
 
+    // replace new lines with <BR> in the message. Uppercase in order to differentiate from <br> below
+    msg.replace("\n","<BR>");
 
-    // replace new lines with <br> in the message
-    msg.replace("\n","<br>");
+    // Prevent the log from growning too large. Maintain a maximum specified size
+    // by removing characters from the beginning of the log.
+    // Calculate the number of characters in the log. If the log size is larger than the max size specified
+    // then find the position of the first newline that reduces the log size to less than the max size.
+    // Delete all characters up to that position.
+    int overflow = info_log_messages.size() - max_info_log_length; 
+    
+    // Get the position of the the first newline after the overflow amount
+    int newline_pos = info_log_messages.indexOf( "<br>", overflow, Qt::CaseSensitive );
+    
+    // If the max size is exceeded and the number of characters to remove is less than
+    // the size of the log remove those characters.
+    if ( overflow > 0 && newline_pos < info_log_messages.size() ) {   
+      info_log_messages.remove(0, newline_pos);
+    }
+    
+    // Use the <br> tag to make log messages atomic for easier deletion later.
+    info_log_messages += "<font color='white'>"+msg+"</font><br>";
 
-    QString new_message = msg+"<br>";
-    info_log_messages = info_log_messages+new_message;
-
-    // Prevent the log from growning too large. Maintain a maximum specified size by removing characters from the beginning of the log
-    int overflow_size = info_log_messages.size() - max_info_log_length;
-    if (overflow_size > 0) info_log_messages.remove(0,overflow_size);
-
-    ui.info_log->setText("<font color='white'>"+info_log_messages+"</font>");
+    ui.info_log->setText(info_log_messages);
 
     QScrollBar *sb = ui.info_log->verticalScrollBar();
     sb->setValue(sb->maximum());
@@ -1198,6 +1317,122 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
     //Disable all autonomous button
     ui.all_autonomous_button->setEnabled(false);
     ui.all_autonomous_button->setStyleSheet("color: grey; border:2px solid grey;");
+
+    //Experiment Timer START
+
+    // this catches the case when the /clock timer is not running
+    // AKA: when we are not running a simulation
+    if (current_simulated_time_in_seconds > 0.0) {
+        if (ui.simulation_timer_combo_box->currentText() == "no time limit") {
+            timer_start_time_in_seconds = 0.0;
+            timer_stop_time_in_seconds = 0.0;
+            is_timer_on = false;
+        } else if (ui.simulation_timer_combo_box->currentText() == "10 min (Testing)") {
+            timer_start_time_in_seconds = current_simulated_time_in_seconds;
+            timer_stop_time_in_seconds = timer_start_time_in_seconds + 600.0;
+            is_timer_on = true;
+            emit sendInfoLogMessage("\nSetting experiment timer to start at: " +
+                                    QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
+                                    QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
+                                    QString::number(getSeconds(timer_start_time_in_seconds)) + " seconds");
+            ui.simulationTimerStartLabel->setText("<font color='white'>" +
+                                                  QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
+                                                  QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
+                                                  QString::number(floor(getSeconds(timer_start_time_in_seconds))) + " seconds</font>");
+            emit sendInfoLogMessage("Setting experiment timer to stop at: " +
+                                    QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
+                                    QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
+                                    QString::number(getSeconds(timer_stop_time_in_seconds)) + " seconds\n");
+            ui.simulationTimerStopLabel->setText("<font color='white'>" +
+                                                 QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
+                                                 QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
+                                                 QString::number(floor(getSeconds(timer_stop_time_in_seconds))) + " seconds</font>");
+            ui.simulation_timer_combo_box->setEnabled(false);
+            ui.simulation_timer_combo_box->setStyleSheet("color: grey; border:2px solid grey;");
+        } else if (ui.simulation_timer_combo_box->currentText() == "30 min (Preliminary)") {
+            timer_start_time_in_seconds = current_simulated_time_in_seconds;
+            timer_stop_time_in_seconds = timer_start_time_in_seconds + 1800.0;
+            is_timer_on = true;
+            emit sendInfoLogMessage("\nSetting experiment timer to start at: " +
+                                    QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
+                                    QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
+                                    QString::number(getSeconds(timer_start_time_in_seconds)) + " seconds");
+            ui.simulationTimerStartLabel->setText("<font color='white'>" +
+                                                  QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
+                                                  QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
+                                                  QString::number(floor(getSeconds(timer_start_time_in_seconds))) + " seconds</font>");
+            emit sendInfoLogMessage("Setting experiment timer to stop at: " +
+                                    QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
+                                    QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
+                                    QString::number(getSeconds(timer_stop_time_in_seconds)) + " seconds\n");
+            ui.simulationTimerStopLabel->setText("<font color='white'>" +
+                                                 QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
+                                                 QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
+                                                 QString::number(floor(getSeconds(timer_stop_time_in_seconds))) + " seconds</font>");
+            ui.simulation_timer_combo_box->setEnabled(false);
+            ui.simulation_timer_combo_box->setStyleSheet("color: grey; border:2px solid grey;");
+        } else if (ui.simulation_timer_combo_box->currentText() == "60 min (Final)") {
+            timer_start_time_in_seconds = current_simulated_time_in_seconds;
+            timer_stop_time_in_seconds = timer_start_time_in_seconds + 3600.0;
+            is_timer_on = true;
+            emit sendInfoLogMessage("\nSetting experiment timer to start at: " +
+                                    QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
+                                    QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
+                                    QString::number(getSeconds(timer_start_time_in_seconds)) + " seconds");
+            ui.simulationTimerStartLabel->setText("<font color='white'>" +
+                                                  QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
+                                                  QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
+                                                  QString::number(floor(getSeconds(timer_start_time_in_seconds))) + " seconds</font>");
+            emit sendInfoLogMessage("Setting experiment timer to stop at: " +
+                                    QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
+                                    QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
+                                    QString::number(getSeconds(timer_stop_time_in_seconds)) + " seconds\n");
+            ui.simulationTimerStopLabel->setText("<font color='white'>" +
+                                                 QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
+                                                 QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
+                                                 QString::number(floor(getSeconds(timer_stop_time_in_seconds))) + " seconds</font>");
+            ui.simulation_timer_combo_box->setEnabled(false);
+            ui.simulation_timer_combo_box->setStyleSheet("color: grey; border:2px solid grey;");
+        }
+    }
+    //Experiment Timer END
+}
+
+double RoverGUIPlugin::getHours(double seconds) {
+    if (seconds < 3600.0) return 0.0;
+
+    double hours = 0.0;
+
+    while (seconds >= 3600.0) {
+        seconds -= 3600.0;
+        hours++;
+    }
+
+    return hours;
+}
+
+double RoverGUIPlugin::getMinutes(double seconds) {
+    double hours = getHours(seconds);
+    seconds -= hours * 3600.0;
+
+    if (seconds < 60.0) return 0.0;
+
+    double minutes = 0.0;
+
+    while (seconds >= 60.0) {
+        seconds -= 60.0;
+        minutes++;
+    }
+
+    return minutes;
+}
+
+double RoverGUIPlugin::getSeconds(double seconds) {
+    double hours = getHours(seconds);
+    double minutes = getMinutes(seconds);
+    seconds -= (hours * 3600.0) + (minutes * 60.0);
+
+    return seconds;
 }
 
 void RoverGUIPlugin::allStopButtonEventHandler()
@@ -1238,6 +1473,22 @@ void RoverGUIPlugin::allStopButtonEventHandler()
     //Disable all stop button
     ui.all_stop_button->setEnabled(false);
     ui.all_stop_button->setStyleSheet("color: grey; border:2px solid grey;");
+
+    // reset the simulation timer variables
+    ui.simulation_timer_combo_box->setEnabled(true);
+    ui.simulation_timer_combo_box->setStyleSheet("color: white; border:1px solid white; padding: 1px 0px 1px 3px");
+    ui.simulationTimerStartLabel->setText("<font color='white'>---</font>");
+    ui.simulationTimerStopLabel->setText("<font color='white'>---</font>");
+    timer_start_time_in_seconds = 0.0;
+    timer_stop_time_in_seconds = 0.0;
+
+    if (is_timer_on == true) {
+        is_timer_on = false;
+        emit sendInfoLogMessage("\nSimulation timer cancelled at: " +
+                                QString::number(getHours(current_simulated_time_in_seconds)) + " hours, " +
+                                QString::number(getMinutes(current_simulated_time_in_seconds)) + " minutes, " +
+                                QString::number(getSeconds(current_simulated_time_in_seconds)) + " seconds\n");
+    }
 }
 
 // Get the path to the world file containing the custom distribution from the user
@@ -1289,7 +1540,6 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
     emit sendInfoLogMessage("Building simulation...");
 
     ui.build_simulation_button->setEnabled(false);
-
     ui.build_simulation_button->setStyleSheet("color: grey; border:2px solid grey;");
 
     QString return_msg;
@@ -1344,6 +1594,8 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
     emit sendInfoLogMessage("Adding collection disk...");
     float collection_disk_radius = 0.5; // meters
     sim_mgr.addModel("collection_disk", "collection_disk", 0, 0, 0, collection_disk_radius);
+    score_subscriber = nh.subscribe("/collectionZone/score", 10, &RoverGUIPlugin::scoreEventHandler, this);
+    simulation_timer_subscriber = nh.subscribe("/clock", 10, &RoverGUIPlugin::simulationTimerEventHandler, this);
 
     int n_rovers_created = 0;
     int n_rovers = 3;
@@ -1361,13 +1613,80 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
     progress_dialog.show();
 
     QString rovers[6] = {"achilles", "aeneas", "ajax", "diomedes", "hector", "paris"};
-    QPoint rover_positions[6] = {QPoint(0,1), QPoint(1,1), QPoint(1,0), QPoint(-1,0), QPoint(0,-1), QPoint(-1,-1)};
 
+    /**
+     * The distance to the rover from a corner position is calculated differently
+     * than the distance to a cardinal position.
+     *
+     * The cardinal direction rovers are a straightforward calculation where:
+     *     a = the distance to the edge of the collection zone
+     *         i.e., 1/2 of the collection zone square side length
+     *     b = the 50cm distance required by the rules for placing the rover
+     *     c = offset for the simulation for the center of the rover (30cm)
+     *         i.e., the rover position is at the center of its body
+     *
+     * The corner rovers use trigonometry to calculate the distance where each
+     * value of d, e, and f, are the legs to an isosceles right triangle. In
+     * other words, we are calculating and summing X and Y offsets to position
+     * the rover.
+     *     d = a
+     *     e = xy offset to move the rover 50cm from the corner of the collection zone
+     *     f = xy offset to move the rover 30cm to account for its position being
+     *         calculated at the center of its body
+     *
+     *                       *  *          d = 0.508m
+     *                     *      *        e = 0.354m
+     *                   *          *    + f = 0.212m
+     *                 *     /*     *    ------------
+     *                 *    / | f *            1.072m
+     *                   * /--| *
+     *                    /* *
+     *                   / | e
+     *                  /--|
+     *     *************
+     *     *          /|
+     *     *         / |
+     *     *        /  | d                 a = 0.508m
+     *     *       /   |     *********     b = 0.500m
+     *     *      /    |     *       *   + c = 0.300m
+     *     *     *-----|-----*---*   *   ------------
+     *     *        a  *  b  * c     *         1.308m
+     *     *           *     *********
+     *     *           *
+     *     *           *
+     *     *           *
+     *     *************
+     */
+    QPointF rover_positions[6] =
+    {
+      /* cardinal rovers: North, East, South, West */
+      QPointF(-1.308,  0.000), // 1.308 = distance_from_center_to_edge_of_collection_zone
+      QPointF( 0.000, -1.308), //             + 50 cm distance to rover
+      QPointF( 1.308,  0.000), //             + 30 cm distance_from_center_of_rover_to_edge_of_rover
+      QPointF( 0.000,  1.308), // 1.308m = 0.508m + 0.5m + 0.3m
+
+      /* corner rovers: Northeast, Southwest */
+      QPointF( 1.072,  1.072), // 1.072 = diagonal_distance_from_center_to_edge_of_collection_zone
+      QPointF(-1.072, -1.072)  //             + diagonal_distance_to_move_50cm
+    };                         //             + diagonal_distance_to_move_30cm
+                               // 1.072m = 0.508 + 0.354 + 0.212
+
+    /* In this case, the yaw is the value that turns rover "left" and "right" */
+    float rover_yaw[6] =
+    {
+       0.000, //  0.00 * PI
+       1.571, //  0.50 * PI
+      -3.142, // -1.00 * PI
+      -1.571, // -0.50 * PI
+      -2.356, // -0.75 * PI
+       0.785  //  0.25 * PI
+    };
+      
     // Add rovers to the simulation and start the associated ROS nodes
     for (int i = 0; i < n_rovers; i++)
     {
         emit sendInfoLogMessage("Adding rover "+rovers[i]+"...");
-        return_msg = sim_mgr.addRover(rovers[i], rover_positions[i].x(), rover_positions[i].y(), 0);
+        return_msg = sim_mgr.addRover(rovers[i], rover_positions[i].x(), rover_positions[i].y(), 0, 0, 0, rover_yaw[i]);
         emit sendInfoLogMessage(return_msg);
 
         emit sendInfoLogMessage("Starting rover node for "+rovers[i]+"...");
@@ -1402,9 +1721,9 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
    //addWalls(-arena_dim/2, -arena_dim/2, arena_dim, arena_dim);
 
    //   // Test rover movement
-//   displayLogMessage("Moving aeneas");
-//   return_msg = sim_mgr.moveRover("aeneas", 10, 0, 0);
-//   displayLogMessage(return_msg);
+   //   displayLogMessage("Moving aeneas");
+   //   return_msg = sim_mgr.moveRover("aeneas", 10, 0, 0);
+   //   displayLogMessage(return_msg);
 
    //displayLogMessage("Starting the gazebo client to visualize the simulation.");
    //sim_mgr.startGazeboClient();
@@ -1415,11 +1734,13 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
    ui.visualize_simulation_button->setStyleSheet("color: white;border:1px solid white;");
    ui.clear_simulation_button->setStyleSheet("color: white;border:1px solid white;");
 
+    ui.simulation_timer_combo_box->setEnabled(true);
+    ui.simulation_timer_combo_box->setStyleSheet("color: white; border:1px solid white; padding: 1px 0px 1px 3px");
+
    emit sendInfoLogMessage("Finished building simulation.");
 
-  // Visualize the simulation by default call button event handler
+   // Visualize the simulation by default call button event handler
    visualizeSimulationButtonEventHandler();
-
 }
 
 void RoverGUIPlugin::clearSimulationButtonEventHandler()
@@ -1459,11 +1780,32 @@ void RoverGUIPlugin::clearSimulationButtonEventHandler()
 
     emit sendInfoLogMessage("Shutting down subscribers...");
 
-    for (map<string,ros::Subscriber>::iterator it=encoder_subscribers.begin(); it!=encoder_subscribers.end(); ++it) it->second.shutdown();
+    for (map<string,ros::Subscriber>::iterator it=encoder_subscribers.begin(); it!=encoder_subscribers.end(); ++it) 
+      {
+	qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+	it->second.shutdown();
+      }
+
     encoder_subscribers.clear();
-    for (map<string,ros::Subscriber>::iterator it=gps_subscribers.begin(); it!=gps_subscribers.end(); ++it) it->second.shutdown();
+
+    for (map<string,ros::Subscriber>::iterator it=gps_subscribers.begin(); it!=gps_subscribers.end(); ++it) {
+      qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+      it->second.shutdown();
+    }
+
+    for (map<string,ros::Subscriber>::iterator it=gps_nav_solution_subscribers.begin(); it!=gps_nav_solution_subscribers.end(); ++it) {
+      qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+      it->second.shutdown();
+    }
+
     gps_subscribers.clear();
-    for (map<string,ros::Subscriber>::iterator it=ekf_subscribers.begin(); it!=ekf_subscribers.end(); ++it) it->second.shutdown();
+    gps_nav_solution_subscribers.clear();
+
+    for (map<string,ros::Subscriber>::iterator it=ekf_subscribers.begin(); it!=ekf_subscribers.end(); ++it) {
+      qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+      it->second.shutdown();
+    }
+
     ekf_subscribers.clear();
     us_center_subscriber.shutdown();
     us_left_subscriber.shutdown();
@@ -1472,22 +1814,38 @@ void RoverGUIPlugin::clearSimulationButtonEventHandler()
 
     // Possible error - the following seems to shutdown all subscribers not just those from simulation
 
-    for (map<string,ros::Subscriber>::iterator it=status_subscribers.begin(); it!=status_subscribers.end(); ++it) it->second.shutdown();
+    for (map<string,ros::Subscriber>::iterator it=status_subscribers.begin(); it!=status_subscribers.end(); ++it) 
+      {
+	qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+	it->second.shutdown();
+      }
     status_subscribers.clear();
 
-    for (map<string,ros::Subscriber>::iterator it=obstacle_subscribers.begin(); it!=obstacle_subscribers.end(); ++it) it->second.shutdown();
-    obstacle_subscribers.clear();
+    for (map<string,ros::Subscriber>::iterator it=obstacle_subscribers.begin(); it!=obstacle_subscribers.end(); ++it) 
+      {
+	qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+	it->second.shutdown();
+      }
 
+    obstacle_subscribers.clear();
+    score_subscriber.shutdown();
+    simulation_timer_subscriber.shutdown();
     camera_subscriber.shutdown();
 
     emit sendInfoLogMessage("Shutting down publishers...");
 
-    for (map<string,ros::Publisher>::iterator it=control_mode_publishers.begin(); it!=control_mode_publishers.end(); ++it) it->second.shutdown();
+    for (map<string,ros::Publisher>::iterator it=control_mode_publishers.begin(); it!=control_mode_publishers.end(); ++it)
+      {
+	qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+	it->second.shutdown();
+      }
     control_mode_publishers.clear();
 
     return_msg += sim_mgr.stopGazeboClient();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     return_msg += "<br>";
     return_msg += sim_mgr.stopGazeboServer();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     emit sendInfoLogMessage(return_msg);
 
     ui.visualize_simulation_button->setEnabled(false);
@@ -1503,7 +1861,21 @@ void RoverGUIPlugin::clearSimulationButtonEventHandler()
     // Clear the task status values
     obstacle_call_count = 0;
     emit updateObstacleCallCount("<font color='white'>0</font>");
- }
+    emit updateNumberOfTagsCollected("<font color='white'>0</font>");
+    emit updateNumberOfSatellites("<font color='white'>Number of GPS Satellites: ---</font>");
+
+    // reset the simulation timer variables
+    ui.simulation_timer_combo_box->setEnabled(true);
+    ui.simulation_timer_combo_box->setStyleSheet("color: white; border:1px solid white; padding: 1px 0px 1px 3px");
+    ui.simulationTimerStartLabel->setText("<font color='white'>---</font>");
+    ui.simulationTimerStopLabel->setText("<font color='white'>---</font>");
+    ui.currentSimulationTimeLabel->setText("<font color='white'>---</font>");
+    timer_start_time_in_seconds = 0.0;
+    timer_stop_time_in_seconds = 0.0;
+    current_simulated_time_in_seconds = 0.0;
+    last_current_time_update_in_seconds = 0.0;
+    is_timer_on = false;
+}
 
 void RoverGUIPlugin::visualizeSimulationButtonEventHandler()
 {
@@ -2124,7 +2496,7 @@ bool RoverGUIPlugin::eventFilter(QObject *target, QEvent *event)
 
             bool direction_key = true;
 
-            float speed = 0.5;
+            float speed = 1;
 
             // displayLogMessage("Key press");
 
@@ -2241,6 +2613,49 @@ void RoverGUIPlugin::overrideNumRoversCheckboxToggledEventHandler(bool checked)
     if (checked) ui.custom_num_rovers_combobox->setStyleSheet("color: white; border:1px solid white; padding: 1px 0px 1px 3px"); // The padding makes the item list color change work
     else ui.custom_num_rovers_combobox->setStyleSheet("color: grey; border:1px solid grey;");
 }
+
+// Slot used to update the GUI diagnostic data output. Ensures we update from the correct process.
+void RoverGUIPlugin::receiveDiagsDataUpdate(QString rover_name, QString text, QColor colour)
+{
+    if (!diag_update_mutex.try_lock()) return;
+
+    // Find the row in the rover list that corresponds to the rover that sent us the diagnostics message
+    // this is just to make sure the diagnostic data is displayed in the row that matches the rover
+    // it came from
+    int row = 0; // declare here so we can use it to index into the rover_diags_list
+    for(; row < ui.rover_list->count(); row++)
+    {
+        QListWidgetItem *item = ui.rover_list->item(row);
+
+        // Extract rover name
+        string rover_name_and_status = item->text().toStdString();
+
+        // Rover names start at the begining of the rover name and status string and end at the first space
+        size_t rover_name_length = rover_name_and_status.find_first_of(" ");
+        string ui_rover_name = rover_name_and_status.substr(0, rover_name_length);
+        if (ui_rover_name.compare(rover_name.toStdString())==0) break; // We found a rover with the right name
+    }
+
+    // Check the the rover was found in the rover list
+    if (row >= ui.rover_list->count())
+    {
+        emit sendInfoLogMessage("Received diagnostic data from an unknown rover: " + rover_name);
+        return;
+    }
+
+    // Update the UI - needs to happen in the UI thread
+    QListWidgetItem *item = ui.rover_diags_list->item(row);
+
+    // We don't want the user to interact with this display item so make non-selectable
+    item->setFlags(item->flags() & ~Qt::ItemIsSelectable);
+
+    // Set the text and colour
+    item->setText(text);
+    item->setTextColor(colour);
+
+    diag_update_mutex.unlock();
+}
+
 
 // Refocus on the main ui widget so the rover list doesn't start capturing key strokes making keyboard rover driving not work.
 void RoverGUIPlugin::refocusKeyboardEventHandler()

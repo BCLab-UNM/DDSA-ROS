@@ -18,6 +18,7 @@ GazeboSimManager::GazeboSimManager()
     char *app_root_cstr;
     app_root_cstr = getenv(name);
     app_root = QString(app_root_cstr);
+    log_root = app_root+"/"+"logs/";
     custom_world_path = "";
 }
 
@@ -37,6 +38,14 @@ QProcess* GazeboSimManager::startGazeboServer()
 QProcess* GazeboSimManager::startGazeboServer( QString path )
 {
     if (gazebo_server_process != NULL) return gazebo_server_process;
+
+    QString argument = QString("rosparam set /use_sim_time true");
+    QProcess sh;
+    sh.start("sh", QStringList() << "-c" << argument);
+
+    sh.waitForFinished();
+    QByteArray output = sh.readAll();
+    sh.close();
 
     gazebo_server_process = new QProcess();
 
@@ -130,57 +139,41 @@ QString GazeboSimManager::stopRoverNode( QString rover_name )
     rover_processes[rover_name]->waitForFinished();
     rover_processes.erase(rover_name);
 
+    // Names of the nodes to kill. 
+    vector<QString> nodes;
+    nodes.push_back("APRILTAG");
+    nodes.push_back("BASE2CAM");
+    nodes.push_back("DIAGNOSTICS");
+    nodes.push_back("MAP");
+    nodes.push_back("MOBILITY");
+    nodes.push_back("NAVSAT");
+    nodes.push_back("OBSTACLE");
+    nodes.push_back("ODOM");
+
     // Kill nodes
-    QString argument = "rosnode kill "+rover_name+"_MOBILITY";
-    QProcess sh;
-    sh.start("sh", QStringList() << "-c" << argument);
-    sh.waitForFinished();
-    QString output = sh.readAll();
-    sh.close();
+    QString output = "";
+    for (int i = 0; i < nodes.size(); i++) {
+      QString argument = "rosnode kill "+rover_name+"_"+nodes[i];
+      QProcess sh;
+      sh.start("sh", QStringList() << "-c" << argument);
+      sh.waitForFinished();
+      output += "<br>" + sh.readAll();
+      sh.close();
+    }
 
-    argument = "rosnode kill "+rover_name+"_NAVSAT";
-    sh.start("sh", QStringList() << "-c" << argument);
-    sh.waitForFinished();
-    output += "<br>" + sh.readAll();
-    sh.close();
-
-    argument = "rosnode kill "+rover_name+"_TARGET";
-    sh.start("sh", QStringList() << "-c" << argument);
-    sh.waitForFinished();
-    output += "<br>" + sh.readAll();
-    sh.close();
-
-    argument = "rosnode kill "+rover_name+"_OBSTACLE";
-    sh.start("sh", QStringList() << "-c" << argument);
-    sh.waitForFinished();
-    output += "<br>" + sh.readAll();
-    sh.close();
-
-    argument = "rosnode kill "+rover_name+"_EKF";
-    sh.start("sh", QStringList() << "-c" << argument);
-    sh.waitForFinished();
-    output += "<br>" + sh.readAll();
-    sh.close();
-
-    argument = "rosnode kill "+rover_name+"_DIAGNOSTICS";
-    sh.start("sh", QStringList() << "-c" << argument);
-    sh.waitForFinished();
-    output += "<br>" + sh.readAll();
-    sh.close();
-
-    return output+"<br>rover process " + rover_name + " terminated along with <font color='green'>navsat, target, obstacle, and mobility</font> nodes";
+    return output;
 }
 
 QString GazeboSimManager::startRoverNode( QString rover_name )
 {
-    QString argument = "roslaunch "+app_root+"/launch/swarmie.launch name:="+rover_name;
+  QString argument = "roslaunch "+app_root+"/launch/swarmie.launch name:="+rover_name+">"+log_root+rover_name+".log";
 
     QProcess* rover_process = new QProcess();
 
     rover_processes[rover_name] = rover_process;
 
     rover_process->start("sh", QStringList() << "-c" << argument);
-
+    
     return "rover process spawned";
 }
 
@@ -199,7 +192,7 @@ QString GazeboSimManager::addGroundPlane( QString ground_name )
     return return_msg;
 }
 
-QString GazeboSimManager::addRover(QString rover_name, float x, float y, float z)
+QString GazeboSimManager::addRover(QString rover_name, float x, float y, float z, float roll, float pitch, float yaw)
 {
     float rover_clearance = 0.45; //meters
     model_locations.insert(make_tuple(x, y, rover_clearance));
@@ -208,8 +201,10 @@ QString GazeboSimManager::addRover(QString rover_name, float x, float y, float z
                + "-model " + rover_name
                + " -x " + QString::number(x)
                + " -y " + QString::number(y)
-               + " -z " + QString::number(z);
-               + " -Y " + QString::number(M_PI);
+               + " -z " + QString::number(z)
+               + " -R " + QString::number(roll)
+               + " -P " + QString::number(pitch)
+               + " -Y " + QString::number(yaw);
 
     QProcess sh;
     sh.start("sh", QStringList() << "-c" << argument);
