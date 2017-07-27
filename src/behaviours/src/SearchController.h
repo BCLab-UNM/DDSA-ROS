@@ -3,6 +3,17 @@
 
 #include <random_numbers/random_numbers.h>
 #include "Controller.h"
+#include <ros/console.h>
+
+#ifndef M_PI
+#define M_PI 3.141592653589793238462643383279502884197169399375105820974944592307816406286
+#endif
+
+#define INSERT_CHECKPOINT 0
+#define TARGET_CURRENTCORNER 1
+#define TARGET_NEWCORNER 2
+
+
 
 /**
  * This class implements the search control algorithm for the rovers. The code
@@ -26,6 +37,11 @@ public:
   void SetCurrentLocation(Point currentLocation);
   void SetCenterLocation(Point centerLocation);
   void SetSuccesfullPickup();
+  //void SpiralSearching();
+  Point SpiralSearching();
+  void setCheckPoint();
+  void reachedCheckPoint();
+  void reachedSearchLocation();
 
 protected:
 
@@ -37,7 +53,10 @@ private:
   Point currentLocation;
   Point centerLocation;
   Point searchLocation;
+  Point checkPoint;
+  Point spiralLocation;
   int attemptCount = 0;
+  double sideLength = 4.0;
   //struct for returning data to ROS adapter
   Result result;
 
@@ -45,6 +64,13 @@ private:
   // Flag to allow special behaviour for the first waypoint
   bool first_waypoint = true;
   bool succesfullPickup = false;
+  int cornerNum = 0;
+  float corner = 2 * M_PI;
+  bool checkpointReached = true;
+  bool checkPointExist = false;
+  bool searchlocationReached = false;
+  bool init = false;
+
 };
 
 #endif /* SEARCH_CONTROLLER */
