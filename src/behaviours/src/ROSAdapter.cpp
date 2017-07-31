@@ -80,6 +80,11 @@ Result result;
 std_msgs::String msg;
 
 
+vector<string> rover_names;
+bool first_auto = false;
+size_t self_index = (size_t)(-1);
+size_t swarm_size = 0;
+
 geometry_msgs::Twist velocity;
 char host[128];
 string publishedName;
@@ -93,6 +98,7 @@ ros::Publisher wristAnglePublish;
 ros::Publisher infoLogPublisher;
 ros::Publisher driveControlPublish;
 ros::Publisher heartbeatPublisher;
+ros::Publisher namePublish;
 
 // Subscribers
 ros::Subscriber joySubscriber;
@@ -100,7 +106,7 @@ ros::Subscriber modeSubscriber;
 ros::Subscriber targetSubscriber;
 ros::Subscriber odometrySubscriber;
 ros::Subscriber mapSubscriber;
-
+ros::Subscriber nameSubscriber;
 
 // Timers
 ros::Timer stateMachineTimer;
@@ -127,6 +133,7 @@ void modeHandler(const std_msgs::UInt8::ConstPtr& message);
 void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& tagInfo);
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
 void mapHandler(const nav_msgs::Odometry::ConstPtr& message);
+void nameHandler(const std_msgs::String::ConstPtr& message);
 void behaviourStateMachine(const ros::TimerEvent&);
 void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
@@ -161,6 +168,8 @@ int main(int argc, char **argv) {
   targetSubscriber = mNH.subscribe((publishedName + "/targets"), 10, targetHandler);
   odometrySubscriber = mNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
   mapSubscriber = mNH.subscribe((publishedName + "/odom/ekf"), 10, mapHandler);
+  nameSubscriber = mNH.subscribe("/names", 36, nameHandler);
+  
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
@@ -172,6 +181,7 @@ int main(int argc, char **argv) {
   infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);
   driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
   heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
+  namePublish = mNH.advertise<std_msgs::String>("/names", 6, true);
 
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   stateMachineTimer = mNH.createTimer(ros::Duration(behaviourLoopTimeStep), behaviourStateMachine);
@@ -226,6 +236,19 @@ void behaviourStateMachine(const ros::TimerEvent&) {
 
   // Robot is in automode
   if (currentMode == 2 || currentMode == 3) {
+
+    if(!first_auto) {
+        cout << publishedName << " is index " << self_index << "\n";
+        cout << publishedName << " - known rovers list:\n";
+
+        for(size_t i = 0; i < rover_names.size(); i++) {
+            cout << "\t" << rover_names[i] << "\n";
+        }
+
+        cout << "\n";
+
+        first_auto = true;
+    }
 
     //TODO: this just sets center to 0 over and over and needs to change
     Point centerOdom;
@@ -399,6 +422,49 @@ void mapHandler(const nav_msgs::Odometry::ConstPtr& message) {
   currentLoc.theta = currentLocation.theta;
   logicController.SetPositionData(currentLoc);
   logicController.SetMapVelocityData(linearVelocity, angularVelocity);
+}
+
+void nameHandler(const std_msgs::String::ConstPtr& message)
+{
+    if(rover_names.empty()) {
+        rover_names.push_back(message->data);
+        self_index = 0;
+    } else {
+
+        size_t pos = rover_names.size();
+        size_t i;
+        for(i = 0; i < rover_names.size(); i++) {
+
+            if(message->data < rover_names[i]) {
+                pos = i;
+                break;
+            }
+
+            if(message->data == rover_names[i]) {
+                return;
+            }
+        }
+
+        first_auto = false;
+
+        rover_names.push_back("");
+
+        for(i = rover_names.size()-1; i > pos; i--) {
+            rover_names[i] = rover_names[i-1];
+        }
+
+        rover_names[pos] = message->data;
+
+        for(i = 0; i < rover_names.size(); i++) {
+            if(rover_names[i] == publishedName) {
+                self_index = i;
+            }
+        }
+    }
+
+    std_msgs::String name_msg;
+    name_msg.data = publishedName;
+    namePublish.publish(name_msg);
 }
 
 void joyCmdHandler(const sensor_msgs::Joy::ConstPtr& message) {
