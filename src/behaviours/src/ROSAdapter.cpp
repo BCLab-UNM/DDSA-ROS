@@ -229,8 +229,8 @@ void behaviourStateMachine(const ros::TimerEvent&) {
       initilized = true;
       //TODO: this just sets center to 0 over and over and needs to change
       Point centerOdom;
-      centerOdom.x = 1 * cos(currentLocation.theta);
-      centerOdom.y = 1 * sin(currentLocation.theta);
+      centerOdom.x = 1.308 * cos(currentLocation.theta);
+      centerOdom.y = 1.308 * sin(currentLocation.theta);
       centerOdom.theta = centerLocation.theta;
       logicController.SetCenterLocationOdom(centerOdom);
 
@@ -254,18 +254,19 @@ void behaviourStateMachine(const ros::TimerEvent&) {
   if (currentMode == 2 || currentMode == 3) {
 
     if(!first_auto) {
-        cout << publishedName << " is index " << self_index << "\n";
-        cout << publishedName << " - known rovers list:\n";
-
+        cout <<"tag:" << publishedName << " - known rovers list:\n";
         for(size_t i = 0; i < rover_names.size(); i++) {
-            cout << "\t" << rover_names[i] << "\n";
+            cout << "\t" <<"tag:"<< rover_names[i] << "\n";
         }
 
         cout << "\n";
 
         first_auto = true;
+        logicController.SetRoverIndex(self_index);
+        logicController.SetSwarmSize(rover_names.size());
+        logicController.SetRoverName(publishedName);
     }
-    humanTime();
+    //humanTime();
 
     //update the time used by all the controllers
     logicController.SetCurrentTimeInMilliSecs( getROSTimeInMilliSecs() );
@@ -430,10 +431,11 @@ void mapHandler(const nav_msgs::Odometry::ConstPtr& message) {
 void nameHandler(const std_msgs::String::ConstPtr& message)
 {
     if(rover_names.empty()) {
+      cout<< "tag: roverlist is empty" << endl;
         rover_names.push_back(message->data);
         self_index = 0;
     } else {
-
+        cout<< "tag: roverlist is Not empty" << endl;
         size_t pos = rover_names.size();
         size_t i;
         for(i = 0; i < rover_names.size(); i++) {
@@ -461,6 +463,7 @@ void nameHandler(const std_msgs::String::ConstPtr& message)
         for(i = 0; i < rover_names.size(); i++) {
             if(rover_names[i] == publishedName) {
                 self_index = i;
+                break;
             }
         }
     }

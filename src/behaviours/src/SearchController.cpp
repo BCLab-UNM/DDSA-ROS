@@ -11,10 +11,7 @@ SearchController::SearchController() {
   centerLocation.theta = 0;
   result.PIDMode = FAST_PID;
 
-  spiralLocation.x = - 1.0;
-  spiralLocation.y = 2.0;
-  searchLocation.x = - 1.0;
-  searchLocation.y = 2.0;
+
   result.type = waypoint;
 
 }
@@ -30,17 +27,21 @@ Result SearchController::DoWork() {
   int searchState;
 
   if(!init){
-
-    init = true;
-    result.wpts.waypoints.clear();
-    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
-    cout << "tag: spiral point at corner No. " << cornerNum<<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
-    return result;
+      init = true;
+      spiralLocation.x = centerLocation.x;
+      spiralLocation.y = centerLocation.y + roverID * CalculateSides(0);
+      searchLocation.x = spiralLocation.x;
+      searchLocation.y = spiralLocation.y;
+      result.wpts.waypoints.clear();
+      result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
+      cout << "tag: spiral point at corner No. " << cornerNum <<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
+      stepsIntoSpiral += 1;
+      return result;
   }
   else {
 
-    reachedCheckPoint();
-    reachedSearchLocation();
+    ReachedCheckPoint();
+    ReachedSearchLocation();
 
     if(succesfullPickup){
       searchState = INSERT_CHECKPOINT;
@@ -83,9 +84,9 @@ Result SearchController::DoWork() {
 }
 
 void SearchController::SetCenterLocation(Point centerLocation) {
-  //this->centerLocation = centerLocation;
-  this->centerLocation.x = centerLocation.x + 1.0;
+  this->centerLocation.x = centerLocation.x;
   this->centerLocation.y = centerLocation.y;
+
 }
 
 void SearchController::SetCurrentLocation(Point currentLocation) {
@@ -108,7 +109,7 @@ bool SearchController::HasWork() {
 void SearchController::SetSuccesfullPickup() {
   succesfullPickup = true;
   if(checkpointReached){
-    setCheckPoint();
+    SetCheckPoint();
     checkpointReached =false;
 
   }
@@ -121,35 +122,29 @@ Point SearchController::SpiralSearching(){
   if(cornerNum == 4){
     cornerNum = 0;
   }
+
+  sideLength = spacing * CalculateSides(stepsIntoSpiral);
   //float corner = 3 * M_PI/4;
   spiralLocation.x = spiralLocation.x + (sideLength * cos(corner));
   spiralLocation.y = spiralLocation.y + (sideLength * sin(corner));
   cout << "tag: spiral point at corner No. " << cornerNum<<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
+  cout << "tag: steps into spiral: " << stepsIntoSpiral << endl;
   result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
   corner -= (M_PI/2);
   if (corner <= 0.0) {
     corner += 2*M_PI;
   }
-  sideLength += 0.3;
 
+  if(cornerNum == 0){
+    stepsIntoSpiral += 1;
+  }
 
   return spiralLocation;
-
-  /** for( int it = 0; it <= 3; it++){
-
-    nextLocation.x = centerLocation.x + (sideLength * cos(corner));
-    nextLocation.y = centerLocation.y + (sideLength * sin(corner));
-    corner -= (M_PI/2);
-    sideLength += 0.3;
-    cout << "tag: spiral point at :"<< it << " " << nextLocation.x << " , "<< nextLocation.y << endl;
-    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), nextLocation);
-
-  }  **/
 
 
 }
 
-void SearchController::setCheckPoint(){
+void SearchController::SetCheckPoint(){
   // or set it to current location
   this->checkPoint = this->currentLocation;
   checkPointExist =true;
@@ -180,7 +175,7 @@ void SearchController::setCheckPoint(){
 
 }
 
-void SearchController::reachedCheckPoint(){
+void SearchController::ReachedCheckPoint(){
   if (hypot(checkPoint.x-currentLocation.x, checkPoint.y-currentLocation.y) < 0.10) {
     checkpointReached = true;
     cout << "tag: reached the checkpoint(): "<< checkPoint.x<< " , "<< checkPoint.y<< endl;
@@ -188,13 +183,74 @@ void SearchController::reachedCheckPoint(){
 
 }
 
-void SearchController::reachedSearchLocation(){
+void SearchController::ReachedSearchLocation(){
   if (hypot(searchLocation.x-currentLocation.x, searchLocation.y-currentLocation.y) < 0.10) {
     searchlocationReached = true;
     cout << "tag: reached the Searchlocation(): " << searchLocation.x<< " , "<< searchLocation.y<< endl;
   }
 
 }
+
+void SearchController::SetRoverIndex(size_t idx){
+  roverID = idx;
+  cout << "tag:"<< "RoverIndex: "<< roverID << endl;
+}
+
+void SearchController::SetSwarmSize(size_t size){
+  swarmSize = size;
+  cout << "tag:"<< "SwarmSize: "<< swarmSize << endl;
+}
+
+void SearchController::SetRoverName(string name){
+  roverName =name;
+  cout << "tag:" << "RoverName: "<< roverName << " and the sidelength = " << sideLength <<  endl;
+}
+
+float SearchController::CalculateSides( int circuitNum){
+  // North and East
+  if(cornerNum == 0 || cornerNum == 1){
+    if(circuitNum == 0){
+      return roverID;
+    }
+    else if(circuitNum == 1){
+      sideLength = CalculateSides(0) + swarmSize + roverID;
+      return sideLength;
+    }
+    else if(circuitNum > 1){
+      sideLength = CalculateSides(circuitNum - 1) + 2 * swarmSize;
+      return sideLength;
+    }
+    // South and West
+  }else if(cornerNum == 2 || cornerNum == 3){
+    if(circuitNum == 0){
+      sideLength = CalculateSides(0) + roverID;
+      return sideLength;
+    }
+    else{
+      sideLength = CalculateSides(circuitNum) + swarmSize;
+      return sideLength;
+    }
+
+  }
+
+
+}
+
+
+
+   // QPointF rover_positions[6] =
+   // {
+      /* cardinal rovers: North, East, South, West */
+      //QPointF(-1.308,  0.000), // 1.308 = distance_from_center_to_edge_of_collection_zone
+     // QPointF( 0.000, -1.308), //             + 50 cm distance to rover
+     // QPointF( 1.308,  0.000), //             + 30 cm distance_from_center_of_rover_to_edge_of_rover
+     // QPointF( 0.000,  1.308), // 1.308m = 0.508m + 0.5m + 0.3m
+
+      /////* corner rovers: Northeast, Southwest */
+      //QPointF( 1.072,  1.072), // 1.072 = diagonal_distance_from_center_to_edge_of_collection_zone
+      //QPointF(-1.072, -1.072)  //             + diagonal_distance_to_move_50cm
+   // };                         //             + diagonal_distance_to_move_30cm
+                               // 1.072m = 0.508 + 0.354 + 0.212
 
 
 

@@ -15,6 +15,8 @@
 
 
 
+
+
 /**
  * This class implements the search control algorithm for the rovers. The code
  * here should be modified and enhanced to improve search performance.
@@ -39,9 +41,15 @@ public:
   void SetSuccesfullPickup();
   //void SpiralSearching();
   Point SpiralSearching();
-  void setCheckPoint();
-  void reachedCheckPoint();
-  void reachedSearchLocation();
+  void SetCheckPoint();
+  void ReachedCheckPoint();
+  void ReachedSearchLocation();
+  void SetSwarmSize(size_t size);
+  void SetRoverIndex(size_t idx);
+  void SetRoverName(string name);
+  float CalculateSides(int circuitNum);
+  void CalculateSpiralandSearch();
+
 
 protected:
 
@@ -56,13 +64,12 @@ private:
   Point checkPoint;
   Point spiralLocation;
   int attemptCount = 0;
-  double sideLength = 4.0;
+  float sideLength = 1.5;
   //struct for returning data to ROS adapter
   Result result;
 
   // Search state
   // Flag to allow special behaviour for the first waypoint
-  bool first_waypoint = true;
   bool succesfullPickup = false;
   int cornerNum = 0;
   float corner = 2 * M_PI;
@@ -70,6 +77,16 @@ private:
   bool checkPointExist = false;
   bool searchlocationReached = false;
   bool init = false;
+  size_t roverID = 0;
+  size_t swarmSize = 0;
+  int stepsIntoSpiral = 0;
+  string roverName;
+  string rovers[6] = {"achilles", "aeneas", "ajax", "diomedes", "hector", "paris"};
+  float x_offset[6] = { 0.000, 0.000, 0.000, 0.000};
+  float y_offset[6] = { 1.308, 2.616, 3.924, 5.232};
+  float cornerVal = 3 * M_PI/4;
+  const float spacing = 0.25;
+
 
 };
 

@@ -1657,6 +1657,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
      *     *           *
      *     *************
      */
+
     QPointF rover_positions[6] =
     {
       /* cardinal rovers: North, East, South, West */
@@ -1672,6 +1673,17 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
                                // 1.072m = 0.508 + 0.354 + 0.212
 
     /* In this case, the yaw is the value that turns rover "left" and "right" */
+/**
+    float rover_yaw[6] =
+        {
+           0.000, //  0.00 * PI
+           0.000, //  0.50 * PI
+           0.000, // -1.00 * PI
+           0.000, // -0.50 * PI
+           0.000, // -0.75 * PI
+           0.785  //  0.25 * PI
+        };
+**/
     float rover_yaw[6] =
     {
        0.000, //  0.00 * PI
@@ -1681,7 +1693,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
       -2.356, // -0.75 * PI
        0.785  //  0.25 * PI
     };
-      
+
     // Add rovers to the simulation and start the associated ROS nodes
     for (int i = 0; i < n_rovers; i++)
     {
