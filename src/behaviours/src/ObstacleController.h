@@ -23,6 +23,7 @@ public:
   void SetTargetHeld ();
   void SetTargetHeldClear() {targetHeld = false; previousTargetState = false;}
   bool GetShouldClearWaypoints() {bool tmp = clearWaypoints; clearWaypoints = false; return tmp;}
+  bool hasDetectedObstacle();
 
 protected:
 

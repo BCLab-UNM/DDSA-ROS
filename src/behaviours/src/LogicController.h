@@ -46,7 +46,6 @@ public:
   void SetCenterLocationMap(Point centerLocationMap);
   void SetSwarmSize(size_t size);
   void SetRoverIndex(size_t idx);
-  void SetRoverName(string name);
   void SetCurrentTimeInMilliSecs( long int time );
 
 protected:
@@ -82,13 +81,7 @@ private:
   void controllerInterconnect();
 
   long int current_time = 0;
-<<<<<<< HEAD
-=======
 
-  size_t index = 0;
-  size_t swarm_size = 0;
-  string roverName;
->>>>>>> 96d495b... inserted the DDSA side calculating algorithm
 };
 
 #endif // LOGICCONTROLLER_H

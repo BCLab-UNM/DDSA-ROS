@@ -152,3 +152,7 @@ void ObstacleController::SetTargetHeld() {
     previousTargetState = true;
   }
 }
+
+bool ObstacleController::hasDetectedObstacle(){
+  return obstacleDetected;
+}

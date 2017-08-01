@@ -229,6 +229,10 @@ void LogicController::controllerInterconnect() {
       obstacleController.SetTargetHeld();
       searchController.SetSuccesfullPickup();
     }
+
+    if(obstacleController.hasDetectedObstacle()){
+      searchController.ObstacleDetected();
+    }
   }
 
   //ask if drop off has released the target from the claws yet
@@ -284,13 +288,11 @@ void LogicController::SetCenterLocationMap(Point centerLocationMap) {
 }
 
 void LogicController::SetSwarmSize(size_t size) {
-    swarm_size = size;
-    searchController.SetSwarmSize(swarm_size);
+    searchController.SetSwarmSize(size);
 }
 
 void LogicController::SetRoverIndex(size_t idx) {
-    index = idx;
-    searchController.SetRoverIndex(index);
+    searchController.SetRoverIndex(idx);
 }
 
 void LogicController::SetCurrentTimeInMilliSecs( long int time )
@@ -301,7 +303,3 @@ void LogicController::SetCurrentTimeInMilliSecs( long int time )
   obstacleController.SetCurrentTimeInMilliSecs( time );
 }
 
-void LogicController::SetRoverName(string name){
-  roverName = name;
-  searchController.SetRoverName(roverName);
-}

@@ -29,13 +29,12 @@ Result SearchController::DoWork() {
   if(!init){
       init = true;
       spiralLocation.x = centerLocation.x;
-      spiralLocation.y = centerLocation.y + roverID * CalculateSides(0);
+      spiralLocation.y = centerLocation.y + spacing * CalculateSides(0, 0);
       searchLocation.x = spiralLocation.x;
       searchLocation.y = spiralLocation.y;
       result.wpts.waypoints.clear();
       result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
       cout << "tag: spiral point at corner No. " << cornerNum <<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
-      stepsIntoSpiral += 1;
       return result;
   }
   else {
@@ -51,6 +50,8 @@ Result SearchController::DoWork() {
       searchState = TARGET_CURRENTCORNER;
       if(searchlocationReached){
         searchState = TARGET_NEWCORNER;
+      }else if( hasObstacleDetected && !searchlocationReached){
+        searchState = PATHPLANNING_CURRENTCORNER;
       }
 
     }
@@ -78,6 +79,15 @@ Result SearchController::DoWork() {
     searchLocation = SpiralSearching();
     return result;
     break;
+
+  }
+  case PATHPLANNING_CURRENTCORNER:{
+    hasObstacleDetected = false;
+    result.wpts.waypoints.clear();
+    PathPlanningWaypoints();
+    return result;
+    break;
+
 
   }
   }
@@ -121,10 +131,10 @@ Point SearchController::SpiralSearching(){
   cornerNum +=1;
   if(cornerNum == 4){
     cornerNum = 0;
+    stepsIntoSpiral += 1;
   }
 
-  sideLength = spacing * CalculateSides(stepsIntoSpiral);
-  //float corner = 3 * M_PI/4;
+  sideLength = spacing * CalculateSides(stepsIntoSpiral, cornerNum);
   spiralLocation.x = spiralLocation.x + (sideLength * cos(corner));
   spiralLocation.y = spiralLocation.y + (sideLength * sin(corner));
   cout << "tag: spiral point at corner No. " << cornerNum<<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
@@ -135,9 +145,6 @@ Point SearchController::SpiralSearching(){
     corner += 2*M_PI;
   }
 
-  if(cornerNum == 0){
-    stepsIntoSpiral += 1;
-  }
 
   return spiralLocation;
 
@@ -201,33 +208,28 @@ void SearchController::SetSwarmSize(size_t size){
   cout << "tag:"<< "SwarmSize: "<< swarmSize << endl;
 }
 
-void SearchController::SetRoverName(string name){
-  roverName =name;
-  cout << "tag:" << "RoverName: "<< roverName << " and the sidelength = " << sideLength <<  endl;
-}
-
-float SearchController::CalculateSides( int circuitNum){
+float SearchController::CalculateSides( int circuitNum, int slot){
   // North and East
-  if(cornerNum == 0 || cornerNum == 1){
+  if(slot == 0 || slot == 1){
     if(circuitNum == 0){
       return roverID;
     }
     else if(circuitNum == 1){
-      sideLength = CalculateSides(0) + swarmSize + roverID;
+      sideLength = CalculateSides(0,slot) + swarmSize + roverID;
       return sideLength;
     }
     else if(circuitNum > 1){
-      sideLength = CalculateSides(circuitNum - 1) + 2 * swarmSize;
+      sideLength = CalculateSides(circuitNum - 1, slot) + 2 * swarmSize;
       return sideLength;
     }
     // South and West
-  }else if(cornerNum == 2 || cornerNum == 3){
+  }else if(slot == 2 || slot == 3){
     if(circuitNum == 0){
-      sideLength = CalculateSides(0) + roverID;
+      sideLength = CalculateSides(0, 0) + roverID;
       return sideLength;
     }
     else{
-      sideLength = CalculateSides(circuitNum) + swarmSize;
+      sideLength = CalculateSides(circuitNum, 0) + swarmSize;
       return sideLength;
     }
 
@@ -235,6 +237,32 @@ float SearchController::CalculateSides( int circuitNum){
 
 
 }
+
+void SearchController::ObstacleDetected(){
+ hasObstacleDetected = true;
+}
+
+void SearchController::PathPlanningWaypoints(){
+  Point reDirectLocation = currentLocation;
+
+  reDirectLocation.x = reDirectLocation.x + (0.50 * cos(M_PI)); // tried M_PI and M_PI/2
+  reDirectLocation.y = reDirectLocation.y + (0.50 * sin(M_PI));
+
+  result.wpts.waypoints.insert(result.wpts.waypoints.begin(), reDirectLocation);
+
+  reDirectLocation.x = reDirectLocation.x + (1.00 * cos(M_PI/2));
+  reDirectLocation.y = reDirectLocation.y + (1.00 * sin(M_PI/2));
+
+  result.wpts.waypoints.insert(result.wpts.waypoints.begin(), reDirectLocation);
+
+  reDirectLocation.x = reDirectLocation.x + (1.00 * cos(0)); // tried M_PI and M_PI/2
+  reDirectLocation.y = reDirectLocation.y + (1.00 * sin(0));
+
+  result.wpts.waypoints.insert(result.wpts.waypoints.begin(), reDirectLocation);
+
+
+}
+
 
 
 
