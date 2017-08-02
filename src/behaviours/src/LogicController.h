@@ -82,13 +82,6 @@ private:
   void controllerInterconnect();
 
   long int current_time = 0;
-<<<<<<< HEAD
-=======
-
-  size_t index = 0;
-  size_t swarm_size = 0;
-  string roverName;
->>>>>>> 96d495b... inserted the DDSA side calculating algorithm
 };
 
 #endif // LOGICCONTROLLER_H

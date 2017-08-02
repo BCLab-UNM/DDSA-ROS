@@ -264,7 +264,6 @@ void behaviourStateMachine(const ros::TimerEvent&) {
         first_auto = true;
         logicController.SetRoverIndex(self_index);
         logicController.SetSwarmSize(rover_names.size());
-        logicController.SetRoverName(publishedName);
     }
     //humanTime();
 

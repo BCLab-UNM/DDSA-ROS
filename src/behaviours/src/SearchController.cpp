@@ -29,7 +29,7 @@ Result SearchController::DoWork() {
   if(!init){
       init = true;
       spiralLocation.x = centerLocation.x;
-      spiralLocation.y = centerLocation.y + roverID * CalculateSides(0);
+      spiralLocation.y = centerLocation.y + roverID * CalculateSides(0,0);
       searchLocation.x = spiralLocation.x;
       searchLocation.y = spiralLocation.y;
       result.wpts.waypoints.clear();
@@ -121,9 +121,10 @@ Point SearchController::SpiralSearching(){
   cornerNum +=1;
   if(cornerNum == 4){
     cornerNum = 0;
+    stepsIntoSpiral += 1;
   }
 
-  sideLength = spacing * CalculateSides(stepsIntoSpiral);
+  sideLength = spacing * CalculateSides(stepsIntoSpiral, cornerNum);
   //float corner = 3 * M_PI/4;
   spiralLocation.x = spiralLocation.x + (sideLength * cos(corner));
   spiralLocation.y = spiralLocation.y + (sideLength * sin(corner));
@@ -135,9 +136,6 @@ Point SearchController::SpiralSearching(){
     corner += 2*M_PI;
   }
 
-  if(cornerNum == 0){
-    stepsIntoSpiral += 1;
-  }
 
   return spiralLocation;
 
@@ -147,7 +145,6 @@ Point SearchController::SpiralSearching(){
 void SearchController::SetCheckPoint(){
   // or set it to current location
   this->checkPoint = this->currentLocation;
-  checkPointExist =true;
   cout << "tag: locating which side of the spiral am I" << endl;
 
 
@@ -201,33 +198,28 @@ void SearchController::SetSwarmSize(size_t size){
   cout << "tag:"<< "SwarmSize: "<< swarmSize << endl;
 }
 
-void SearchController::SetRoverName(string name){
-  roverName =name;
-  cout << "tag:" << "RoverName: "<< roverName << " and the sidelength = " << sideLength <<  endl;
-}
-
-float SearchController::CalculateSides( int circuitNum){
+float SearchController::CalculateSides( int circuitNum, int slot){
   // North and East
-  if(cornerNum == 0 || cornerNum == 1){
+  if(slot == 0 || slot == 1){
     if(circuitNum == 0){
       return roverID;
     }
     else if(circuitNum == 1){
-      sideLength = CalculateSides(0) + swarmSize + roverID;
+      sideLength = CalculateSides(0, slot) + swarmSize + roverID;
       return sideLength;
     }
     else if(circuitNum > 1){
-      sideLength = CalculateSides(circuitNum - 1) + 2 * swarmSize;
+      sideLength = CalculateSides(circuitNum - 1, slot) + 2 * swarmSize;
       return sideLength;
     }
     // South and West
-  }else if(cornerNum == 2 || cornerNum == 3){
+  }else if(slot == 2 || slot == 3){
     if(circuitNum == 0){
-      sideLength = CalculateSides(0) + roverID;
+      sideLength = CalculateSides(0,0) + roverID;
       return sideLength;
     }
     else{
-      sideLength = CalculateSides(circuitNum) + swarmSize;
+      sideLength = CalculateSides(circuitNum, 0) + swarmSize;
       return sideLength;
     }
 
@@ -238,19 +230,6 @@ float SearchController::CalculateSides( int circuitNum){
 
 
 
-   // QPointF rover_positions[6] =
-   // {
-      /* cardinal rovers: North, East, South, West */
-      //QPointF(-1.308,  0.000), // 1.308 = distance_from_center_to_edge_of_collection_zone
-     // QPointF( 0.000, -1.308), //             + 50 cm distance to rover
-     // QPointF( 1.308,  0.000), //             + 30 cm distance_from_center_of_rover_to_edge_of_rover
-     // QPointF( 0.000,  1.308), // 1.308m = 0.508m + 0.5m + 0.3m
-
-      /////* corner rovers: Northeast, Southwest */
-      //QPointF( 1.072,  1.072), // 1.072 = diagonal_distance_from_center_to_edge_of_collection_zone
-      //QPointF(-1.072, -1.072)  //             + diagonal_distance_to_move_50cm
-   // };                         //             + diagonal_distance_to_move_30cm
-                               // 1.072m = 0.508 + 0.354 + 0.212
 
 
 
