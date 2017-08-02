@@ -209,13 +209,17 @@ void SearchController::SetSwarmSize(size_t size){
 }
 
 float SearchController::CalculateSides( int circuitNum, int slot){
+
+  constexpr double center_distance = 1.308;
+  constexpr double initial_spiral_offset = center_distance / 2.0;
+
   // North and East
   if(slot == 0 || slot == 1){
     if(circuitNum == 0){
-      return roverID;
+      return roverID + initial_spiral_offset;
     }
     else if(circuitNum == 1){
-      sideLength = CalculateSides(0,slot) + swarmSize + roverID;
+      sideLength = CalculateSides(0,slot) + swarmSize + roverID + initial_spiral_offset;
       return sideLength;
     }
     else if(circuitNum > 1){
@@ -225,7 +229,7 @@ float SearchController::CalculateSides( int circuitNum, int slot){
     // South and West
   }else if(slot == 2 || slot == 3){
     if(circuitNum == 0){
-      sideLength = CalculateSides(0, 0) + roverID;
+      sideLength = CalculateSides(0, 0) + roverID + initial_spiral_offset;
       return sideLength;
     }
     else{
