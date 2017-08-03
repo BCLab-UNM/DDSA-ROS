@@ -152,3 +152,65 @@ void ObstacleController::SetTargetHeld() {
     previousTargetState = true;
   }
 }
+
+int ObstacleController::CheckWaypoint(Point InQuestionLocation, Point centerLocation){
+  //cout << "tag: ObstacleController -> step 4:  In CheckingWaypoint"<< endl;
+  waypointState = -1;
+  this->driveLocation = InQuestionLocation;
+  this->centerLocation = centerLocation;
+
+  if(IsPointInCircleCenter() > radius*radius && DoesLineIntersectCircle() > radius ){
+    cout << "tag:   drivelocation is not in the center && path from currentLocation to drivelocation does not intersect the circle" << endl;
+    waypointState = continueCurrentWaypoint;
+  }else if(IsPointInCircleCenter() < radius*radius){
+    cout << " tag:  driveLocation is in the center" << endl;
+    waypointState = deleteWaypoints;
+  }else if(DoesLineIntersectCircle() < radius){
+    cout << "tag:   the path intersects the circle" << endl;
+    waypointState = createWaypoints;
+  }
+
+  return waypointState;
+
+}
+
+float ObstacleController::IsPointInCircleCenter(){
+  float xVal = (driveLocation.x - centerLocation.x);
+  float yVal = (driveLocation.y - centerLocation.y);
+  xVal *= xVal;
+  yVal *= yVal;
+  return xVal + yVal;
+}
+
+float ObstacleController::DoesLineIntersectCircle(){
+  float LAB = sqrt(pow((currentLocation.x - driveLocation.x),2) + pow((currentLocation.y - driveLocation.y),2));
+  float Dx = (currentLocation.x - driveLocation.x)/ LAB;
+  float Dy = (currentLocation.y - driveLocation.y)/ LAB;
+  float t = Dx * (centerLocation.x - driveLocation.x) + Dy*(centerLocation.y - driveLocation.y);
+  float Ex = t * Dx + driveLocation.x;
+  float Ey = t * Dy + driveLocation.y;
+  float LEC = sqrt(pow((Ex - centerLocation.x), 2) + pow((Ey - centerLocation.y), 2));
+  return LEC;
+
+}
+
+Result ObstacleController::GetAvoidanceWayPoints(){
+  result.type = waypoint;
+  result.wpts.waypoints.clear();
+  float distance = sqrt(pow((currentLocation.x - driveLocation.x),2) + pow((currentLocation.y - driveLocation.y),2)) / 3;
+  Point nextLocation;
+
+  nextLocation.x = currentLocation.x + (distance + radius * cos(M_PI/2));
+  nextLocation.y = currentLocation.y + (distance + radius * sin(M_PI/2));
+
+  result.wpts.waypoints.insert(result.wpts.waypoints.begin(), nextLocation);
+
+  nextLocation.x = nextLocation.x + (distance + radius * cos(0));
+  nextLocation.y = nextLocation.y + (distance + radius * sin(0));
+
+  result.wpts.waypoints.insert(result.wpts.waypoints.begin(), nextLocation);
+
+  return result;
+
+
+}

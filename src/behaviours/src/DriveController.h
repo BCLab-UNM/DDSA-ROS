@@ -19,6 +19,11 @@ public:
   void SetResultData(Result result) {this->result = result;}
   void SetVelocityData(float linearVelocity,float angularVelocity);
   void SetCurrentLocation(Point currentLocation) {this->currentLocation = currentLocation;}
+  bool ObstacleCheckUpNeeded();
+  Point GetCurrentWaypoint();
+  Point GetCenterLocation();
+  void SetObstacleInstructCode(int code);
+
 
 private:
 
@@ -79,12 +84,18 @@ private:
     STATE_MACHINE_WAYPOINTS,
     STATE_MACHINE_ROTATE,
     STATE_MACHINE_SKID_STEER,
+    STATE_MACHINE_OBSTACLE_CHECK
   };
 
 
   StateMachineStates stateMachineState = STATE_MACHINE_WAITING;
 
   void ProcessData();
+
+  bool waypointNeedsObstacleCheck = false;
+  bool waypointHasBeenChecked = false;
+  int ObstacleInstructCode = 2;
+
 
 };
 

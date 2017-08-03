@@ -34,7 +34,7 @@ Result SearchController::DoWork() {
       searchLocation.y = spiralLocation.y;
       result.wpts.waypoints.clear();
       result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
-      cout << "tag: spiral point at corner No. " << cornerNum <<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
+      //cout << "tag: spiral point at corner No. " << cornerNum <<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
       stepsIntoSpiral += 1;
       return result;
   }
@@ -128,8 +128,8 @@ Point SearchController::SpiralSearching(){
   //float corner = 3 * M_PI/4;
   spiralLocation.x = spiralLocation.x + (sideLength * cos(corner));
   spiralLocation.y = spiralLocation.y + (sideLength * sin(corner));
-  cout << "tag: spiral point at corner No. " << cornerNum<<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
-  cout << "tag: steps into spiral: " << stepsIntoSpiral << endl;
+  //cout << "tag: spiral point at corner No. " << cornerNum<<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
+  //cout << "tag: steps into spiral: " << stepsIntoSpiral << endl;
   result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
   corner -= (M_PI/2);
   if (corner <= 0.0) {
@@ -146,8 +146,6 @@ void SearchController::SetCheckPoint(){
   // or set it to current location
   this->checkPoint = this->currentLocation;
   cout << "tag: locating which side of the spiral am I" << endl;
-
-
   if(cornerNum == 0){
     cout << "tag: West side of the square " << endl;
     this->checkPoint.y -= 1.0;
@@ -183,7 +181,7 @@ void SearchController::ReachedCheckPoint(){
 void SearchController::ReachedSearchLocation(){
   if (hypot(searchLocation.x-currentLocation.x, searchLocation.y-currentLocation.y) < 0.10) {
     searchlocationReached = true;
-    cout << "tag: reached the Searchlocation(): " << searchLocation.x<< " , "<< searchLocation.y<< endl;
+    //cout << "tag: reached the Searchlocation(): " << searchLocation.x<< " , "<< searchLocation.y<< endl;
   }
 
 }

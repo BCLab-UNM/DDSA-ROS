@@ -60,25 +60,52 @@ Result DriveController::DoWork() {
 
     //Handles route planning and navigation as well as makeing sure all waypoints are valid.
   case STATE_MACHINE_WAYPOINTS: {
-
-
+    //cout << "tag: DriveController -> DW " << endl;
+    //cout << "tag: DriveController -> 3"<< endl;
     bool tooClose = true;
     while (!waypoints.empty() && tooClose) {
       if (hypot(waypoints.back().x-currentLocation.x, waypoints.back().y-currentLocation.y) < waypointTolerance) {
         waypoints.pop_back();
+        //cout << "tag: DriveController -> 4A"<< endl;
       }
       else {
         tooClose = false;
+        // cout << "tag: DriveController -> 4B"<< endl;
       }
     }
     if (waypoints.empty()) {
+      waypointHasBeenChecked = false;
+      //cout << "tag: DriveController -> 5  -- empty vector"<< endl;
       stateMachineState = STATE_MACHINE_WAITING;
       result.type = behavior;
       interupt = true;
       return result;
     }
     else {
-      stateMachineState = STATE_MACHINE_ROTATE;
+      if(!waypointHasBeenChecked){
+       // cout << "tag: DriveController -> step 2: Waypoint has NOT BEEN CHECKED"<< endl;
+        waypointNeedsObstacleCheck = true;
+        waypointHasBeenChecked = true;
+
+      }else
+      {
+        //cout << "tag: DriveController -> step 6: Waypoint has BEEN CHECKED"<< endl;
+        waypointNeedsObstacleCheck = false;
+        if(ObstacleInstructCode == 0 || ObstacleInstructCode == 1){
+          if(ObstacleInstructCode == 0){
+            //cout << "tag: DriveController -> step 6: Deleting the Waypoint"<< endl;
+             waypoints.pop_back();
+          }
+          stateMachineState = STATE_MACHINE_WAYPOINTS;
+          ObstacleInstructCode = 2;
+           waypointHasBeenChecked = false;
+
+        }else{
+          //cout << "tag: DriveController -> Waypoint has BEEN CHECKED"<< endl;
+          stateMachineState = STATE_MACHINE_ROTATE;
+        }
+      }
+
       //fall through on purpose
     }
 
@@ -89,7 +116,7 @@ Result DriveController::DoWork() {
     // Stay in this state until angle is minimized
   case STATE_MACHINE_ROTATE: {
 
-
+    //cout << "tag: DriveController -> 6 -- rotating "<< endl;
     waypoints.back().theta = atan2(waypoints.back().y - currentLocation.y, waypoints.back().x - currentLocation.x);
     // Calculate the diffrence between current and desired heading in radians.
     float errorYaw = angles::shortest_angular_distance(currentLocation.theta, waypoints.back().theta);
@@ -99,6 +126,7 @@ Result DriveController::DoWork() {
 
     // If angle > rotateOnlyAngleTolerance radians rotate but dont drive forward.
     if (fabs(angles::shortest_angular_distance(currentLocation.theta, waypoints.back().theta)) > rotateOnlyAngleTolerance) {
+     // cout << "tag: DriveController -> 6A -- rotating --  rotate but dont drive."<< endl;
       // rotate but dont drive.
       if (result.PIDMode == FAST_PID) {
         fastPID(0.0,errorYaw, result.pd.setPointVel, result.pd.setPointYaw);
@@ -106,6 +134,7 @@ Result DriveController::DoWork() {
       break;
     } else {
       // move to differential drive step
+      //cout << "tag: DriveController -> 6B -- rotating --  move to differential drive step."<< endl;
       stateMachineState = STATE_MACHINE_SKID_STEER;
       //fall through on purpose.
     }
@@ -114,7 +143,7 @@ Result DriveController::DoWork() {
     // Drive forward
     // Stay in this state until angle is at least PI/2
   case STATE_MACHINE_SKID_STEER: {
-
+    //cout << "tag: DriveController -> 7"<< endl;
     // calculate the distance between current and desired heading in radians
     float errorYaw = angles::shortest_angular_distance(currentLocation.theta, waypoints.back().theta);
 
@@ -123,6 +152,7 @@ Result DriveController::DoWork() {
     // goal not yet reached drive while maintaining proper heading.
     if (fabs(angles::shortest_angular_distance(currentLocation.theta, atan2(waypoints.back().y - currentLocation.y, waypoints.back().x - currentLocation.x))) < M_PI_2) {
       // drive and turn simultaniously
+      //cout << "tag: DriveController -> 8A -- goal not yet reached drive while maintaining proper heading. "<< endl;
       result.pd.setPointVel = searchVelocity;
       if (result.PIDMode == FAST_PID){
         fastPID(searchVelocity - linearVelocity,errorYaw, result.pd.setPointVel, result.pd.setPointYaw);
@@ -131,6 +161,7 @@ Result DriveController::DoWork() {
     // goal is reached but desired heading is still wrong turn only
     else if (fabs(angles::shortest_angular_distance(currentLocation.theta, waypoints.back().theta)) > finalRotationTolerance) {
       // rotate but dont drive
+      //cout << "tag: DriveController -> 8B -- goal is reached but desired heading is still wrong turn only "<< endl;
       result.pd.setPointVel = 0.0;
       if (result.PIDMode == FAST_PID){
         fastPID(0.0,errorYaw, result.pd.setPointVel, result.pd.setPointYaw);
@@ -138,6 +169,7 @@ Result DriveController::DoWork() {
     }
     else {
       // stopno change
+      //cout << "tag: DriveController -> 8C -- stopno change "<< endl;
       left = 0.0;
       right = 0.0;
 
@@ -152,7 +184,7 @@ Result DriveController::DoWork() {
     break;
   }
 
-
+//cout << "tag: DriveController -> 9 -- statemachine done "<< endl;
   }
 
   result.pd.right = right;
@@ -163,7 +195,7 @@ Result DriveController::DoWork() {
 }
 
 bool DriveController::ShouldInterrupt() {
-
+//cout << "tag: DriveController -> INTERRUPT "<< endl;
   if (interupt) {
     interupt = false;
     return true;
@@ -188,9 +220,12 @@ void DriveController::ProcessData()
     if(result.reset) {
       waypoints.clear();
     }
-
+    //cout << "tag: DriveController -> 1"<< endl;
     if (!result.wpts.waypoints.empty()) {
       waypoints.insert(waypoints.end(),result.wpts.waypoints.begin(), result.wpts.waypoints.end());
+      cout << "tag: DriveController -> step 1 : Cordinates of the current point: "<< result.wpts.waypoints.back().x << " , "<< result.wpts.waypoints.back().y <<endl;
+      //cout << "tag: DriveController -> PD"<< endl;
+      //cout << "tag: DriveController -> 2"<< endl;
       stateMachineState = STATE_MACHINE_WAYPOINTS;
     }
   }
@@ -213,6 +248,24 @@ void DriveController::ProcessData()
     }
   }
 }
+
+Point DriveController::GetCurrentWaypoint(){
+  return result.wpts.waypoints.back();
+}
+
+Point DriveController::GetCenterLocation(){
+  return centerLocation;
+}
+
+bool DriveController::ObstacleCheckUpNeeded(){
+  return waypointNeedsObstacleCheck;
+
+}
+
+void DriveController::SetObstacleInstructCode(int code){
+  ObstacleInstructCode = code;
+}
+
 
 
 void DriveController::fastPID(float errorVel, float errorYaw , float setPointVel, float setPointYaw) {

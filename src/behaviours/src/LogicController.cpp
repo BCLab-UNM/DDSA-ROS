@@ -240,7 +240,23 @@ void LogicController::controllerInterconnect() {
   if(obstacleController.GetShouldClearWaypoints()) {
     driveController.Reset();
   }
+
+  if(driveController.ObstacleCheckUpNeeded()){
+    //cout << "tag: LogicController ->  step 3: ObstacleController is checking the Waypoint"<< endl;
+    int waypointState = obstacleController.CheckWaypoint(driveController.GetCurrentWaypoint(), driveController.GetCenterLocation());
+    // delete or add waypoint(s)
+    if( waypointState == 0 || waypointState == 1){
+      if(waypointState == 1){
+        //cout << "tag: LogicController - > step 5:  addding new waypoints" << endl;
+        driveController.SetResultData(obstacleController.GetAvoidanceWayPoints());
+      }
+
+      driveController.SetObstacleInstructCode(waypointState);
+    }
+  }
 }
+
+
 
 
 void LogicController::SetPositionData(Point currentLocation) {
