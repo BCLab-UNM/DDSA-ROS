@@ -301,3 +301,12 @@ void LogicController::SetCurrentTimeInMilliSecs( long int time )
   pickUpController.SetCurrentTimeInMilliSecs( time );
   obstacleController.SetCurrentTimeInMilliSecs( time );
 }
+
+void LogicController::SetSwarmSize(size_t size) {
+  searchController.SetSwarmSize(size);
+}
+
+void LogicController::SetRoverIndex(size_t idx) {
+  searchController.SetRoverIndex(idx);
+
+}
