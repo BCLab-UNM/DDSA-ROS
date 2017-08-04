@@ -94,9 +94,7 @@ Result SearchController::DoWork() {
 }
 
 void SearchController::SetCenterLocation(Point centerLocation) {
-  this->centerLocation.x = centerLocation.x;
-  this->centerLocation.y = centerLocation.y;
-
+  this->centerLocation = centerLocation;
 }
 
 void SearchController::SetCurrentLocation(Point currentLocation) {
@@ -211,7 +209,7 @@ void SearchController::SetSwarmSize(size_t size){
 float SearchController::CalculateSides( int circuitNum, int slot){
 
   constexpr double center_distance = 1.308;
-  constexpr double initial_spiral_offset = center_distance / 2.0;
+  const double initial_spiral_offset = (center_distance / (2.0 * spacing)) + 0.5;
 
   // North and East
   if(slot == 0 || slot == 1){
