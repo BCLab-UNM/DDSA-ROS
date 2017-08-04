@@ -254,7 +254,7 @@ void LogicController::controllerInterconnect() {
       if(waypointState == 1)
       {
         //cout << "tag: LogicController - > step 5:  addding new waypoints" << endl;
-        driveController.SetResultData(obstacleController.GetAvoidanceWayPoints());
+        driveController.SetResultData(obstacleController.GetAvoidanceWayPoints(driveController.GetCurrentWaypoint()));
       }
 
       driveController.SetObstacleInstructCode(waypointState);

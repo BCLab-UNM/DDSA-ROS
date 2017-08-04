@@ -212,7 +212,7 @@ float ObstacleController::DoesLineIntersectCircle(){
 
 }
 
-Result ObstacleController::GetAvoidanceWayPoints(){
+Result ObstacleController::GetAvoidanceWayPoints(Point driveLocation){
   result.type = waypoint;
   result.wpts.waypoints.clear();
 
