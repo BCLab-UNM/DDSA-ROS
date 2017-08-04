@@ -84,7 +84,10 @@ void ObstacleController::ProcessData() {
     }
   }
 
-  if (left < triggerDistance || right < triggerDistance || center < triggerDistance || centerSeen) {
+  if (((left < triggerDistance || right < triggerDistance || center < triggerDistance) &&
+       (this->currentLocation.x < -6.0 || this->currentLocation.x > 6.0) && (this->currentLocation.y < -6.0 || this->currentLocation.y > 6.0))||
+      centerSeen)
+  {
     obstacleDetected = true;
     obstacleAvoided = false;
   } else {
