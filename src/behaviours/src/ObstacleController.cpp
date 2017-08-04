@@ -276,8 +276,6 @@ Result ObstacleController::GetAvoidanceWayPoints(Point driveLocation){
 
   return result;
 
-
-
 }
 
 bool ObstacleController::hasDetectedObstacle(){

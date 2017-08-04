@@ -30,7 +30,7 @@ public:
   int CheckWaypoint(Point InQuestionLocation);
   float IsPointInCircleCenter();
   float DoesLineIntersectCircle();
-  Result GetAvoidanceWayPoints();
+  Result GetAvoidanceWayPoints(Point driveLocation);
   bool hasDetectedObstacle();
   void SetCenterLocation(Point centerLocationOdom);
 

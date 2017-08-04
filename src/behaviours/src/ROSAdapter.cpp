@@ -229,8 +229,8 @@ void behaviourStateMachine(const ros::TimerEvent&) {
       initilized = true;
       //TODO: this just sets center to 0 over and over and needs to change
       Point centerOdom;
-      centerOdom.x = 1.308 * cos(currentLocation.theta);
-      centerOdom.y = 1.308 * sin(currentLocation.theta);
+      centerOdom.x = currentLocation.x + 1.308 * cos(currentLocation.theta);
+      centerOdom.y = currentLocation.y + 1.308 * sin(currentLocation.theta);
       centerOdom.theta = centerLocation.theta;
       logicController.SetCenterLocationOdom(centerOdom);
 
@@ -423,7 +423,7 @@ void mapHandler(const nav_msgs::Odometry::ConstPtr& message) {
   currentLoc.x = currentLocation.x;
   currentLoc.y = currentLocation.y;
   currentLoc.theta = currentLocation.theta;
-  logicController.SetPositionData(currentLoc);
+  //logicController.SetPositionData(currentLoc);
   logicController.SetMapVelocityData(linearVelocity, angularVelocity);
 }
 
