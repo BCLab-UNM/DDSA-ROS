@@ -60,7 +60,7 @@ Result DriveController::DoWork() {
 
     //Handles route planning and navigation as well as makeing sure all waypoints are valid.
   case STATE_MACHINE_WAYPOINTS: {
-    //cout << "tag: DriveController -> DW " << endl;
+   // cout << "tag: DriveController -> DW " << endl;
     //cout << "tag: DriveController -> 3"<< endl;
     bool tooClose = true;
     while (!waypoints.empty() && tooClose) {
@@ -70,7 +70,7 @@ Result DriveController::DoWork() {
       }
       else {
         tooClose = false;
-        // cout << "tag: DriveController -> 4B"<< endl;
+         //cout << "tag: DriveController -> 4B"<< endl;
       }
     }
     if (waypoints.empty()) {
@@ -83,27 +83,17 @@ Result DriveController::DoWork() {
     }
     else {
       if(!waypointHasBeenChecked){
-       // cout << "tag: DriveController -> step 2: Waypoint has NOT BEEN CHECKED"<< endl;
+        cout << "tag: checking way point: " << result.wpts.waypoints.back().x << " , "<< result.wpts.waypoints.back().y <<endl;
         waypointNeedsObstacleCheck = true;
         waypointHasBeenChecked = true;
 
       }else
       {
-        //cout << "tag: DriveController -> step 6: Waypoint has BEEN CHECKED"<< endl;
+        cout << "tag: DriveController -> step 6: Waypoint has BEEN CHECKED"<< endl;
         waypointNeedsObstacleCheck = false;
-        if(ObstacleInstructCode == 0 || ObstacleInstructCode == 1){
-          if(ObstacleInstructCode == 0){
-            //cout << "tag: DriveController -> step 6: Deleting the Waypoint"<< endl;
-             waypoints.pop_back();
-          }
-          stateMachineState = STATE_MACHINE_WAYPOINTS;
-          ObstacleInstructCode = 2;
-           waypointHasBeenChecked = false;
+        waypointHasBeenChecked = false;
+        stateMachineState = STATE_MACHINE_ROTATE;
 
-        }else{
-          //cout << "tag: DriveController -> Waypoint has BEEN CHECKED"<< endl;
-          stateMachineState = STATE_MACHINE_ROTATE;
-        }
       }
 
       //fall through on purpose
@@ -223,7 +213,7 @@ void DriveController::ProcessData()
     //cout << "tag: DriveController -> 1"<< endl;
     if (!result.wpts.waypoints.empty()) {
       waypoints.insert(waypoints.end(),result.wpts.waypoints.begin(), result.wpts.waypoints.end());
-      cout << "tag: DriveController -> step 1 : Cordinates of the current point: "<< result.wpts.waypoints.back().x << " , "<< result.wpts.waypoints.back().y <<endl;
+      //cout << "tag: DriveController -> step 1 : Cordinates of the current point: "<< result.wpts.waypoints.back().x << " , "<< result.wpts.waypoints.back().y <<endl;
       //cout << "tag: DriveController -> PD"<< endl;
       //cout << "tag: DriveController -> 2"<< endl;
       stateMachineState = STATE_MACHINE_WAYPOINTS;
@@ -253,10 +243,6 @@ Point DriveController::GetCurrentWaypoint(){
   return result.wpts.waypoints.back();
 }
 
-Point DriveController::GetCenterLocation(){
-  return centerLocation;
-}
-
 bool DriveController::ObstacleCheckUpNeeded(){
   return waypointNeedsObstacleCheck;
 
@@ -264,6 +250,16 @@ bool DriveController::ObstacleCheckUpNeeded(){
 
 void DriveController::SetObstacleInstructCode(int code){
   ObstacleInstructCode = code;
+  if(ObstacleInstructCode == 0 || ObstacleInstructCode == 1)
+  {
+    if(ObstacleInstructCode == 0){
+      cout << "tag: wayopint being deleted: "<< result.wpts.waypoints.back().x << " , "<< result.wpts.waypoints.back().y <<endl;
+      waypoints.pop_back();
+    }
+    ObstacleInstructCode = 2;
+    waypointHasBeenChecked = false;
+
+  }
 }
 
 

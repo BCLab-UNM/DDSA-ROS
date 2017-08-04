@@ -229,6 +229,10 @@ void LogicController::controllerInterconnect() {
       obstacleController.SetTargetHeld();
       searchController.SetSuccesfullPickup();
     }
+
+    if(obstacleController.hasDetectedObstacle()){
+      searchController.ObstacleDetected();
+    }
   }
 
   //ask if drop off has released the target from the claws yet
@@ -243,10 +247,12 @@ void LogicController::controllerInterconnect() {
 
   if(driveController.ObstacleCheckUpNeeded()){
     //cout << "tag: LogicController ->  step 3: ObstacleController is checking the Waypoint"<< endl;
-    int waypointState = obstacleController.CheckWaypoint(driveController.GetCurrentWaypoint(), driveController.GetCenterLocation());
+    int waypointState = obstacleController.CheckWaypoint(driveController.GetCurrentWaypoint());
     // delete or add waypoint(s)
-    if( waypointState == 0 || waypointState == 1){
-      if(waypointState == 1){
+    if( waypointState == 0 || waypointState == 1)
+    {
+      if(waypointState == 1)
+      {
         //cout << "tag: LogicController - > step 5:  addding new waypoints" << endl;
         driveController.SetResultData(obstacleController.GetAvoidanceWayPoints());
       }
@@ -293,6 +299,7 @@ void LogicController::SetSonarData(float left, float center, float right) {
 void LogicController::SetCenterLocationOdom(Point centerLocationOdom) {
   searchController.SetCenterLocation(centerLocationOdom);
   dropOffController.SetCenterLocation(centerLocationOdom);
+  obstacleController.SetCenterLocation(centerLocationOdom);
 }
 
 void LogicController::SetCenterLocationMap(Point centerLocationMap) {
@@ -314,5 +321,4 @@ void LogicController::SetCurrentTimeInMilliSecs( long int time )
   pickUpController.SetCurrentTimeInMilliSecs( time );
   obstacleController.SetCurrentTimeInMilliSecs( time );
 }
-
 

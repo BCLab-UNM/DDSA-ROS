@@ -6,6 +6,9 @@ ObstacleController::ObstacleController()
   obstacleDetected = false;
   obstacleInterrupt = false;
   result.PIDMode = CONST_PID;
+
+  centerLocation.x = 0;
+  centerLocation.y = 0;
 }
 
 void ObstacleController::Reset() {
@@ -17,6 +20,7 @@ void ObstacleController::Reset() {
 Result ObstacleController::DoWork() {
 
   clearWaypoints = true;
+  result.PIDMode = CONST_PID;
 
   if(centerSeen){
 
@@ -153,21 +157,22 @@ void ObstacleController::SetTargetHeld() {
   }
 }
 
-int ObstacleController::CheckWaypoint(Point InQuestionLocation, Point centerLocation){
+int ObstacleController::CheckWaypoint(Point InQuestionLocation){
   //cout << "tag: ObstacleController -> step 4:  In CheckingWaypoint"<< endl;
   waypointState = -1;
   this->driveLocation = InQuestionLocation;
-  this->centerLocation = centerLocation;
 
-  if(IsPointInCircleCenter() > radius*radius && DoesLineIntersectCircle() > radius ){
-    cout << "tag:   drivelocation is not in the center && path from currentLocation to drivelocation does not intersect the circle" << endl;
-    waypointState = continueCurrentWaypoint;
-  }else if(IsPointInCircleCenter() < radius*radius){
+  if(IsPointInCircleCenter() < radius*radius){
     cout << " tag:  driveLocation is in the center" << endl;
     waypointState = deleteWaypoints;
   }else if(DoesLineIntersectCircle() < radius){
     cout << "tag:   the path intersects the circle" << endl;
     waypointState = createWaypoints;
+  }
+  else
+  {
+    cout << "tag:   Good to Go!" << endl;
+    waypointState = continueCurrentWaypoint;
   }
 
   return waypointState;
@@ -183,34 +188,102 @@ float ObstacleController::IsPointInCircleCenter(){
 }
 
 float ObstacleController::DoesLineIntersectCircle(){
-  float LAB = sqrt(pow((currentLocation.x - driveLocation.x),2) + pow((currentLocation.y - driveLocation.y),2));
-  float Dx = (currentLocation.x - driveLocation.x)/ LAB;
-  float Dy = (currentLocation.y - driveLocation.y)/ LAB;
-  float t = Dx * (centerLocation.x - driveLocation.x) + Dy*(centerLocation.y - driveLocation.y);
-  float Ex = t * Dx + driveLocation.x;
-  float Ey = t * Dy + driveLocation.y;
-  float LEC = sqrt(pow((Ex - centerLocation.x), 2) + pow((Ey - centerLocation.y), 2));
-  return LEC;
+  //First we define the u and v vectors by their components-
+
+    //v is the vector from the current location to the drive point
+    float v_x = (driveLocation.x - currentLocation.x);
+    float v_y = (driveLocation.y - currentLocation.y);
+
+    //u is the vector from the current location to the center
+    float u_x = (centerLocation.x - currentLocation.x);
+    float u_y = (centerLocation.y - currentLocation.y);
+
+    //helpful terms- dot product of u and v, and magnitude of v squared
+    float u_dot_v = (u_x * v_x) + (u_y * v_y);
+    float v_sqrd = (v_x * v_x) + (v_y * v_y);
+
+    //these are the x and y components of u_proj_v
+    float u_projected_onto_v_x = v_x * (u_dot_v / v_sqrd);
+    float u_projected_onto_v_y = v_y * (u_dot_v / v_sqrd);
+
+    float distance = hypot((centerLocation.x - u_projected_onto_v_x), centerLocation.y - u_projected_onto_v_y);
+
+    return distance;
 
 }
 
 Result ObstacleController::GetAvoidanceWayPoints(){
   result.type = waypoint;
   result.wpts.waypoints.clear();
+
+/*
   float distance = sqrt(pow((currentLocation.x - driveLocation.x),2) + pow((currentLocation.y - driveLocation.y),2)) / 3;
   Point nextLocation;
 
-  nextLocation.x = currentLocation.x + (distance + radius * cos(M_PI/2));
-  nextLocation.y = currentLocation.y + (distance + radius * sin(M_PI/2));
+  float angle = atan2(driveLocation.y - currentLocation.y, driveLocation.x - currentLocation.x);
+  angle += M_PI/2;
 
+  nextLocation.x = currentLocation.x + (distance * cos(angle));
+  nextLocation.y = currentLocation.y + (distance * sin(angle));
+
+  cout<< "tag: adding waypoint #1: " << nextLocation.x << ", " << nextLocation.y << endl;
   result.wpts.waypoints.insert(result.wpts.waypoints.begin(), nextLocation);
 
-  nextLocation.x = nextLocation.x + (distance + radius * cos(0));
-  nextLocation.y = nextLocation.y + (distance + radius * sin(0));
+  nextLocation.x = nextLocation.x + (0.75 * cos(angle));
+  nextLocation.y = nextLocation.y + (0.75 * sin(angle));
+
+  cout<< "tag: adding waypoint #2: " << nextLocation.x << ", " << nextLocation.y << endl;
+  result.wpts.waypoints.insert(result.wpts.waypoints.begin(), nextLocation);
+
+  return result;
+  */
+
+
+  //v is the vector from the current location to the drive point
+  float v_x = (driveLocation.x - currentLocation.x);
+  float v_y = (driveLocation.y - currentLocation.y);
+
+  //u is the vector from the current location to the center
+  float u_x = (centerLocation.x - currentLocation.x);
+  float u_y = (centerLocation.y - currentLocation.y);
+
+  //helpful terms- dot product of u and v, and magnitude of v squared
+  float u_dot_v = (u_x * v_x) + (u_y * v_y);
+  float v_sqrd = (v_x * v_x) + (v_y * v_y);
+
+  //these are the x and y components of u_proj_v
+  float u_projected_onto_v_x = v_x * (u_dot_v / v_sqrd);
+  float u_projected_onto_v_y = v_y * (u_dot_v / v_sqrd);
+
+  float perpendicular_x = -u_projected_onto_v_y;
+  float perpendicular_y = u_projected_onto_v_x;
+
+  float perpendicular_mag = hypot(perpendicular_x, perpendicular_y);
+
+  float radius_from_center = sqrt(1.0 + 1.0) + .5;
+
+  Point nextLocation;
+
+  nextLocation.x = centerLocation.x + (perpendicular_x / perpendicular_mag) * radius_from_center;
+  nextLocation.y = centerLocation.y + (perpendicular_y / perpendicular_mag) * radius_from_center;
 
   result.wpts.waypoints.insert(result.wpts.waypoints.begin(), nextLocation);
+  cout<< "tag: adding waypoint #1: " << nextLocation.x << ", " << nextLocation.y << endl;
+
+  result.wpts.waypoints.insert(result.wpts.waypoints.begin(), driveLocation);
+
+  result.PIDMode = FAST_PID;
 
   return result;
 
 
+
+}
+
+bool ObstacleController::hasDetectedObstacle(){
+  return obstacleDetected;
+}
+
+void ObstacleController::SetCenterLocation(Point centerLocationOdom){
+  this->centerLocation = centerLocationOdom;
 }

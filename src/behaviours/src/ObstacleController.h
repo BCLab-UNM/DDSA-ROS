@@ -27,10 +27,13 @@ public:
   void SetTargetHeld ();
   void SetTargetHeldClear() {targetHeld = false; previousTargetState = false;}
   bool GetShouldClearWaypoints() {bool tmp = clearWaypoints; clearWaypoints = false; return tmp;}
-  int CheckWaypoint(Point InQuestionLocation, Point centerLocation);
+  int CheckWaypoint(Point InQuestionLocation);
   float IsPointInCircleCenter();
   float DoesLineIntersectCircle();
   Result GetAvoidanceWayPoints();
+  bool hasDetectedObstacle();
+  void SetCenterLocation(Point centerLocationOdom);
+
 protected:
 
   void ProcessData();

@@ -432,7 +432,7 @@ void nameHandler(const std_msgs::String::ConstPtr& message)
     if(rover_names.empty()) {
       cout<< "tag: roverlist is empty" << endl;
         rover_names.push_back(message->data);
-        self_index = 0;
+        self_index = 1;
     } else {
         cout<< "tag: roverlist is Not empty" << endl;
         size_t pos = rover_names.size();
@@ -461,7 +461,7 @@ void nameHandler(const std_msgs::String::ConstPtr& message)
 
         for(i = 0; i < rover_names.size(); i++) {
             if(rover_names[i] == publishedName) {
-                self_index = i;
+                self_index = i + 1;
                 break;
             }
         }

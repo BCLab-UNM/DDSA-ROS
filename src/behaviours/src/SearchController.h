@@ -12,6 +12,7 @@
 #define INSERT_CHECKPOINT 0
 #define TARGET_CURRENTCORNER 1
 #define TARGET_NEWCORNER 2
+#define PATHPLANNING_CURRENTCORNER 3
 
 
 
@@ -47,7 +48,10 @@ public:
   void SetSwarmSize(size_t size);
   void SetRoverIndex(size_t idx);
   float CalculateSides(int circuitNum, int slot);
-
+  void SetRoverName(string name);
+  void CalculateSpiralandSearch();
+  void ObstacleDetected();
+  void PathPlanningWaypoints();
 
 protected:
 
@@ -77,7 +81,9 @@ private:
   size_t roverID = 0;
   size_t swarmSize = 0;
   int stepsIntoSpiral = 0;
-  const float spacing = 0.25;
+  const float spacing = 0.41;
+  bool hasObstacleDetected = false;
+  bool centerSet = false;
 
 
 };

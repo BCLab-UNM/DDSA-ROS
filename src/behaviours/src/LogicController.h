@@ -46,7 +46,6 @@ public:
   void SetCenterLocationMap(Point centerLocationMap);
   void SetSwarmSize(size_t size);
   void SetRoverIndex(size_t idx);
-  void SetRoverName(string name);
   void SetCurrentTimeInMilliSecs( long int time );
 
 protected:

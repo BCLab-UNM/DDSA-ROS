@@ -21,7 +21,6 @@ public:
   void SetCurrentLocation(Point currentLocation) {this->currentLocation = currentLocation;}
   bool ObstacleCheckUpNeeded();
   Point GetCurrentWaypoint();
-  Point GetCenterLocation();
   void SetObstacleInstructCode(int code);
 
 
