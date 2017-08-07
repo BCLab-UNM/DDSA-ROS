@@ -34,7 +34,7 @@ Result SearchController::DoWork() {
       searchLocation.y = spiralLocation.y;
       result.wpts.waypoints.clear();
       result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
-      cout << "tag: spiral point at corner No. " << cornerNum <<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
+      cout << "tag: spiral point at corner No. " << cornerNum <<" :" << spiralLocation.x << " , "<< spiralLocation.y << " centerLocation.y : " << centerLocation.y << endl;
       return result;
   }
   else {
@@ -171,16 +171,21 @@ void SearchController::SetCheckPoint(){
 }
 
 void SearchController::ReachedCheckPoint(){
-  if (hypot(checkPoint.x-currentLocation.x, checkPoint.y-currentLocation.y) < 0.10) {
+  if (hypot(checkPoint.x-currentLocation.x, checkPoint.y-currentLocation.y) < 0.15) {
     checkpointReached = true;
     cout << "tag: reached the checkpoint(): "<< checkPoint.x<< " , "<< checkPoint.y<< endl;
+  }
+  else if(!reachedFirstCorner)
+  {
+    checkpointReached = true;
   }
 
 }
 
 void SearchController::ReachedSearchLocation(){
-  if (hypot(searchLocation.x-currentLocation.x, searchLocation.y-currentLocation.y) < 0.10) {
+  if (hypot(searchLocation.x-currentLocation.x, searchLocation.y-currentLocation.y) < 0.15) {
     searchlocationReached = true;
+    reachedFirstCorner = true;
     cout << "tag: reached the Searchlocation(): " << searchLocation.x<< " , "<< searchLocation.y<< endl;
   }
 
@@ -198,8 +203,7 @@ void SearchController::SetSwarmSize(size_t size){
 
 float SearchController::CalculateSides( int circuitNum, int slot){
 
-  constexpr double center_distance = 1.308;
-  constexpr double initial_spiral_offset = center_distance / 2.0;
+  constexpr double initial_spiral_offset = 2;
 
   // North and East
   if(slot == 0 || slot == 1){

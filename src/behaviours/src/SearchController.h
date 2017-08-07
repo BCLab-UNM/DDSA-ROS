@@ -75,6 +75,7 @@ private:
   size_t swarmSize = 0;
   int stepsIntoSpiral = 0;
   const float spacing = 0.41;
+  bool reachedFirstCorner = false;
 
 
 };

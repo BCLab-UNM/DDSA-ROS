@@ -43,7 +43,7 @@ Result ObstacleController::DoWork() {
 
 
     //obstacle on right side
-    if (right < 0.8 || center < 0.8 || left < 0.8) {
+    if (right < side_trigger_distance || center < center_trigger_distance || left < side_trigger_distance ) {
       result.type = precisionDriving;
 
       result.pd.cmdAngular = -K_angular;
@@ -117,7 +117,7 @@ void ObstacleController::ProcessData() {
     }
   }
 
-  if (left < triggerDistance || right < triggerDistance || center < triggerDistance)
+  if (left < side_trigger_distance || right < side_trigger_distance || center < center_trigger_distance)
   {
     phys = true;
     timeSinceTags = current_time;

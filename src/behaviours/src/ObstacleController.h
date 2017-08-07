@@ -35,8 +35,8 @@ private:
   const float reactivateCenterThreshold = 0.8;
   const int targetCountPivot = 6;
   const float obstacleDistancePivot = 0.2526;
-  const float triggerDistance = 0.8;
-
+  const float center_trigger_distance = 0.4;
+  const float side_trigger_distance = 0.3;
   /*
      * Member variables
      */
