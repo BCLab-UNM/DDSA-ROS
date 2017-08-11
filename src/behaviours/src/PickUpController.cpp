@@ -11,7 +11,7 @@ PickUpController::PickUpController() {
   timeDifference = 0;
 
   targetFound = false;
-
+ cout << "PickUPController -> 0" << endl;
   result.type = precisionDriving;
   result.pd.cmdVel = 0;
   result.pd.cmdAngularError= 0;
@@ -25,7 +25,7 @@ PickUpController::~PickUpController() {
 }
 
 void PickUpController::SetTagData(vector<TagPoint> tags) {
-
+cout << "PickUPController -> 1" << endl;
   if (tags.size() > 0) {
 
     nTargetsSeen = tags.size();
@@ -46,6 +46,7 @@ void PickUpController::SetTagData(vector<TagPoint> tags) {
         }
       }
       else {
+        cout << "PickUPController -> 2" << endl;
         nTargetsSeen--;
 
         if(tags[i].id == 256)
@@ -67,7 +68,7 @@ void PickUpController::SetTagData(vector<TagPoint> tags) {
 
     ///TODO: Explain the trig going on here- blockDistance is c, 0.195 is b; find a
     blockDistance = hypot(tags[target].z, tags[target].y); //distance from bottom center of chassis ignoring height.
-
+cout << "PickUPController -> 3" << endl;
     blockDistanceFromCamera = hypot(hypot(tags[target].x, tags[target].y), tags[target].z);
   }
 
@@ -75,7 +76,7 @@ void PickUpController::SetTagData(vector<TagPoint> tags) {
 
 
 bool PickUpController::SetSonarData(float rangeCenter){
-
+cout << "PickUPController -> 4" << endl;
   if (rangeCenter < 0.12 && targetFound) {
     result.type = behavior;
     result.b = nextProcess;
@@ -91,6 +92,7 @@ bool PickUpController::SetSonarData(float rangeCenter){
 void PickUpController::ProcessData() {
   if(!targetFound){
     // Do nothing
+    cout << "PickUPController -> 5" << endl;
     return;
   }
 
@@ -102,6 +104,7 @@ void PickUpController::ProcessData() {
   {
     float epsilon = 0.00001; // A small non-zero positive number
     blockDistance = epsilon;
+    cout << "PickUPController -> 6" << endl;
   }
 
   //if target is close enough
@@ -110,7 +113,7 @@ void PickUpController::ProcessData() {
   float Td = Tdiff/1e3;
 
   if (blockDistanceFromCamera < 0.12 && Td < 2.7) {
-
+cout << "PickUPController -> 7" << endl;
     result.type = behavior;
     result.b = nextProcess;
     result.reset = true;
@@ -132,6 +135,7 @@ bool PickUpController::ShouldInterrupt(){
 
   if (interupte_release)
   {
+    cout << "PickUPController -> 8" << endl;
     interupte_release = false;
     has_controle = false;
     return true;
@@ -148,12 +152,13 @@ bool PickUpController::ShouldInterrupt(){
     return true;
   }
   else {
+    cout << "PickUPController -> 9" << endl;
     return false;
   }
 }
 
 Result PickUpController::DoWork() {
-
+cout << "PickUPController -> 10" << endl;
   has_controle = true;
 
   if (!targetHeld) {
@@ -188,6 +193,7 @@ Result PickUpController::DoWork() {
     }
     else if (blockDistance > targetDistance && !lockTarget) //if a target is detected but not locked, and not too close.
     {
+      cout << "PickUPController -> 11" << endl;
       float vel = blockDistance * 0.20;
       if (vel < 0.1) vel = 0.1;
       if (vel > 0.2) vel = 0.2;
@@ -250,6 +256,7 @@ Result PickUpController::DoWork() {
 
 bool PickUpController::HasWork() {
   return targetFound;
+  cout << "PickUPController -> 12" << endl;
 }
 
 void PickUpController::Reset() {
@@ -282,5 +289,6 @@ void PickUpController::SetUltraSoundData(bool blockBlock){
 
 void PickUpController::SetCurrentTimeInMilliSecs( long int time )
 {
+  cout << "PickUPController -> 13" << endl;
   current_time = time;
 }
