@@ -6,6 +6,8 @@ ObstacleController::ObstacleController()
   obstacleDetected = false;
   obstacleInterrupt = false;
   result.PIDMode = CONST_PID;
+  cout << "ObstacleController -> 0" << endl;
+
 }
 
 void ObstacleController::Reset() {
@@ -13,16 +15,17 @@ void ObstacleController::Reset() {
   obstacleDetected = false;
   obstacleInterrupt = false;
   delay = current_time;
+   cout << "ObstacleController -> 1" << endl;
 }
 
 Result ObstacleController::DoWork() {
-
+cout << "ObstacleController -> 26" << endl;
   clearWaypoints = true;
   set_waypoint = true;
   result.PIDMode = CONST_PID;
 
   if(centerSeen){
-
+ cout << "ObstacleController -> 2" << endl;
 
     result.type = precisionDriving;
 
@@ -40,7 +43,7 @@ Result ObstacleController::DoWork() {
 
   }
   else {
-
+ cout << "ObstacleController -> 3" << endl;
 
     //obstacle on right side
     if (right < side_trigger_distance || center < center_trigger_distance || left < side_trigger_distance ) {
@@ -55,7 +58,7 @@ Result ObstacleController::DoWork() {
   }
 
   if (can_set_waypoint) {
-
+ cout << "ObstacleController -> 4" << endl;
     can_set_waypoint = false;
     set_waypoint = false;
     clearWaypoints = false;
@@ -77,16 +80,17 @@ void ObstacleController::SetSonarData(float sonarleft, float sonarcenter, float 
   left = sonarleft;
   right = sonarright;
   center = sonarcenter;
-
+ cout << "ObstacleController -> 5" << endl;
   ProcessData();
 }
 
 void ObstacleController::SetCurrentLocation(Point currentLocation) {
   this->currentLocation = currentLocation;
+   cout << "ObstacleController -> 6" << endl;
 }
 
 void ObstacleController::ProcessData() {
-
+ cout << "ObstacleController -> 7" << endl;
   //timeout timer for no tag messages
   long int Tdifference = current_time - timeSinceTags;
   float Td = Tdifference/1e3;
@@ -134,9 +138,11 @@ void ObstacleController::ProcessData() {
   {
     obstacleAvoided = true;
   }
+   cout << "ObstacleController -> 18" << endl;
 }
 
 void ObstacleController::SetTagData(vector<TagPoint> tags){
+   cout << "ObstacleController -> 19" << endl;
   float cameraOffsetCorrection = 0.020; //meters;
   centerSeen = false;
   countLeft = 0;
@@ -144,6 +150,7 @@ void ObstacleController::SetTagData(vector<TagPoint> tags){
 
   // this loop is to get the number of center tags
   if (!targetHeld) {
+     cout << "ObstacleController -> 20" << endl;
     for (int i = 0; i < tags.size(); i++) {
       if (tags[i].id == 256) {
 
@@ -164,7 +171,7 @@ void ObstacleController::SetTagData(vector<TagPoint> tags){
 
 bool ObstacleController::ShouldInterrupt() {
 
-
+ cout << "ObstacleController -> 21" << endl;
   if(obstacleDetected && !obstacleInterrupt)
   {
     obstacleInterrupt = true;
@@ -183,6 +190,7 @@ bool ObstacleController::ShouldInterrupt() {
 }
 
 bool ObstacleController::HasWork() {
+   cout << "ObstacleController -> 22" << endl;
   if (can_set_waypoint && set_waypoint)
   {
     return true;
@@ -192,18 +200,20 @@ bool ObstacleController::HasWork() {
 }
 
 void ObstacleController::SetIgnoreCenter(){
+   cout << "ObstacleController -> 23" << endl;
   ignoreCenter = true; //ignore center ultrasound
 }
 
 void ObstacleController::SetCurrentTimeInMilliSecs( long int time )
 {
   current_time = time;
+   cout << "ObstacleController -> 24" << endl;
 }
 
 void ObstacleController::SetTargetHeld() {
   targetHeld = true;
 
-
+ cout << "ObstacleController -> 25" << endl;
   if (previousTargetState == false) {
     obstacleAvoided = true;
     obstacleInterrupt = false;

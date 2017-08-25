@@ -26,6 +26,7 @@ void LogicController::Reset() {
 //This function is called every 1/10th second by the ROSAdapter
 //The logical flow if the behaviours is controlled here by using a interrupt, haswork, priority queue system.
 Result LogicController::DoWork() {
+  cout << "LogicController -> 0" << endl;
   Result result;
 
   //first a loop runs through all the controllers who have a priority of 0 or above witht he largest number being
@@ -40,7 +41,7 @@ Result LogicController::DoWork() {
 
   //logic state switch
   switch(logicState) {
-
+cout << "LogicController -> 1" << endl;
   //when an interrupt has been thorwn or there are no pending control_queue.top().actions logic controller is in this state.
   case LOGIC_STATE_INTERRUPT: {
 
@@ -58,25 +59,27 @@ Result LogicController::DoWork() {
         }
       }
     }
-
+cout << "LogicController -> 2" << endl;
     //if no controlers have work report this to ROS Adapter and do nothing.
     if(control_queue.empty()) {
+      cout << "LogicController -> 2A" << endl;
       result.type = behavior;
       result.b = wait;
       break;
     }
     else {
+      cout << "LogicController -> 2B" << endl;
       //default result state if someone has work this safe gaurds against faulty result types
       result.b = noChange;
     }
-
+cout << "LogicController -> 3" << endl;
     //take the top member of the priority queue and run their do work function.
     result = control_queue.top().controller->DoWork();
-
+cout << "LogicController -> 4" << endl;
     //anaylyze the result that was returned and do state changes accordingly
     //behavior types are used to indicate behavior changes of some form
     if(result.type == behavior) {
-
+cout << "LogicController -> 5" << endl;
       //ask for an external reset so the state of the controller is preserved untill after it has returned a result and
       //gotten a chance to communicate with other controllers
       if (result.reset) {
@@ -115,7 +118,7 @@ Result LogicController::DoWork() {
     //precision driving result types are when a controller wants direct command of the robots actuators
     //logic controller facilitates the command pass through in the LOGIC_STATE_PRECISION_COMMAND switch case
     else if(result.type == precisionDriving) {
-
+cout << "LogicController -> 6" << endl;
       logicState = LOGIC_STATE_PRECISION_COMMAND;
       break;
 
@@ -134,7 +137,7 @@ Result LogicController::DoWork() {
 
     //this case is primarly when logic controller is waiting for drive controller to reach its last waypoint
   case LOGIC_STATE_WAITING: {
-
+cout << "LogicController -> 7" << endl;
     //ask drive controller how to drive
     //commands to be passed the ROS Adapter as left and right wheel PWM values in the result struct are returned
     result = driveController.DoWork();
@@ -151,11 +154,11 @@ Result LogicController::DoWork() {
 
     //used for precision driving pass through
   case LOGIC_STATE_PRECISION_COMMAND: {
-
+cout << "LogicController -> 8" << endl;
     //unlike waypoints precision commands change every update tick so we ask the
     //controller for new commands on every update tick.
     result = control_queue.top().controller->DoWork();
-
+cout << "LogicController -> 9" << endl;
     //pass the driving commands to the drive controller so it can interpret them
     driveController.SetResultData(result);
 
@@ -169,7 +172,8 @@ Result LogicController::DoWork() {
 
   // bad! causes node to crash
   //cout << "logic state " << logicState << " top controller " << control_queue.top().priority << " Proccess " << processState <<endl;
-
+ 
+   cout << "LogicController -> 0" << endl;
 
   //now using proccess logic allow the controller to communicate data between eachother
   controllerInterconnect();

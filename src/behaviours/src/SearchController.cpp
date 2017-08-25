@@ -10,7 +10,7 @@ SearchController::SearchController() {
   centerLocation.y = 0;
   centerLocation.theta = 0;
   result.PIDMode = FAST_PID;
-
+  cout << "SearchController -> 0" << endl;
 
   result.type = waypoint;
 
@@ -18,6 +18,8 @@ SearchController::SearchController() {
 
 void SearchController::Reset() {
   result.reset = false;
+  cout << "SearchController -> 1" << endl;
+
 }
 
 /**
@@ -25,6 +27,7 @@ void SearchController::Reset() {
  */
 Result SearchController::DoWork() {
   int searchState;
+  cout << "SearchController -> 2" << endl;
 
   if(!init){
       init = true;
@@ -34,7 +37,7 @@ Result SearchController::DoWork() {
       searchLocation.y = spiralLocation.y;
       result.wpts.waypoints.clear();
       result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
-      cout << "tag: spiral point at corner No. " << cornerNum <<" :" << spiralLocation.x << " , "<< spiralLocation.y << " centerLocation.y : " << centerLocation.y << endl;
+      //cout << "tag: spiral point at corner No. " << cornerNum <<" :" << spiralLocation.x << " , "<< spiralLocation.y << " centerLocation.y : " << centerLocation.y << endl;
       return result;
   }
   else {
@@ -44,12 +47,18 @@ Result SearchController::DoWork() {
 
     if(succesfullPickup){
       searchState = INSERT_CHECKPOINT;
+      cout << "SearchController -> 3" << endl;
+
     }
 
     else if (checkpointReached) {
       searchState = TARGET_CURRENTCORNER;
+      cout << "SearchController -> 4" << endl;
+
       if(searchlocationReached){
         searchState = TARGET_NEWCORNER;
+        cout << "SearchController -> 5" << endl;
+
       }
 
     }
@@ -57,6 +66,8 @@ Result SearchController::DoWork() {
 
   switch(searchState){
   case INSERT_CHECKPOINT:{
+    cout << "SearchController -> 6" << endl;
+
     succesfullPickup = false;
     result.wpts.waypoints.clear();
     result.wpts.waypoints.insert(result.wpts.waypoints.end(), checkPoint);
@@ -65,6 +76,8 @@ Result SearchController::DoWork() {
 
   }
   case TARGET_CURRENTCORNER:{
+    cout << "SearchController -> 7" << endl;
+
     result.wpts.waypoints.clear();
     result.wpts.waypoints.insert(result.wpts.waypoints.end(), searchLocation);
     return result;
@@ -72,6 +85,8 @@ Result SearchController::DoWork() {
 
   }
   case TARGET_NEWCORNER:{
+    cout << "SearchController -> 8" << endl;
+
     searchlocationReached = false;
     result.wpts.waypoints.clear();
     searchLocation = SpiralSearching();
@@ -83,6 +98,8 @@ Result SearchController::DoWork() {
 }
 
 void SearchController::SetCenterLocation(Point centerLocation) {
+  cout << "SearchController -> 9" << endl;
+
   this->centerLocation.x = centerLocation.x;
   this->centerLocation.y = centerLocation.y;
 
@@ -90,6 +107,8 @@ void SearchController::SetCenterLocation(Point centerLocation) {
 
 void SearchController::SetCurrentLocation(Point currentLocation) {
   this->currentLocation = currentLocation;
+  cout << "SearchController -> 10" << endl;
+
 }
 
 void SearchController::ProcessData() {
@@ -97,15 +116,21 @@ void SearchController::ProcessData() {
 
 bool SearchController::ShouldInterrupt(){
   ProcessData();
+  cout << "SearchController -> 11" << endl;
+
 
   return false;
 }
 
 bool SearchController::HasWork() {
+  cout << "SearchController -> 12" << endl;
+
   return true;
 }
 
 void SearchController::SetSuccesfullPickup() {
+  cout << "SearchController -> 12" << endl;
+
   succesfullPickup = true;
   if(checkpointReached){
     SetCheckPoint();
@@ -122,12 +147,13 @@ Point SearchController::SpiralSearching(){
     cornerNum = 0;
     stepsIntoSpiral += 1;
   }
+  cout << "SearchController -> 13" << endl;
 
   sideLength = spacing * CalculateSides(stepsIntoSpiral, cornerNum);
   spiralLocation.x = spiralLocation.x + (sideLength * cos(corner));
   spiralLocation.y = spiralLocation.y + (sideLength * sin(corner));
-  cout << "tag: spiral point at corner No. " << cornerNum<<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
-  cout << "tag: steps into spiral: " << stepsIntoSpiral << endl;
+  //cout << "tag: spiral point at corner No. " << cornerNum<<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
+  //cout << "tag: steps into spiral: " << stepsIntoSpiral << endl;
   result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
   corner -= (M_PI/2);
   if (corner <= 0.0) {
@@ -142,8 +168,11 @@ Point SearchController::SpiralSearching(){
 
 void SearchController::SetCheckPoint(){
   // or set it to current location
+  cout << "SearchController -> 14" << endl;
+
   this->checkPoint = this->currentLocation;
   cout << "tag: locating which side of the spiral am I" << endl;
+
 
 
   if(cornerNum == 0){
@@ -166,11 +195,13 @@ void SearchController::SetCheckPoint(){
     this->checkPoint.x += 1.0;
     this->checkPoint.y = searchLocation.y;
   }
-  cout << "tag: CHECKPOINT LOCATION: "<< checkPoint.x << " , "<< checkPoint.y << endl;
+  //cout << "tag: CHECKPOINT LOCATION: "<< checkPoint.x << " , "<< checkPoint.y << endl;
 
 }
 
 void SearchController::ReachedCheckPoint(){
+  cout << "SearchController -> 15" << endl;
+
   if (hypot(checkPoint.x-currentLocation.x, checkPoint.y-currentLocation.y) < 0.15) {
     checkpointReached = true;
     cout << "tag: reached the checkpoint(): "<< checkPoint.x<< " , "<< checkPoint.y<< endl;
@@ -183,6 +214,8 @@ void SearchController::ReachedCheckPoint(){
 }
 
 void SearchController::ReachedSearchLocation(){
+  cout << "SearchController -> 16" << endl;
+
   if (hypot(searchLocation.x-currentLocation.x, searchLocation.y-currentLocation.y) < 0.15) {
     searchlocationReached = true;
     reachedFirstCorner = true;
@@ -202,6 +235,7 @@ void SearchController::SetSwarmSize(size_t size){
 }
 
 float SearchController::CalculateSides( int circuitNum, int slot){
+  cout << "SearchController -> 17" << endl;
 
   constexpr double initial_spiral_offset = 2;
 
@@ -230,6 +264,7 @@ float SearchController::CalculateSides( int circuitNum, int slot){
     }
 
   }
+  cout << "SearchController -> 18" << endl;
 
 
 }
