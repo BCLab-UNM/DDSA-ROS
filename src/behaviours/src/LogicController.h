@@ -45,6 +45,8 @@ public:
   void SetMapVelocityData(float linearVelocity, float angularVelocity);
   void SetCenterLocationOdom(Point centerLocationOdom);
   void SetCenterLocationMap(Point centerLocationMap);
+  void SetSwarmSize(size_t size);
+  void SetRoverIndex(size_t idx);
 
   void SetCurrentTimeInMilliSecs( long int time );
 

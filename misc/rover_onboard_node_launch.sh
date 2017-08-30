@@ -53,7 +53,6 @@ findDevicePath() {
 echo "rosrun tf static_transform_publisher"
 nohup rosrun tf static_transform_publisher __name:=$HOSTNAME\_BASE2CAM 0.12 -0.03 0.195 -1.57 0 -2.22 /$HOSTNAME/base_link /$HOSTNAME/camera_link 100 &
 echo "rosrun video_stream_opencv"
-
 nohup rosrun video_stream_opencv video_stream __name:=$HOSTNAME\_CAMERA _video_stream_provider:=/dev/video0 /camera:=/$HOSTNAME/camera/image _camera_info_url:=file://${HOME}/rover_workspace/camera_info head_camera.yaml _width:=320 _height:=240 &
 
 # deprecated; we are replacing the usb cam with opencv cam

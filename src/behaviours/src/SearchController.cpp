@@ -10,71 +10,105 @@ SearchController::SearchController() {
   centerLocation.y = 0;
   centerLocation.theta = 0;
   result.PIDMode = FAST_PID;
+  cout << "SearchController -> 0" << endl;
 
-  result.fingerAngle = M_PI/2;
-  result.wristAngle = M_PI/4;
+  result.type = waypoint;
+
 }
 
 void SearchController::Reset() {
   result.reset = false;
+  cout << "SearchController -> 1" << endl;
+
 }
 
 /**
  * This code implements a basic random walk search.
  */
 Result SearchController::DoWork() {
+  int searchState;
+  cout << "SearchController -> 2" << endl;
 
-  if (!result.wpts.waypoints.empty()) {
-    if (hypot(result.wpts.waypoints[0].x-currentLocation.x, result.wpts.waypoints[0].y-currentLocation.y) < 0.10) {
-      attemptCount = 0;
+  if(!init){
+      init = true;
+      spiralLocation.x = centerLocation.x;
+      spiralLocation.y = centerLocation.y + spacing * CalculateSides(0, 0);
+      searchLocation.x = spiralLocation.x;
+      searchLocation.y = spiralLocation.y;
+      result.wpts.waypoints.clear();
+      result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
+      //cout << "tag: spiral point at corner No. " << cornerNum <<" :" << spiralLocation.x << " , "<< spiralLocation.y << " centerLocation.y : " << centerLocation.y << endl;
+      return result;
+  }
+  else {
+
+    ReachedCheckPoint();
+    ReachedSearchLocation();
+
+    if(succesfullPickup){
+      searchState = INSERT_CHECKPOINT;
+      cout << "SearchController -> 3" << endl;
+
+    }
+
+    else if (checkpointReached) {
+      searchState = TARGET_CURRENTCORNER;
+      cout << "SearchController -> 4" << endl;
+
+      if(searchlocationReached){
+        searchState = TARGET_NEWCORNER;
+        cout << "SearchController -> 5" << endl;
+
+      }
+
     }
   }
 
-  if (attemptCount > 0 && attemptCount < 5) {
-    attemptCount++;
-    if (succesfullPickup) {
-      succesfullPickup = false;
-      attemptCount = 1;
-    }
+  switch(searchState){
+  case INSERT_CHECKPOINT:{
+    cout << "SearchController -> 6" << endl;
+
+    succesfullPickup = false;
+    result.wpts.waypoints.clear();
+    result.wpts.waypoints.insert(result.wpts.waypoints.end(), checkPoint);
     return result;
+    break;
+
   }
-  else if (attemptCount >= 5 || attemptCount == 0) {
-    attemptCount = 1;
-
-
-    result.type = waypoint;
-    Point  searchLocation;
-
-    //select new position 50 cm from current location
-    if (first_waypoint)
-    {
-      first_waypoint = false;
-      searchLocation.theta = currentLocation.theta + M_PI;
-      searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
-      searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
-    }
-    else
-    {
-      //select new heading from Gaussian distribution around current heading
-      searchLocation.theta = rng->gaussian(currentLocation.theta, 0.785398); //45 degrees in radians
-      searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
-      searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
-    }
+  case TARGET_CURRENTCORNER:{
+    cout << "SearchController -> 7" << endl;
 
     result.wpts.waypoints.clear();
-    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
-
+    result.wpts.waypoints.insert(result.wpts.waypoints.end(), searchLocation);
     return result;
-  }
+    break;
 
+  }
+  case TARGET_NEWCORNER:{
+    cout << "SearchController -> 8" << endl;
+
+    searchlocationReached = false;
+    result.wpts.waypoints.clear();
+    searchLocation = SpiralSearching();
+    return result;
+    break;
+
+  }
+  }
 }
 
 void SearchController::SetCenterLocation(Point centerLocation) {
-  this->centerLocation = centerLocation;
+  cout << "SearchController -> 9" << endl;
+
+  this->centerLocation.x = centerLocation.x;
+  this->centerLocation.y = centerLocation.y;
+
 }
 
 void SearchController::SetCurrentLocation(Point currentLocation) {
   this->currentLocation = currentLocation;
+  cout << "SearchController -> 10" << endl;
+
 }
 
 void SearchController::ProcessData() {
@@ -82,16 +116,155 @@ void SearchController::ProcessData() {
 
 bool SearchController::ShouldInterrupt(){
   ProcessData();
+  cout << "SearchController -> 11" << endl;
+
 
   return false;
 }
 
 bool SearchController::HasWork() {
+  cout << "SearchController -> 12" << endl;
+
   return true;
 }
 
 void SearchController::SetSuccesfullPickup() {
+  cout << "SearchController -> 12" << endl;
+
   succesfullPickup = true;
+  if(checkpointReached){
+    SetCheckPoint();
+    checkpointReached =false;
+
+  }
+
+
 }
 
+Point SearchController::SpiralSearching(){
+  cornerNum +=1;
+  if(cornerNum == 4){
+    cornerNum = 0;
+    stepsIntoSpiral += 1;
+  }
+  cout << "SearchController -> 13" << endl;
 
+  sideLength = spacing * CalculateSides(stepsIntoSpiral, cornerNum);
+  spiralLocation.x = spiralLocation.x + (sideLength * cos(corner));
+  spiralLocation.y = spiralLocation.y + (sideLength * sin(corner));
+  //cout << "tag: spiral point at corner No. " << cornerNum<<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
+  //cout << "tag: steps into spiral: " << stepsIntoSpiral << endl;
+  result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
+  corner -= (M_PI/2);
+  if (corner <= 0.0) {
+    corner += 2*M_PI;
+  }
+
+
+  return spiralLocation;
+
+
+}
+
+void SearchController::SetCheckPoint(){
+  // or set it to current location
+  cout << "SearchController -> 14" << endl;
+
+  this->checkPoint = this->currentLocation;
+  cout << "tag: locating which side of the spiral am I" << endl;
+
+
+
+  if(cornerNum == 0){
+    cout << "tag: West side of the square " << endl;
+    this->checkPoint.y -= 1.0;
+    this->checkPoint.x = searchLocation.x;
+
+  }else if(cornerNum == 1){
+    cout << "tag: North side of the square" << endl;
+    this->checkPoint.x -= 1.0;
+    this->checkPoint.y = searchLocation.y;
+
+  }else if(cornerNum == 2){
+    cout << "tag: East side of the square" << endl;
+    this->checkPoint.y += 1.0;
+    this->checkPoint.x = searchLocation.x;
+
+  }else if(cornerNum == 3){
+    cout << "tag: South side of the square" << endl;
+    this->checkPoint.x += 1.0;
+    this->checkPoint.y = searchLocation.y;
+  }
+  //cout << "tag: CHECKPOINT LOCATION: "<< checkPoint.x << " , "<< checkPoint.y << endl;
+
+}
+
+void SearchController::ReachedCheckPoint(){
+  cout << "SearchController -> 15" << endl;
+
+  if (hypot(checkPoint.x-currentLocation.x, checkPoint.y-currentLocation.y) < 0.15) {
+    checkpointReached = true;
+    cout << "tag: reached the checkpoint(): "<< checkPoint.x<< " , "<< checkPoint.y<< endl;
+  }
+  else if(!reachedFirstCorner)
+  {
+    checkpointReached = true;
+  }
+
+}
+
+void SearchController::ReachedSearchLocation(){
+  cout << "SearchController -> 16" << endl;
+
+  if (hypot(searchLocation.x-currentLocation.x, searchLocation.y-currentLocation.y) < 0.15) {
+    searchlocationReached = true;
+    reachedFirstCorner = true;
+    cout << "tag: reached the Searchlocation(): " << searchLocation.x<< " , "<< searchLocation.y<< endl;
+  }
+
+}
+
+void SearchController::SetRoverIndex(size_t idx){
+  roverID = idx;
+  cout << "tag:"<< "RoverIndex: "<< roverID << endl;
+}
+
+void SearchController::SetSwarmSize(size_t size){
+  swarmSize = size;
+  cout << "tag:"<< "SwarmSize: "<< swarmSize << endl;
+}
+
+float SearchController::CalculateSides( int circuitNum, int slot){
+  cout << "SearchController -> 17" << endl;
+
+  constexpr double initial_spiral_offset = 2;
+
+  // North and East
+  if(slot == 0 || slot == 1){
+    if(circuitNum == 0){
+      return roverID + initial_spiral_offset;
+    }
+    else if(circuitNum == 1){
+      sideLength = CalculateSides(0,slot) + swarmSize + roverID + initial_spiral_offset;
+      return sideLength;
+    }
+    else if(circuitNum > 1){
+      sideLength = CalculateSides(circuitNum - 1, slot) + 2 * swarmSize;
+      return sideLength;
+    }
+    // South and West
+  }else if(slot == 2 || slot == 3){
+    if(circuitNum == 0){
+      sideLength = CalculateSides(0, 0) + roverID + initial_spiral_offset;
+      return sideLength;
+    }
+    else{
+      sideLength = CalculateSides(circuitNum, 0) + swarmSize;
+      return sideLength;
+    }
+
+  }
+  cout << "SearchController -> 18" << endl;
+
+
+}
