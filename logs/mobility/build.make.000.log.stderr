@@ -1,7 +1,0 @@
-/nfs/home/matthew/DDSA-ROS/src/mobility/src/mobility.cpp:23:29: fatal error: mobility/rover.h: No such file or directory
- #include "mobility/rover.h" 
-                             ^
-compilation terminated.
-make[2]: *** [CMakeFiles/mobility.dir/src/mobility.cpp.o] Error 1
-make[1]: *** [CMakeFiles/mobility.dir/all] Error 2
-make: *** [all] Error 2
