@@ -1,6 +1,7 @@
 #!/bin/bash
+echo "running pkill on old rosnodes"
 pkill usb_cam_node
-pkill mobility
+pkill behaviours
 pkill obstacle
 pkill apriltag_detector_node
 pkill abridge
@@ -10,8 +11,10 @@ pkill ekf_localization
 pkill diagnostics
 pkill static_transform_publisher
 
+source "../devel/setup.bash"
 
 #Point to ROS master on the network
+echo "point to ROS master on the network"
 if [ -z "$1" ]
 then
     echo "Error: ROS_MASTER_URI hostname was not provided"
@@ -23,10 +26,12 @@ fi
 
 
 #Set prefix to fully qualify transforms for each robot
+echo "set prefix to fully qualify transforms for each robot: $HOSTNAME"
 rosparam set tf_prefix $HOSTNAME
 
 
 #Function to lookup correct path for a given device
+echo "findDevicePath() for usb devices (arduino, camera, etc)"
 findDevicePath() {
     for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do
     (
@@ -45,10 +50,20 @@ findDevicePath() {
 
 
 #Startup ROS packages/processes
+echo "rosrun tf static_transform_publisher"
 nohup rosrun tf static_transform_publisher __name:=$HOSTNAME\_BASE2CAM 0.12 -0.03 0.195 -1.57 0 -2.22 /$HOSTNAME/base_link /$HOSTNAME/camera_link 100 &
-nohup rosrun usb_cam usb_cam_node __name:=$HOSTNAME\_CAMERA /$HOSTNAME\_CAMERA/image_raw:=/$HOSTNAME/camera/image _camera_info_url:=file://${HOME}/rover_workspace/camera_info/head_camera.yaml _image_width:=640 _image_height:=480 &
-nohup rosrun mobility mobility &
+echo "rosrun video_stream_opencv"
+
+nohup rosrun video_stream_opencv video_stream __name:=$HOSTNAME\_CAMERA _video_stream_provider:=/dev/video0 /camera:=/$HOSTNAME/camera/image _camera_info_url:=file://${HOME}/rover_workspace/camera_info head_camera.yaml _width:=320 _height:=240 &
+
+# deprecated; we are replacing the usb cam with opencv cam
+# mage_raw:=/$HOSTNAME/camera/image _camera_info_url:=file://${HOME}/rover_workspace/camera_info/head_camera.yaml _image_width:=320 _image_height:=240 &
+
+echo "rosrun behaviours"
+nohup rosrun behaviours behaviours &
+echo "rosrun obstacle_detection"
 nohup rosrun obstacle_detection obstacle &
+echo "rosrun diagnostics"
 nohup rosrun diagnostics diagnostics &
 
 rosparam set /$HOSTNAME\_TARGET/sensor_frame_id /$HOSTNAME/camera_link
@@ -72,7 +87,7 @@ else
     nohup rosrun ublox_gps ublox_gps __name:=$HOSTNAME\_UBLOX /$HOSTNAME\_UBLOX/fix:=/$HOSTNAME/fix /$HOSTNAME\_UBLOX/fix_velocity:=/$HOSTNAME/fix_velocity /$HOSTNAME\_UBLOX/navposllh:=/$HOSTNAME/navposllh /$HOSTNAME\_UBLOX/navsol:=/$HOSTNAME/navsol /$HOSTNAME\_UBLOX/navstatus:=/$HOSTNAME/navstatus /$HOSTNAME\_UBLOX/navvelned:=/$HOSTNAME/navvelned _device:=/dev/$gpsDevicePath _frame_id:=$HOSTNAME/base_link &
 fi
 
-nohup rosrun robot_localization navsat_transform_node __name:=$HOSTNAME\_NAVSAT _world_frame:=map _frequency:=10 _magnetic_declination_radians:=0.1530654 _yaw_offset:=1.57079632679 /imu/data:=/$HOSTNAME/imu /gps/fix:=/$HOSTNAME/fix /odometry/filtered:=/$HOSTNAME/odom/ekf /odometry/gps:=/$HOSTNAME/odom/navsat &
+nohup rosrun robot_localization navsat_transform_node __name:=$HOSTNAME\_NAVSAT _world_frame:=map _frequency:=10 _magnetic_declination_radians:=0.1530654 _yaw_offset:=0 /imu/data:=/$HOSTNAME/imu /gps/fix:=/$HOSTNAME/fix /odometry/filtered:=/$HOSTNAME/odom/ekf /odometry/gps:=/$HOSTNAME/odom/navsat &
 
 rosparam set /$HOSTNAME\_ODOM/odom0 /$HOSTNAME/odom
 rosparam set /$HOSTNAME\_ODOM/imu0 /$HOSTNAME/imu
@@ -82,8 +97,44 @@ nohup rosrun robot_localization ekf_localization_node _two_d_mode:=true _world_f
 
 rosparam set /$HOSTNAME\_MAP/odom0 /$HOSTNAME/odom/navsat
 rosparam set /$HOSTNAME\_MAP/odom1 /$HOSTNAME/odom/filtered
+rosparam set /$HOSTNAME\_MAP/imu0 /$HOSTNAME/imu
 rosparam set /$HOSTNAME\_MAP/odom0_config [true,true,false,false,false,false,false,false,false,false,false,false,false,false,false]
-rosparam set /$HOSTNAME\_MAP/odom1_config [false,false,false,false,false,true,true,false,false,false,false,true,true,false,false]
+rosparam set /$HOSTNAME\_MAP/odom1_config [false,false,false,false,false,false,true,false,false,false,false,false,false,false,false]
+rosparam set /$HOSTNAME\_MAP/imu0_config [false,false,false,false,false,true,false,false,false,false,false,true,false,false,false]
+
+rosparam set /$HOSTNAME\_MAP/initial_estimate_covariance "[1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                               0, 1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                               0, 0, 1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                               0, 0, 0, 1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                               0, 0, 0, 0, 1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                               0, 0, 0, 0, 0, 1e-9, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                               0, 0, 0, 0, 0, 0, 1e-9, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                               0, 0, 0, 0, 0, 0, 0, 1e-9, 0, 0, 0, 0, 0, 0, 0,  /
+                                               0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0, 0, 0, 0, 0, 0,  /
+                                               0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0, 0, 0, 0, 0,  /
+                                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0, 0, 0, 0,  /
+                                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0, 0, 0,  /
+                                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0, 0,  /
+                                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9, 0,  /
+                                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1e-9]"
+
+
+rosparam set $HOSTNAME\_MAP/process_noise_covariance "[0.005, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                                    0, 0.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                                    0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                                    0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                                    0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                                    0, 0, 0, 0, 0, 0.005, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                                    0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0,  /
+                                                    0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0,  /
+                                                    0, 0, 0, 0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 0, 0,  /
+                                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0, 0,  /
+                                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, 0,  /
+                                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0,  /
+                                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0,  /
+                                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0,  /
+                                                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1]"
+
 nohup rosrun robot_localization ekf_localization_node _two_d_mode:=true _world_frame:=map _frequency:=10 __name:=$HOSTNAME\_MAP /odometry/filtered:=/$HOSTNAME/odom/ekf &
 
 
@@ -93,7 +144,7 @@ while true; do
     read choice;
 
     if [ "$choice" == "q" ];then
-	rosnode kill $HOSTNAME\_MOBILITY
+	rosnode kill $HOSTNAME\_BEHAVIOUR
 	rostopic pub -1 /$HOSTNAME\/velocity geometry_msgs/Twist '{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}'
 	rosnode kill $HOSTNAME\_ABRIDGE
 	rosnode kill $HOSTNAME\_NAVSAT

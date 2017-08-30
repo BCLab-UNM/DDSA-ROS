@@ -3,9 +3,8 @@
 	<model name="at0">
 		<static>false</static>
 		<link name='link'>
-			<pose>0 0 0.0 0.0 0 0</pose>
 			<inertial>
-				<mass>0.01</mass> <!-- Set the mass of the target to 10 grams -->>
+				<mass>0.01</mass> <!-- Set the mass of the target to 10 grams -->
 				<inertia>
 					<ixx>0.00004</ixx>
 					<ixy>0.0</ixy>
@@ -16,7 +15,6 @@
 				</inertia>
 			</inertial>
 			<visual name='visual'>
-			  <transparency>0.1</transparency>
 				<geometry>
 					<box>
 						<size>0.05 0.05 0.05</size>
@@ -31,7 +29,6 @@
 				</material>
 			</visual>
 			<collision name ='collision'>
-				<pose>0 0 0 0 0 0</pose>
 				<geometry>
 					<box>
 						<size>0.05 0.05 0.05</size>
