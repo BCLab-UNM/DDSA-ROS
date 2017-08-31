@@ -223,35 +223,30 @@ void driveCommandHandler(const geometry_msgs::Twist::ConstPtr& message) {
 
   if (currentMode == 1) //manual control
   {
-    float left = message->linear.x;
-    float right = message->angular.z;
-   
-	yawError[0] *= 255/Kpy;
-	velError[0] = linearSpeed * 255/Kpv; //scale values between -255 and 255;
-	  
+
 	float linear = left * 255;
 	float angular = right * 255; //scale values between -255 and 255;
 
- 	left = linear - angular;
- 	right = linear + angular;
- 
- 	if (left >255)
- 	{
- 	  left = 255;
-         }
-         else if (left < -255)
-         {
-           left = -255;
-  	}
- 
- 	if (right >255)
- 	{
- 	  right = 255;
-         }
+	left = linear - angular;
+	right = linear + angular;
+
+	if (left >255)
+	{
+	  left = 255;
+        }
+        else if (left < -255)
+        {
+          left = -255;
+ 	}
+
+	if (right >255)
+	{
+	  right = 255;
+        }
         else if (right < -255)
-         {
-           right = -255;
-  	}
+        {
+          right = -255;
+ 	}
   }
   else //auto control
   {
