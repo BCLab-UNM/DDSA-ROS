@@ -40,6 +40,7 @@ MapFrame::MapFrame(QWidget *parent, Qt::WFlags flags) : QFrame(parent)
     display_ekf_data = false;
     display_gps_data = false;
     display_encoder_data = false;
+    display_global_offset = false;
 
     frames = 0;
     popout_mapframe = NULL;
@@ -423,6 +424,19 @@ void MapFrame::setDisplayEKFData(bool display)
     display_ekf_data = display;
 
     if(popout_mapframe) popout_mapframe->setDisplayEKFData(display);
+}
+
+void MapFrame::setGlobalOffset(bool display)
+{
+    display_global_offset = display;
+    map_data->setGlobalOffset(display);
+
+    if(popout_mapframe) popout_mapframe->setGlobalOffset(display);
+}
+
+void MapFrame::setGlobalOffsetForRover(string rover, float x, float y)
+{
+    map_data->setGlobalOffsetForRover(rover, x, y);
 }
 
 void MapFrame::setWhetherToDisplay(string rover, bool yes)
