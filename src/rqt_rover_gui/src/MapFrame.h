@@ -53,6 +53,8 @@ namespace rqt_rover_gui
       void setDisplayEKFData(bool display);
       void setGlobalOffset(bool display);
       void setGlobalOffsetForRover(std::string rover, float x, float y);
+      void setDisplayUniqueRoverColors(bool display);
+      void setUniqueRoverColor(std::string, QColor rover_color);
 
       void addToGPSRoverPath(std::string rover, float x, float y);
       void addToEncoderRoverPath(std::string rover, float x, float y);
@@ -103,11 +105,19 @@ namespace rqt_rover_gui
       bool display_ekf_data;
       bool display_encoder_data;
       bool display_global_offset;
+      bool display_unique_rover_colors;
 
       QTime frame_rate_timer;
       int frames;
 
       set<string> display_list;
+      std::map<std::string, QColor> unique_simulated_rover_colors;
+      QColor unique_physical_rover_colors[6] = { /* green         */ QColor(  0, 255,   0),
+                                                 /* yellow        */ QColor(255, 255,   0),
+                                                 /* white         */ QColor(255, 255, 255),
+                                                 /* red           */ QColor(255,   0,   0),
+                                                 /* deep sky blue */ QColor(  0, 191, 255),
+                                                 /* hot pink      */ QColor(255, 105, 180)  };
 
       // For external pop out window
       QMainWindow* popout_window;
