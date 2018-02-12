@@ -548,7 +548,10 @@ void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs
 
     if (code != 0)
     {
-        emit updateObstacleCallCount("<font color='white'>"+QString::number(++obstacle_call_count)+"</font>");
+		if(current_simulated_time_in_seconds < timer_stop_time_in_seconds || !is_timer_on)
+		{
+		    emit updateObstacleCallCount("<font color='white'>"+QString::number(++obstacle_call_count)+"</font>");	
+		}
     }
 }
 
