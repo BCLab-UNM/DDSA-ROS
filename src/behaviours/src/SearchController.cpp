@@ -1,4 +1,5 @@
 #include "SearchController.h"
+#include <angles/angles.h>
 
 SearchController::SearchController() {
   rng = new random_numbers::RandomNumberGenerator();
@@ -98,17 +99,21 @@ Result SearchController::DoWork() {
 }
 
 void SearchController::SetCenterLocation(Point centerLocation) {
-  cout << "SearchController -> 9" << endl;
-
-  this->centerLocation.x = centerLocation.x;
-  this->centerLocation.y = centerLocation.y;
-
+  
+  float diffX = this->centerLocation.x - centerLocation.x;
+  float diffY = this->centerLocation.y - centerLocation.y;
+  this->centerLocation = centerLocation;
+  
+  if (!result.wpts.waypoints.empty())
+  {
+  result.wpts.waypoints.back().x -= diffX;
+  result.wpts.waypoints.back().y -= diffY;
+  }
+  
 }
 
 void SearchController::SetCurrentLocation(Point currentLocation) {
   this->currentLocation = currentLocation;
-  cout << "SearchController -> 10" << endl;
-
 }
 
 void SearchController::ProcessData() {
@@ -116,21 +121,16 @@ void SearchController::ProcessData() {
 
 bool SearchController::ShouldInterrupt(){
   ProcessData();
-  cout << "SearchController -> 11" << endl;
 
 
   return false;
 }
 
 bool SearchController::HasWork() {
-  cout << "SearchController -> 12" << endl;
-
   return true;
 }
 
 void SearchController::SetSuccesfullPickup() {
-  cout << "SearchController -> 12" << endl;
-
   succesfullPickup = true;
   if(checkpointReached){
     SetCheckPoint();

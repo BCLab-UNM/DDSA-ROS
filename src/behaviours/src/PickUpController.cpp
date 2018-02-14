@@ -2,7 +2,8 @@
 #include <limits> // For numeric limits
 #include <cmath> // For hypot
 
-PickUpController::PickUpController() {
+PickUpController::PickUpController()
+{
   lockTarget = false;
   timeOut = false;
   nTargetsSeen = 0;
@@ -10,7 +11,7 @@ PickUpController::PickUpController() {
   blockDistance = 0;
 
   targetFound = false;
- cout << "PickUPController -> 0" << endl;
+
   result.type = precisionDriving;
   result.pd.cmdVel = 0;
   result.pd.cmdAngularError= 0;
@@ -19,42 +20,55 @@ PickUpController::PickUpController() {
   result.PIDMode = SLOW_PID;
 }
 
-PickUpController::~PickUpController() {
-}
+PickUpController::~PickUpController() { /*Destructor*/  }
 
-void PickUpController::SetTagData(vector<TagPoint> tags) {
+void PickUpController::SetTagData(vector<Tag> tags)
+{
 cout << "PickUPController -> 1" << endl;
-  if (tags.size() > 0) {
+  if (tags.size() > 0)
+  {
 
     nTargetsSeen = tags.size();
 
+    //we saw a target, set target_timer
+    target_timer = current_time;
+
     double closest = std::numeric_limits<double>::max();
     int target  = 0;
-    for (int i = 0; i < tags.size(); i++) { //this loop selects the closest visible block to makes goals for it
 
-      if (tags[i].id == 0) {
+    //this loop selects the closest visible block to makes goals for it
+    for (int i = 0; i < tags.size(); i++)
+    {
+
+      if (tags[i].getID() == 0)
+      {
 
         targetFound = true;
 
-        double test = hypot(hypot(tags[i].x, tags[i].y), tags[i].z); //absolute distance to block from camera lens
+        //absolute distance to block from camera lens
+        double test = hypot(hypot(tags[i].getPositionX(), tags[i].getPositionY()), tags[i].getPositionZ());
+
         if (closest > test)
         {
           target = i;
           closest = test;
         }
       }
-      else {
+      else
         cout << "PickUPController -> 2" << endl;
-        nTargetsSeen--;
+      {
 
-        if(tags[i].id == 256)
+        if(tags[i].getID() == 256)
         {
+
           Reset();
+
           if (has_control)
           {
             cout << "pickup reset return interupt free" << endl;
             release_control = true;
           }
+
           return;
         }
       }
@@ -62,20 +76,35 @@ cout << "PickUPController -> 1" << endl;
 
     float cameraOffsetCorrection = 0.023; //meters;
 
-    blockYawError = atan((tags[target].x + cameraOffsetCorrection)/blockDistance)*1.05; //angle to block from bottom center of chassis on the horizontal.
-
     ///TODO: Explain the trig going on here- blockDistance is c, 0.195 is b; find a
-    blockDistance = hypot(tags[target].z, tags[target].y); //distance from bottom center of chassis ignoring height.
+    blockDistanceFromCamera = hypot(hypot(tags[target].getPositionX(), tags[target].getPositionY()), tags[target].getPositionZ());
+
+    if ( (blockDistanceFromCamera*blockDistanceFromCamera - 0.195*0.195) > 0 )
+    {
+      blockDistance = sqrt(blockDistanceFromCamera*blockDistanceFromCamera - 0.195*0.195);
+    }
+    else
+    {
+      float epsilon = 0.00001; // A small non-zero positive number
+      blockDistance = epsilon;
+    }
 cout << "PickUPController -> 3" << endl;
-    blockDistanceFromCamera = hypot(hypot(tags[target].x, tags[target].y), tags[target].z);
+    //cout << "blockDistance  TAGDATA:  " << blockDistance << endl;
+
+    blockYawError = atan((tags[target].getPositionX() + cameraOffsetCorrection)/blockDistance)*1.05; //angle to block from bottom center of chassis on the horizontal.
+
+    cout << "blockYawError TAGDATA:  " << blockYawError << endl;
+
   }
 
 }
 
 
-bool PickUpController::SetSonarData(float rangeCenter){
+bool PickUpController::SetSonarData(float rangeCenter)
+{
 cout << "PickUPController -> 4" << endl;
-  if (rangeCenter < 0.12 && targetFound) {
+  if (rangeCenter < 0.12 && targetFound)
+  {
     result.type = behavior;
     result.b = nextProcess;
     result.reset = true;
@@ -87,32 +116,27 @@ cout << "PickUPController -> 4" << endl;
 
 }
 
-void PickUpController::ProcessData() {
-  if(!targetFound){
-    // Do nothing
-    cout << "PickUPController -> 5" << endl;
+void PickUpController::ProcessData()
+{
+
+  if(!targetFound)
+  {
+    //cout << "PICKUP No Target Seen!" << endl;
+
+    cout << "PickUPController -> 6" << endl;
     return;
   }
 
-  if ( (blockDistance*blockDistance - 0.195*0.195) > 0 )
-  {
-    blockDistance = sqrt(blockDistance*blockDistance - 0.195*0.195);
-  }
-  else
-  {
-    float epsilon = 0.00001; // A small non-zero positive number
-    blockDistance = epsilon;
-    cout << "PickUPController -> 6" << endl;
-  }
-
-  //if target is close enough
   //diffrence between current time and millisecond time
   long int Tdiff = current_time - millTimer;
   float Td = Tdiff/1e3;
 
-  cout << "distance : " << blockDistanceFromCamera << " time is : " << Td << endl;
+  //cout << "PICKUP Target Seen!" << endl;
+
+  //cout << "distance : " << blockDistanceFromCamera << " time is : " << Td << endl;
   
-  if (blockDistanceFromCamera < 0.14 && Td < reverse_to_before_reaquire_begin) {
+  if (blockDistanceFromCamera < 0.14 && Td < 3.9)
+  {
     result.type = behavior;
     result.b = nextProcess;
     result.reset = true;
@@ -128,8 +152,8 @@ void PickUpController::ProcessData() {
 }
 
 
-bool PickUpController::ShouldInterrupt(){
-
+bool PickUpController::ShouldInterrupt()
+{
   ProcessData();
 
   if (release_control)
@@ -140,30 +164,31 @@ bool PickUpController::ShouldInterrupt(){
     return true;
   }
 
-  if ((targetFound && !interupted) || targetHeld) {
+  if ((targetFound && !interupted) || targetHeld)
+  {
     interupted = true;
     has_control = false;
     return true;
   }
-  else if (!targetFound && interupted) {
+  else if (!targetFound && interupted)
+  {
     interupted = false;
     has_control = false;
     return true;
   }
-  else {
-    cout << "PickUPController -> 9" << endl;
+  else
     return false;
-  }
 }
 
-Result PickUpController::DoWork() {
+Result PickUpController::DoWork()
+{
 cout << "PickUPController -> 10" << endl;
   has_control = true;
 
-  if (!targetHeld) {
+  if (!targetHeld)
+  {
     //threshold distance to be from the target block before attempting pickup
     float targetDistance = 0.15; //meters
-
 
     // -----------------------------------------------------------
     // millisecond time = current time if not in a counting state
@@ -202,12 +227,27 @@ cout << "PickUPController -> 10" << endl;
     // If we don't see any blocks or cubes turn towards the location of the last cube we saw.
     // I.E., try to re-aquire the last cube we saw.
 
-    float grasp_time_begin = 1.7;
-    float raise_time_begin = 2.5;
+    float grasp_time_begin = 1.5;
+    float raise_time_begin = 2.0;
     //float reverse_to_before_reaquire_begin = 4.4; //is declared in header for class usage but refrence is left hear for clarity
     float target_reaquire_begin= 5.0;
     float target_pickup_task_time_limit = 5.6;
     float done_center_begin_reversing = 1.0;
+    //cout << "blockDistance DOWORK:  " << blockDistance << endl;
+
+    //Calculate time difference between last seen tag
+    float target_timeout = (current_time - target_timer)/1e3;
+
+    //delay between the camera refresh and rover runtime is 6/10's of a second
+    float target_timeout_limit = 0.61;
+
+    //Timer to deal with delay in refresh from camera and the runtime of rover code
+    if( target_timeout >= target_timeout_limit )
+    {
+        //Has to be set back to 0
+        nTargetsSeen = 0;
+    }
+
     
     if (nTargetsSeen == 0 && !lockTarget)
     {
@@ -216,7 +256,7 @@ cout << "PickUPController -> 10" << endl;
       {
         result.pd.cmdVel = 0.0;
         result.pd.cmdAngularError= 0.0;
-        result.wristAngle = 0.8;
+        result.wristAngle = 1.25;
         // result.fingerAngle does not need to be set here
 
         // We are getting ready to start the pre-programmed pickup routine now! Maybe? <(^_^)/"
@@ -246,13 +286,13 @@ cout << "PickUPController -> 10" << endl;
       result.pd.cmdVel = vel;
       result.pd.cmdAngularError = -blockYawError;
       timeOut = false;
-      nTargetsSeen = 0;
+
       return result;
     }
     else if (!lockTarget) //if a target hasn't been locked lock it and enter a counting state while slowly driving forward.
     {
       lockTarget = true;
-      result.pd.cmdVel = 0.15;
+      result.pd.cmdVel = 0.18;
       result.pd.cmdAngularError= 0.0;
       timeOut = true;
       ignoreCenterSonar = true;
@@ -273,10 +313,13 @@ cout << "PickUPController -> 10" << endl;
 
 
     // the magic numbers compared to Td must be in order from greater(top) to smaller(bottom) numbers
-    if (Td > target_reaquire_begin && timeOut) {
+    if (Td > target_reaquire_begin && timeOut)
+    {
       lockTarget = false;
       ignoreCenterSonar = true;
     }
+
+    //if enough time has passed enter a recovery state to re-attempt a pickup
     else if (Td > reverse_to_before_reaquire_begin && timeOut) //if enough time has passed enter a recovery state to re-attempt a pickup
     {
       result.pd.cmdVel = -0.2;
@@ -286,8 +329,8 @@ cout << "PickUPController -> 10" << endl;
       result.wristAngle = 0;
     }
 
-
-    if (Td > target_pickup_task_time_limit && timeOut) //if no targets are found after too long a period go back to search pattern
+    //if no targets are found after too long a period go back to search pattern
+    if (Td > target_pickup_task_time_limit && timeOut)
     {
       Reset();
       interupted = true;
@@ -300,7 +343,8 @@ cout << "PickUPController -> 10" << endl;
   return result;
 }
 
-bool PickUpController::HasWork() {
+bool PickUpController::HasWork()
+{
   return targetFound;
   cout << "PickUPController -> 12" << endl;
 }

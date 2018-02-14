@@ -1,6 +1,6 @@
 // Author: Matthew Fricke
 // E-mail: matthew@fricke.co.uk
-// Date: 9-16-205
+// Date: 9-16-2015
 // Purpose: implementation of a simple graphical front end for the UNM-NASA Swarmathon rovers.
 // License: GPL3
 
@@ -69,7 +69,6 @@ namespace rqt_rover_gui
     joystickGripperInterface = NULL;
 
     obstacle_call_count = 0;
-
     arena_dim = 20;
 
     display_sim_visualization = false;
@@ -110,7 +109,7 @@ namespace rqt_rover_gui
     QString version_qstr("<font color='white'>"+GIT_VERSION+"</font>");
     ui.version_number_label->setText(version_qstr);
 
-    widget->setWindowTitle("Rover Interface: Built on " + BUILD_TIME + " Branch: " + GIT_BRANCH);
+    widget->setWindowTitle("DDSA Rover Interface: Built on " + BUILD_TIME + " Branch: " + GIT_BRANCH);
 
     string rover_name_msg = "<font color='white'>Rover: " + selected_rover_name + "</font>";
     QString rover_name_msg_qstr = QString::fromStdString(rover_name_msg);
@@ -160,11 +159,19 @@ namespace rqt_rover_gui
 
     connect(ui.custom_world_path_button, SIGNAL(pressed()), this, SLOT(customWorldButtonEventHandler()));
     connect(ui.custom_distribution_radio_button, SIGNAL(toggled(bool)), this, SLOT(customWorldRadioButtonEventHandler(bool)));
-    connect(ui.powerlaw_distribution_radio_button, SIGNAL(toggled(bool)), this, SLOT(powerlawDistributionRadioButtonEventHandler(bool)));
+    connect(ui.powerlaw_distribution_radio_button, SIGNAL(toggled(bool)), this, SLOT(customNumCubesRadioButtonEventHandler(bool)));
     connect(ui.unbounded_radio_button, SIGNAL(toggled(bool)), this, SLOT(unboundedRadioButtonEventHandler(bool)));
+    connect(ui.uniform_distribution_radio_button, SIGNAL(toggled(bool)), this, SLOT(customNumCubesRadioButtonEventHandler(bool)));
+    connect(ui.clustered_distribution_radio_button, SIGNAL(toggled(bool)), this, SLOT(customNumCubesRadioButtonEventHandler(bool)));
     connect(ui.override_num_rovers_checkbox, SIGNAL(toggled(bool)), this, SLOT(overrideNumRoversCheckboxToggledEventHandler(bool)));
     connect(ui.create_savable_world_checkbox, SIGNAL(toggled(bool)), this, SLOT(createSavableWorldCheckboxToggledEventHandler(bool)));
 
+    connect(this, SIGNAL(updateMapFrameWithCurrentRoverName(QString)), ui.map_frame, SLOT(receiveCurrentRoverName(QString)));
+
+    // Receive waypoint commands from MapFrame
+    connect(ui.map_frame, SIGNAL(sendWaypointCmd(WaypointCmd, int, float, float)), this, SLOT(receiveWaypointCmd(WaypointCmd, int, float, float)));
+    connect(this, SIGNAL(sendWaypointReached(int)), ui.map_frame, SLOT(receiveWaypointReached(int)));
+    
     // Receive log messages from contained frames
     connect(ui.map_frame, SIGNAL(sendInfoLogMessage(QString)), this, SLOT(receiveInfoLogMessage(QString)));
 
@@ -187,7 +194,7 @@ namespace rqt_rover_gui
     ui.map_frame->createPopoutWindow(map_data); // This has to happen before the display radio buttons are set
     ui.map_frame->setDisplayGPSData(ui.gps_checkbox->isChecked());
     ui.map_frame->setDisplayEncoderData(ui.encoder_checkbox->isChecked());
-    ui.map_frame->setDisplayEKFData(ui.ekf_checkbox->isChecked());
+    ui.map_frame->SetDisplayEKFData(ui.ekf_checkbox->isChecked());
 
     ui.joystick_frame->setHidden(false);
 
@@ -197,7 +204,11 @@ namespace rqt_rover_gui
     // Make the custom rover number combo box look greyed out to begin with
     ui.custom_num_rovers_combobox->setStyleSheet("color: grey; border:2px solid grey;");
 
-    ui.tab_widget->setCurrentIndex(0);
+    ui.number_of_tags_combobox->setEnabled(false);
+    ui.number_of_tags_combobox->setStyleSheet("color: grey; border:1px solid grey;");
+
+    ui.tab_widget->setCurrentIndex(1); //0: show sensor display tab; 1: show simulation parameters tab 
+    ui.log_tab->setCurrentIndex(1);
 
     ui.texture_combobox->setItemData(0, QColor(Qt::white), Qt::TextColorRole);
 
@@ -217,7 +228,7 @@ namespace rqt_rover_gui
     info_log_subscriber = nh.subscribe("/infoLog", 10, &RoverGUIPlugin::infoLogMessageEventHandler, this);
     diag_log_subscriber = nh.subscribe("/diagsLog", 10, &RoverGUIPlugin::diagLogMessageEventHandler, this);
 
-    emit updateNumberOfSatellites("<font color='white'>Number of GPS Satellites: ---</font>");
+    emit updateNumberOfSatellites("<font color='white'>---</font>");
   }
 
   void RoverGUIPlugin::shutdownPlugin()
@@ -242,6 +253,12 @@ void RoverGUIPlugin::restoreSettings(const qt_gui_cpp::Settings& plugin_settings
 // Receives messages from the ROS joystick driver and used them to articulate the gripper and drive the rover.
 void RoverGUIPlugin::joyEventHandler(const sensor_msgs::Joy::ConstPtr& joy_msg)
 {
+  // Are we in autonomous mode? If so do not process manual drive and gripper controls.
+  if ( rover_control_state.count(selected_rover_name) == 2 )
+  {
+    return;
+  }
+  
      // Give the array values some helpful names:
     int left_stick_x_axis = 0; // Gripper fingers close and open
     int left_stick_y_axis = 1; // Gripper wrist up and down
@@ -351,7 +368,7 @@ void RoverGUIPlugin::joyEventHandler(const sensor_msgs::Joy::ConstPtr& joy_msg)
 
 
         joystick_publisher.publish(joy_msg);
-    }
+     }
 }
 
 void RoverGUIPlugin::EKFEventHandler(const ros::MessageEvent<const nav_msgs::Odometry> &event)
@@ -435,10 +452,10 @@ void RoverGUIPlugin::GPSNavSolutionEventHandler(const ros::MessageEvent<const ub
     // and the number of detected satellites is > 0
     if (selected_rover_name.compare("") != 0 && msg.get()->numSV > 0) {
         // Update the label in the GUI with the selected rover's information
-        QString newLabelText = "Number of GPS Satellites: " + QString::number(rover_numSV_state[selected_rover_name]);
+        QString newLabelText = QString::number(rover_numSV_state[selected_rover_name]);
         emit updateNumberOfSatellites("<font color='white'>" + newLabelText + "</font>");
     } else {
-        emit updateNumberOfSatellites("<font color='white'>Number of GPS Satellites: ---</font>");
+        emit updateNumberOfSatellites("<font color='white'>---</font>");
     }
 }
 
@@ -512,8 +529,8 @@ set<string> RoverGUIPlugin::findConnectedRovers()
 void RoverGUIPlugin::statusEventHandler(const ros::MessageEvent<std_msgs::String const> &event)
 {
     const ros::M_string& header = event.getConnectionHeader();
+    //ros::Time receipt_time = ros::Time::now();
     ros::Time receipt_time = event.getReceiptTime();
-
     // Extract rover name from the message source
 
     // This method is used rather than reading the publisher name to accomodate teams that changed the node name.
@@ -532,6 +549,11 @@ void RoverGUIPlugin::statusEventHandler(const ros::MessageEvent<std_msgs::String
     rover_statuses[rover_name] = rover_status;
 }
 
+void RoverGUIPlugin::waypointEventHandler(const swarmie_msgs::Waypoint& msg)
+{
+  emit sendWaypointReached(msg.id);
+}
+
 // Counts the number of obstacle avoidance calls
 void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs::UInt8> &event)
 {
@@ -545,13 +567,10 @@ void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs
 
     // 0 for no obstacle, 1 for right side obstacle, and 2 for left side obsticle
     int code = msg->data;
-
+    
     if (code != 0)
     {
-		if(current_simulated_time_in_seconds < timer_stop_time_in_seconds || !is_timer_on)
-		{
-		    emit updateObstacleCallCount("<font color='white'>"+QString::number(++obstacle_call_count)+"</font>");	
-		}
+		emit updateObstacleCallCount("<font color='white'>"+QString::number(++obstacle_call_count)+"</font>");	
     }
 }
 
@@ -622,6 +641,9 @@ void RoverGUIPlugin::currentRoverChangedEventHandler(QListWidgetItem *current, Q
 
     emit sendInfoLogMessage(QString("Selected rover: ") + QString::fromStdString(selected_rover_name));
 
+    // Tell the MapFrame that the currently selected rover changed
+    emit updateMapFrameWithCurrentRoverName(QString::fromStdString(selected_rover_name));
+
     // Attempt to read the simulation model xml file if it exists. If it does not exist assume this is a physical rover.
     const char *name = "GAZEBO_MODEL_PATH";
     char *model_root_cstr;
@@ -683,10 +705,10 @@ void RoverGUIPlugin::currentRoverChangedEventHandler(QListWidgetItem *current, Q
 
     // only update the number of satellites if a valid rover name has been selected
     if (selected_rover_name.compare("") != 0 && rover_numSV_state[selected_rover_name] > 0) {
-        QString newLabelText = "Number of GPS Satellites: " + QString::number(rover_numSV_state[selected_rover_name]);
+        QString newLabelText = QString::number(rover_numSV_state[selected_rover_name]);
         emit updateNumberOfSatellites("<font color='white'>" + newLabelText + "</font>");
     } else {
-        emit updateNumberOfSatellites("<font color='white'>Number of GPS Satellites: ---</font>");
+        emit updateNumberOfSatellites("<font color='white'>---</font>");
     }
 
     // Enable control mode radio group now that a rover has been selected
@@ -696,6 +718,12 @@ void RoverGUIPlugin::currentRoverChangedEventHandler(QListWidgetItem *current, Q
 
 void RoverGUIPlugin::pollRoversTimerEventHandler()
 {
+    //If there are no rovers connected to the GUI, reset the obstacle call count to 0
+    if(ui.rover_list->count() == 0)
+    {
+		obstacle_call_count = 0;
+    }
+
     // Returns rovers that have created a status topic
     set<string>new_rover_names = findConnectedRovers();
 
@@ -732,6 +760,7 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
 
         // Shutdown the subscribers
         status_subscribers[*it].shutdown();
+        waypoint_subscribers[*it].shutdown();
         encoder_subscribers[*it].shutdown();
         gps_subscribers[*it].shutdown();
         gps_nav_solution_subscribers[*it].shutdown();
@@ -740,6 +769,7 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
 
         // Delete the subscribers
         status_subscribers.erase(*it);
+        waypoint_subscribers.erase(*it);
         encoder_subscribers.erase(*it);
         gps_subscribers.erase(*it);
         gps_nav_solution_subscribers.erase(*it);
@@ -748,9 +778,13 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
         
         // Shudown Publishers
         control_mode_publishers[*it].shutdown();
+        waypoint_cmd_publishers[*it].shutdown();
 
         // Delete Publishers
         control_mode_publishers.erase(*it);
+        waypoint_cmd_publishers.erase(*it);
+
+        ui.map_frame->resetWaypointPathForSelectedRover(*it);
     }
 
     // Wait for a rover to connect
@@ -816,77 +850,78 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
     }
     else
     {
-    rover_names = new_rover_names;
+		rover_names = new_rover_names;
     
-    emit sendInfoLogMessage("List of connected rovers has changed");
-    selected_rover_name = "";
-    ui.rover_list->clearSelection();
-    ui.rover_list->clear();
-
-    // Also clear the rover diagnostics list
-    ui.rover_diags_list->clear();
-    ui.map_selection_list->clear();
-    
-    //Enable all autonomous button
-    ui.all_autonomous_button->setEnabled(true);
-    ui.all_autonomous_button->setStyleSheet("color: white; border:2px solid white;");
-
-    // This code is from above. Consider moving into a function or restructuring
-    for(set<string>::const_iterator i = rover_names.begin(); i != rover_names.end(); ++i)
-    {
-        //Set up publishers
-        control_mode_publishers[*i]=nh.advertise<std_msgs::UInt8>("/"+*i+"/mode", 10, true); // last argument sets latch to true
-
-        //Set up subscribers
-        status_subscribers[*i] = nh.subscribe("/"+*i+"/status", 10, &RoverGUIPlugin::statusEventHandler, this);
-        obstacle_subscribers[*i] = nh.subscribe("/"+*i+"/obstacle", 10, &RoverGUIPlugin::obstacleEventHandler, this);
-        encoder_subscribers[*i] = nh.subscribe("/"+*i+"/odom/filtered", 10, &RoverGUIPlugin::encoderEventHandler, this);
-        ekf_subscribers[*i] = nh.subscribe("/"+*i+"/odom/ekf", 10, &RoverGUIPlugin::EKFEventHandler, this);
-        gps_subscribers[*i] = nh.subscribe("/"+*i+"/odom/navsat", 10, &RoverGUIPlugin::GPSEventHandler, this);
-        gps_nav_solution_subscribers[*i] = nh.subscribe("/"+*i+"/navsol", 10, &RoverGUIPlugin::GPSNavSolutionEventHandler, this);
-        rover_diagnostic_subscribers[*i] = nh.subscribe("/"+*i+"/diagnostics", 10, &RoverGUIPlugin::diagnosticEventHandler, this);
-
-        RoverStatus rover_status;
-        // Build new ui rover list string
-        try
-        {
-            rover_status = rover_statuses.at(*i);
-        }
-        catch (std::out_of_range& e)
-        {
-            emit sendInfoLogMessage("No status entry for rover " + QString::fromStdString(*i));
-        }
-
-        QString rover_name_and_status = QString::fromStdString(*i) // Add the rover name
-                                                + " (" // Delimiters needed for parsing the rover name and status when read
-                                                +  QString::fromStdString(rover_status.status_msg) // Add the rover status
-                                                + ")";
-
-        QListWidgetItem* new_item = new QListWidgetItem(rover_name_and_status);
-        new_item->setForeground(Qt::green);
-        ui.rover_list->addItem(new_item);
-
-        // Create the corresponding diagnostic data listwidgetitem
-        QListWidgetItem* new_diags_item = new QListWidgetItem("");
-
-        // The user shouldn't be able to select the diagnostic output
-        new_diags_item->setFlags(new_diags_item->flags() & ~Qt::ItemIsSelectable);
-
-        ui.rover_diags_list->addItem(new_diags_item);
-
-
-        // Add the map selection checkbox for this rover
-        QListWidgetItem* new_map_selection_item = new QListWidgetItem("");
-
-        // set checkable but not selectable flags
-        new_map_selection_item->setFlags(new_map_selection_item->flags() | Qt::ItemIsUserCheckable);
-        new_map_selection_item->setFlags(new_map_selection_item->flags() & ~Qt::ItemIsSelectable);
-        new_map_selection_item->setCheckState(Qt::Unchecked);
-
-        // Add to the widget list
-        ui.map_selection_list->addItem(new_map_selection_item);
-
-    }
+	    emit sendInfoLogMessage("List of connected rovers has changed");
+	    selected_rover_name = "";
+	    ui.rover_list->clearSelection();
+	    ui.rover_list->clear();
+	
+	    // Also clear the rover diagnostics list
+	    ui.rover_diags_list->clear();
+	    ui.map_selection_list->clear();
+	    
+	    //Enable all autonomous button
+	    ui.all_autonomous_button->setEnabled(true);
+	    ui.all_autonomous_button->setStyleSheet("color: white; border:2px solid white;");
+	
+	    // This code is from above. Consider moving into a function or restructuring
+	    for(set<string>::const_iterator i = rover_names.begin(); i != rover_names.end(); ++i)
+	    {
+	        //Set up publishers
+	        control_mode_publishers[*i]=nh.advertise<std_msgs::UInt8>("/"+*i+"/mode", 10, true); // last argument sets latch to true
+	        waypoint_cmd_publishers[*i]=nh.advertise<swarmie_msgs::Waypoint>("/"+*i+"/waypoints/cmd", 10, true);
+	        
+	        //Set up subscribers
+	        status_subscribers[*i] = nh.subscribe("/"+*i+"/status", 10, &RoverGUIPlugin::statusEventHandler, this);
+	        waypoint_subscribers[*i] = nh.subscribe("/"+*i+"/waypoints", 10, &RoverGUIPlugin::waypointEventHandler, this);
+	        obstacle_subscribers[*i] = nh.subscribe("/"+*i+"/obstacle", 10, &RoverGUIPlugin::obstacleEventHandler, this);
+	        encoder_subscribers[*i] = nh.subscribe("/"+*i+"/odom/filtered", 10, &RoverGUIPlugin::encoderEventHandler, this);
+	        ekf_subscribers[*i] = nh.subscribe("/"+*i+"/odom/ekf", 10, &RoverGUIPlugin::EKFEventHandler, this);
+	        gps_subscribers[*i] = nh.subscribe("/"+*i+"/odom/navsat", 10, &RoverGUIPlugin::GPSEventHandler, this);
+	        gps_nav_solution_subscribers[*i] = nh.subscribe("/"+*i+"/navsol", 10, &RoverGUIPlugin::GPSNavSolutionEventHandler, this);
+	        rover_diagnostic_subscribers[*i] = nh.subscribe("/"+*i+"/diagnostics", 1, &RoverGUIPlugin::diagnosticEventHandler, this);
+	
+	        RoverStatus rover_status;
+	        // Build new ui rover list string
+	        try
+	        {
+	            rover_status = rover_statuses.at(*i);
+	        }
+	        catch (std::out_of_range& e)
+	        {
+	            emit sendInfoLogMessage("No status entry for rover " + QString::fromStdString(*i));
+	        }
+	
+	        QString rover_name_and_status = QString::fromStdString(*i) // Add the rover name
+	                                                + " (" // Delimiters needed for parsing the rover name and status when read
+	                                                +  QString::fromStdString(rover_status.status_msg) // Add the rover status
+	                                                + ")";
+	
+	        QListWidgetItem* new_item = new QListWidgetItem(rover_name_and_status);
+	        new_item->setForeground(Qt::green);
+	        ui.rover_list->addItem(new_item);
+	
+	        // Create the corresponding diagnostic data listwidgetitem
+	        QListWidgetItem* new_diags_item = new QListWidgetItem("");
+	
+	        // The user shouldn't be able to select the diagnostic output
+	        new_diags_item->setFlags(new_diags_item->flags() & ~Qt::ItemIsSelectable);
+	
+	        ui.rover_diags_list->addItem(new_diags_item);
+	
+	        // Add the map selection checkbox for this rover
+	        QListWidgetItem* new_map_selection_item = new QListWidgetItem("");
+	
+	        // set checkable but not selectable flags
+	        new_map_selection_item->setFlags(new_map_selection_item->flags() | Qt::ItemIsUserCheckable);
+	        new_map_selection_item->setFlags(new_map_selection_item->flags() & ~Qt::ItemIsSelectable);
+	        new_map_selection_item->setCheckState(Qt::Unchecked);
+	
+	        // Add to the widget list
+	        ui.map_selection_list->addItem(new_map_selection_item);
+	
+	    }
     }
 
     // If rovers have not sent a status message recently mark them as disconnected
@@ -906,14 +941,13 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
         RoverStatus rover_status = rover_statuses[ui_rover_name];
         if (ros::Time::now() - rover_status.timestamp < disconnect_threshold)
         {
-            rover_item->setForeground(Qt::green);
+          rover_item->setForeground(Qt::green);
         }
         else
         {
-            rover_item->setForeground(Qt::red);
-	    diags_item->setForeground(Qt::red);
-
-	    diags_item->setText("disconnected");
+          rover_item->setForeground(Qt::red);
+          diags_item->setForeground(Qt::red);
+          diags_item->setText("disconnected");
         }
     }
 }
@@ -1123,7 +1157,7 @@ void RoverGUIPlugin::mapSelectionListItemChangedHandler(QListWidgetItem* changed
 
     emit sendInfoLogMessage("Map selection changed to " + (checked ? QString("true") : QString("false")) + " for rover " + QString::fromStdString(ui_rover_name));
 
-    ui.map_frame->setWhetherToDisplay(ui_rover_name, checked);
+    ui.map_frame->SetWhetherToDisplay(ui_rover_name, checked);
 }
 
 void RoverGUIPlugin::GPSCheckboxToggledEventHandler(bool checked)
@@ -1133,7 +1167,7 @@ void RoverGUIPlugin::GPSCheckboxToggledEventHandler(bool checked)
 
 void RoverGUIPlugin::EKFCheckboxToggledEventHandler(bool checked)
 {
-    ui.map_frame->setDisplayEKFData(checked);
+    ui.map_frame->SetDisplayEKFData(checked);
 }
 
 void RoverGUIPlugin::encoderCheckboxToggledEventHandler(bool checked)
@@ -1143,12 +1177,12 @@ void RoverGUIPlugin::encoderCheckboxToggledEventHandler(bool checked)
 
 void RoverGUIPlugin::globalOffsetCheckboxToggledEventHandler(bool checked)
 {
-    ui.map_frame->setGlobalOffset(checked);
+    ui.map_frame->SetGlobalOffset(checked);
 }
 
 void RoverGUIPlugin::uniqueRoverColorsCheckboxToggledEventHandler(bool checked)
 {
-    ui.map_frame->setDisplayUniqueRoverColors(checked);
+    ui.map_frame->SetDisplayUniqueRoverColors(checked);
 }
 
 void RoverGUIPlugin::displayDiagLogMessage(QString msg)
@@ -1255,6 +1289,9 @@ void RoverGUIPlugin::autonomousRadioButtonEventHandler(bool marked)
 
     //Hide joystick frame
     ui.joystick_frame->setHidden(true);
+
+    // disable waypoint input in map frame
+    ui.map_frame->disableWaypoints(selected_rover_name);
 }
 
 void RoverGUIPlugin::joystickRadioButtonEventHandler(bool marked)
@@ -1298,6 +1335,9 @@ void RoverGUIPlugin::joystickRadioButtonEventHandler(bool marked)
     
     //Show joystick frame
     ui.joystick_frame->setHidden(false);
+
+    // enable wayoint input in the map frame
+    ui.map_frame->enableWaypoints(selected_rover_name);
 }
 
 void RoverGUIPlugin::allAutonomousButtonEventHandler()
@@ -1335,11 +1375,11 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
     ui.autonomous_control_radio_button->setChecked(true);
     ui.joystick_frame->setHidden(true);
     
-    //Disable all autonomous button
+    // Disable all autonomous button
     ui.all_autonomous_button->setEnabled(false);
     ui.all_autonomous_button->setStyleSheet("color: grey; border:2px solid grey;");
 
-    //Experiment Timer START
+    // Experiment Timer START
 
     // this catches the case when the /clock timer is not running
     // AKA: when we are not running a simulation
@@ -1351,6 +1391,28 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
         } else if (ui.simulation_timer_combobox->currentText() == "10 min (Testing)") {
             timer_start_time_in_seconds = current_simulated_time_in_seconds;
             timer_stop_time_in_seconds = timer_start_time_in_seconds + 600.0;
+            is_timer_on = true;
+            emit sendInfoLogMessage("\nSetting experiment timer to start at: " +
+                                    QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
+                                    QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
+                                    QString::number(getSeconds(timer_start_time_in_seconds)) + " seconds");
+            ui.simulationTimerStartLabel->setText("<font color='white'>" +
+                                                  QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
+                                                  QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
+                                                  QString::number(floor(getSeconds(timer_start_time_in_seconds))) + " seconds</font>");
+            emit sendInfoLogMessage("Setting experiment timer to stop at: " +
+                                    QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
+                                    QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
+                                    QString::number(getSeconds(timer_stop_time_in_seconds)) + " seconds\n");
+            ui.simulationTimerStopLabel->setText("<font color='white'>" +
+                                                 QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
+                                                 QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
+                                                 QString::number(floor(getSeconds(timer_stop_time_in_seconds))) + " seconds</font>");
+            ui.simulation_timer_combobox->setEnabled(false);
+            ui.simulation_timer_combobox->setStyleSheet("color: grey; border:2px solid grey;");
+        } else if (ui.simulation_timer_combobox->currentText() == "20 min (Preliminary)") {
+            timer_start_time_in_seconds = current_simulated_time_in_seconds;
+            timer_stop_time_in_seconds = timer_start_time_in_seconds + 1200.0;
             is_timer_on = true;
             emit sendInfoLogMessage("\nSetting experiment timer to start at: " +
                                     QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
@@ -1416,7 +1478,8 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
             ui.simulation_timer_combobox->setStyleSheet("color: grey; border:2px solid grey;");
         }
     }
-    //Experiment Timer END
+
+    // Experiment Timer END
 }
 
 double RoverGUIPlugin::getHours(double seconds) {
@@ -1536,6 +1599,19 @@ void RoverGUIPlugin::customWorldButtonEventHandler()
     ui.custom_world_path->setText(fi.baseName());
 }
 
+void RoverGUIPlugin::customNumCubesRadioButtonEventHandler(bool toggled)
+{
+	ui.number_of_tags_combobox->setEnabled(toggled);
+	if(toggled)
+	{
+	  ui.number_of_tags_combobox->setStyleSheet("color: white; border:1px solid white; padding: 1px 0px 1px 3px");
+	}
+	else
+	{
+	  ui.number_of_tags_combobox->setStyleSheet("color: grey; border:2px solid grey;");
+	}
+	
+}
 // Enable or disable custom distributions
 void RoverGUIPlugin::customWorldRadioButtonEventHandler(bool toggled)
 {
@@ -1566,7 +1642,7 @@ void RoverGUIPlugin::customWorldRadioButtonEventHandler(bool toggled)
 // I.E., we always use 256 tags, so disable the option to change the number of cubes when
 // generating a power law distribution. If we add dynamic power law distribution generation
 // in the future this block can be removed.
-void RoverGUIPlugin::powerlawDistributionRadioButtonEventHandler(bool toggled)
+/*void RoverGUIPlugin::powerlawDistributionRadioButtonEventHandler(bool toggled)
 {
     ui.number_of_tags_combobox->setEnabled(!toggled);
 
@@ -1580,7 +1656,7 @@ void RoverGUIPlugin::powerlawDistributionRadioButtonEventHandler(bool toggled)
         ui.number_of_tags_label->setStyleSheet("color: grey;");
         ui.number_of_tags_combobox->setStyleSheet("color: grey; border:2px solid grey; padding: 1px 0px 1px 3px");
     }
-}
+}*/
 
 void RoverGUIPlugin::unboundedRadioButtonEventHandler(bool toggled)
 {
@@ -1620,7 +1696,6 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
 
     QProcess* sim_server_process = sim_mgr.startGazeboServer();
     connect(sim_server_process, SIGNAL(finished(int)), this, SLOT(gazeboServerFinishedEventHandler()));
-
 
     if (ui.final_radio_button->isChecked() && !ui.create_savable_world_checkbox->isChecked())
     {
@@ -1682,11 +1757,18 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
     {
         emit sendInfoLogMessage("Not adding collection disk...");
     }
-
+    
+    arenaDim_publisher = nh.advertise<std_msgs::Float32>("/arena_dim", 10, this); 
+    std_msgs::Float32 msg_arena;
+    msg_arena.data = arena_dim; 
+    arenaDim_publisher.publish(msg_arena);  
+    
+    
+    
     if(!ui.create_savable_world_checkbox->isChecked())
     {
         int n_rovers_created = 0;
-        int n_rovers = 3;
+        int n_rovers = 0;
         if (ui.final_radio_button->isChecked()) n_rovers = 6;
 
         // If the user chose to override the number of rovers to add to the simulation read the selected value
@@ -1694,7 +1776,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
         if (ui.override_num_rovers_checkbox->isChecked()) n_rovers = ui.custom_num_rovers_combobox->currentText().toInt();
 
         QProgressDialog progress_dialog;
-        progress_dialog.setWindowTitle("Creating rovers");
+        progress_dialog.setWindowTitle("Creating "+ui.custom_num_rovers_combobox->currentText()+ " rovers");
         progress_dialog.setCancelButton(NULL); // no cancel button
         progress_dialog.setWindowModality(Qt::ApplicationModal);
         progress_dialog.setWindowFlags(progress_dialog.windowFlags() | Qt::WindowStaysOnTopHint);
@@ -1791,8 +1873,8 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
         for (int i = 0; i < n_rovers; i++)
         {
             // add the global offset for sim rovers
-            ui.map_frame->setGlobalOffsetForRover(rovers[i].toStdString(), rover_positions[i].x(), rover_positions[i].y());
-            ui.map_frame->setUniqueRoverColor(rovers[i].toStdString(), rover_colors[i]);
+            ui.map_frame->SetGlobalOffsetForRover(rovers[i].toStdString(), rover_positions[i].x(), rover_positions[i].y());
+            ui.map_frame->SetUniqueRoverColor(rovers[i].toStdString(), rover_colors[i]);
 
             emit sendInfoLogMessage("Adding rover "+rovers[i]+"...");
             return_msg = sim_mgr.addRover(rovers[i], rover_positions[i].x(), rover_positions[i].y(), 0, 0, 0, rover_yaw[i]);
@@ -1858,8 +1940,16 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
 
     emit sendInfoLogMessage("Finished building simulation.");
 
-    // Visualize the simulation by default call button event handler
-    visualizeSimulationButtonEventHandler();
+    if (ui.start_visualization_on_build_checkbox->isChecked())
+    {
+   // Visualize the simulation by default call button event handler
+   visualizeSimulationButtonEventHandler();
+        display_sim_visualization = true;
+    }
+    else
+    {
+        display_sim_visualization = false;
+    }
 }
 
 void RoverGUIPlugin::clearSimulationButtonEventHandler()
@@ -1940,6 +2030,13 @@ void RoverGUIPlugin::clearSimulationButtonEventHandler()
       }
     status_subscribers.clear();
 
+    for (map<string,ros::Subscriber>::iterator it=waypoint_subscribers.begin(); it!=waypoint_subscribers.end(); ++it) 
+      {
+	qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+	it->second.shutdown();
+      }
+    waypoint_subscribers.clear();
+
     for (map<string,ros::Subscriber>::iterator it=obstacle_subscribers.begin(); it!=obstacle_subscribers.end(); ++it) 
       {
 	qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -1960,6 +2057,14 @@ void RoverGUIPlugin::clearSimulationButtonEventHandler()
       }
     control_mode_publishers.clear();
 
+    for (map<string,ros::Publisher>::iterator it=waypoint_cmd_publishers.begin(); it!=waypoint_cmd_publishers.end(); ++it)
+      {
+	qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+	it->second.shutdown();
+      }
+    waypoint_cmd_publishers.clear();
+    
+    
     return_msg += sim_mgr.stopGazeboClient();
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     return_msg += "<br>";
@@ -1977,11 +2082,14 @@ void RoverGUIPlugin::clearSimulationButtonEventHandler()
     ui.visualize_simulation_button->setStyleSheet("color: grey; border:2px solid grey;");
     ui.clear_simulation_button->setStyleSheet("color: grey; border:2px solid grey;");
 
+    // reset waypoints
+    ui.map_frame->resetAllWaypointPaths();
+
     // Clear the task status values
     obstacle_call_count = 0;
     emit updateObstacleCallCount("<font color='white'>0</font>");
     emit updateNumberOfTagsCollected("<font color='white'>0</font>");
-    emit updateNumberOfSatellites("<font color='white'>Number of GPS Satellites: ---</font>");
+    emit updateNumberOfSatellites("<font color='white'>---</font>");
 
     // reset the simulation timer variables
     ui.simulation_timer_combobox->setEnabled(true);
@@ -2115,42 +2223,9 @@ QString RoverGUIPlugin::addUniformTargets()
 
 QString RoverGUIPlugin::addClusteredTargets()
 {
-    QString number_of_tags = ui.number_of_tags_combobox->currentText();
-    int cluster_length = 0;
-    int cluster_width = 0;
-
-    switch(number_of_tags.toInt())
-    {
-        case 256:
-            cluster_length = 8;
-            cluster_width = 8;
-            break;
-        case 128:
-            cluster_length = 8;
-            cluster_width = 4;
-            break;
-        case 64:
-            cluster_length = 4;
-            cluster_width = 4;
-            break;
-        case 32:
-            cluster_length = 4;
-            cluster_width = 2;
-            break;
-        case 16:
-            cluster_length = 2;
-            cluster_width = 2;
-            break;
-        case 0:
-            cluster_length = 0;
-            cluster_width = 0;
-        default:
-            cluster_length = 1;
-            cluster_width = 1;
-    }
-
+	QString number_of_tags = ui.number_of_tags_combobox->currentText();
     QProgressDialog progress_dialog;
-    progress_dialog.setWindowTitle("Placing " + number_of_tags + " Targets into four " + QString::number(cluster_length) + " x " + QString::number(cluster_width) + " clusters");
+    progress_dialog.setWindowTitle("Placing " + number_of_tags + " Targets into " + QString::number(number_of_tags.toInt()/64) + " Clusters (64 targets each)");
     progress_dialog.setCancelButton(NULL); // no cancel button
     progress_dialog.setWindowModality(Qt::ApplicationModal);
     progress_dialog.setWindowFlags(progress_dialog.windowFlags() | Qt::WindowStaysOnTopHint);
@@ -2162,15 +2237,14 @@ QString RoverGUIPlugin::addClusteredTargets()
     float proposed_x, proposed_x2;
     float proposed_y, proposed_y2;
 
-    float target_cluster_clearance = target_cluster_size_1_clearance * ((cluster_length > cluster_width) ? (cluster_length) : (cluster_width));
-    float d = arena_dim/2.0-(barrier_clearance+target_cluster_clearance);
+    float d = arena_dim/2.0-(barrier_clearance+target_cluster_size_64_clearance);
     int cube_index = 0;
 
     progress_dialog.setValue(0.0);
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
-    // Four piles
-    for (int i = 0; i < 4; i++)
+    //(number_of_tags/64) piles of 64
+    for (int i = 0; i < number_of_tags.toInt()/64; i++)
     {
         do
         {
@@ -2178,18 +2252,18 @@ QString RoverGUIPlugin::addClusteredTargets()
             proposed_x = d - ((float) rand()) / RAND_MAX*2*d;
             proposed_y = d - ((float) rand()) / RAND_MAX*2*d;
         }
-        while (sim_mgr.isLocationOccupied(proposed_x, proposed_y, target_cluster_clearance));
+        while (sim_mgr.isLocationOccupied(proposed_x, proposed_y, target_cluster_size_64_clearance));
 
-        proposed_y2 = proposed_y - (target_cluster_size_1_clearance * cluster_length);
+        proposed_y2 = proposed_y - (target_cluster_size_1_clearance * 8);
 
-        for(int j = 0; j < cluster_length; j++) {
-            proposed_x2 = proposed_x - (target_cluster_size_1_clearance * cluster_width);
+        for(int j = 0; j < 8; j++) {
+            proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 8);
 
-            for(int k = 0; k < cluster_width; k++) {
+            for(int k = 0; k < 8; k++) {
                 output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
                 proposed_x2 += target_cluster_size_1_clearance;
                 cube_index++;
-                progress_dialog.setValue(cube_index*100.0f/256);
+                progress_dialog.setValue(cube_index*100.0f/number_of_tags.toInt());
                 qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
             }
 
@@ -2199,15 +2273,16 @@ QString RoverGUIPlugin::addClusteredTargets()
         emit sendInfoLogMessage("<font color=green>Succeeded.</font>");
     }
 
-    emit sendInfoLogMessage("Placed four " + QString::number(cluster_length) + " x " + QString::number(cluster_width) + " clusters of targets");
+    emit sendInfoLogMessage("Placed " + QString::number(number_of_tags.toInt()/64) + " clusters of 64 targets");
 
     return output;
 }
 
 QString RoverGUIPlugin::addPowerLawTargets()
 {
+	QString number_of_tags = ui.number_of_tags_combobox->currentText();
     QProgressDialog progress_dialog;
-    progress_dialog.setWindowTitle("Placing 256 Targets into 85 Clusters (Power Law pattern)");
+    progress_dialog.setWindowTitle("Placing " + number_of_tags + " Targets into Power Law pattern");
     progress_dialog.setCancelButton(NULL); // no cancel button
     progress_dialog.setWindowModality(Qt::ApplicationModal);
     progress_dialog.setWindowFlags(progress_dialog.windowFlags() | Qt::WindowStaysOnTopHint);
@@ -2215,128 +2290,103 @@ QString RoverGUIPlugin::addPowerLawTargets()
     progress_dialog.show();
 
 
-    float total_number_of_clusters = 85;
+    //float total_number_of_clusters = 85;
     float clusters_placed = 0;
     int cube_index = 0;
-
+    int maxTrials      = 200;
+    int trialCount     = 0;
+    int powerLawLength = 1;
+    int FoodCount =0;
+    int foodPlaced = 0;
+    int priorPowerRank =0;
+    int PowerRank =0;
+    int power4 =0;
+    int diffFoodCount =0;
+    int singleClusterCount =0;
+    int otherClusterCount =0; 
+    int modDiff =0;
+    int target_cluster_size_clearance;
+    vector<int> clusterNums;
+	vector<int> clusterWidths; 
+	
     QString output = "";
 
     float proposed_x, proposed_x2;
     float proposed_y, proposed_y2;
 
-    float d = arena_dim/2.0-(barrier_clearance+target_cluster_size_64_clearance);
+    float d;
 
     progress_dialog.setValue(0.0);
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
-    // One pile of 64
-    do
-    {
-        emit sendInfoLogMessage("Tried to place cluster "+QString::number(clusters_placed)+" at " + QString::number(proposed_x) + " " + QString::number(proposed_y));
-        proposed_x = d - ((float) rand()) / RAND_MAX*2*d;
-        proposed_y = d - ((float) rand()) / RAND_MAX*2*d;
-    }
-    while (sim_mgr.isLocationOccupied(proposed_x, proposed_y, target_cluster_size_64_clearance));
-
-    proposed_y2 = proposed_y - (target_cluster_size_1_clearance * 8);
-
-    for(int j = 0; j < 8; j++) {
-        proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 8);
-
-        for(int k = 0; k < 8; k++) {
-            output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
-            proposed_x2 += target_cluster_size_1_clearance;
-            cube_index++;
-            progress_dialog.setValue(cube_index*100.0f/256);
-            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        }
-
-        proposed_y2 += target_cluster_size_1_clearance;
+    while (FoodCount < number_of_tags.toInt()){
+        priorPowerRank++;
+        power4 = pow (4.0, priorPowerRank);
+        FoodCount = power4 + priorPowerRank * power4;
     }
 
-    emit sendInfoLogMessage("<font color=green>Succeeded.</font>");
-    d = arena_dim/2.0-(barrier_clearance+target_cluster_size_16_clearance);
+    PowerRank = priorPowerRank + 1;
+    diffFoodCount = FoodCount - number_of_tags.toInt();
+    modDiff = diffFoodCount % PowerRank;
+    
+    if (number_of_tags.toInt() % PowerRank == 0){
+        singleClusterCount = number_of_tags.toInt() / PowerRank;
+        otherClusterCount = singleClusterCount;
+    }
+    else {
+        otherClusterCount = number_of_tags.toInt() / PowerRank + 1;
+        singleClusterCount = otherClusterCount - modDiff;
+    }
+    
+    for(int i = 0; i < PowerRank; i++) {
+		clusterNums.push_back(powerLawLength * powerLawLength);
+		powerLawLength *= 2;
+	}
 
-    // Four piles of 16
-    for (int i = 0; i < 4; i++)
-    {
-        do
-        {
-            proposed_x = d - ((float) rand()) / RAND_MAX*2*d;
-            proposed_y = d - ((float) rand()) / RAND_MAX*2*d;
-            emit sendInfoLogMessage("Tried to place cluster "+QString::number(clusters_placed)+" at " + QString::number(proposed_x) + " " + QString::number(proposed_y));
-        }
-        while (sim_mgr.isLocationOccupied(proposed_x, proposed_y, target_cluster_size_16_clearance));
-
-        proposed_y2 = proposed_y - (target_cluster_size_1_clearance * 4);
-
-        for(int j = 0; j < 4; j++) {
-            proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 4);
-
-            for(int k = 0; k < 4; k++) {
-                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
+	for(int i = 0; i < PowerRank; i++) {
+		powerLawLength /= 2;
+		clusterWidths.push_back(powerLawLength);
+	}
+    
+    for(int h = 0; h < clusterNums.size(); h++) {
+	  for(int i = 0; i < clusterNums[h]; i++) {
+		  target_cluster_size_clearance = 0.1*clusterWidths[h];
+		  d = arena_dim/2.0-(barrier_clearance+ target_cluster_size_clearance);
+		  
+		  do
+          {
+           proposed_x = d - ((float) rand()) / RAND_MAX*2*d;
+           proposed_y = d - ((float) rand()) / RAND_MAX*2*d;
+          }
+          while (sim_mgr.isLocationOccupied(proposed_x, proposed_y, target_cluster_size_clearance));
+          
+          emit sendInfoLogMessage("Tried to place cluster "+QString::number(clusters_placed)+" at " + QString::number(proposed_x) + " " + QString::number(proposed_y));
+          clusters_placed++;             
+		   
+		  proposed_y2 = proposed_y - target_cluster_size_clearance;
+		   
+          for(int j = 0; j < clusterWidths[h]; j++) {
+			  proposed_x2 = proposed_x - target_cluster_size_clearance;
+		      for(int k = 0; k < clusterWidths[h]; k++) { 
+			    output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
                 proposed_x2 += target_cluster_size_1_clearance;
                 cube_index++;
-                progress_dialog.setValue(cube_index*100.0f/256);
+                progress_dialog.setValue(cube_index*100.0f/number_of_tags.toInt());
                 qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-            }
-
-            proposed_y2 += target_cluster_size_1_clearance;
-        }
-
-        emit sendInfoLogMessage("<font color=green>Succeeded.</font>");
-    }
-
-    d = arena_dim/2.0-(barrier_clearance+target_cluster_size_4_clearance);
-
-    // Sixteen piles of 4
-    for (int i = 0; i < 16; i++)
-    {
-        do
-        {
-            emit sendInfoLogMessage("Tried to place cluster "+QString::number(clusters_placed)+" at " + QString::number(proposed_x) + " " + QString::number(proposed_y));
-            proposed_x = d - ((float) rand()) / RAND_MAX*2*d;
-            proposed_y = d - ((float) rand()) / RAND_MAX*2*d;
-        }
-        while (sim_mgr.isLocationOccupied(proposed_x, proposed_y, target_cluster_size_4_clearance));
-
-        proposed_y2 = proposed_y - (target_cluster_size_1_clearance * 2);
-
-        for(int j = 0; j < 2; j++) {
-            proposed_x2 = proposed_x - (target_cluster_size_1_clearance * 2);
-
-            for(int k = 0; k < 2; k++) {
-                output += sim_mgr.addModel(QString("at")+QString::number(0),  QString("at")+QString::number(cube_index), proposed_x2, proposed_y2, 0, target_cluster_size_1_clearance);
-                proposed_x2 += target_cluster_size_1_clearance;
-                cube_index++;
-                progress_dialog.setValue(cube_index*100.0f/256);
-                qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-            }
-
-            proposed_y2 += target_cluster_size_1_clearance;
-        }
-
-        emit sendInfoLogMessage("<font color=green>Succeeded.</font>");
-    }
-
-    d = arena_dim/2.0-(barrier_clearance+target_cluster_size_1_clearance);
-
-    // Sixty-four piles of 1 (using tags 192 through 255 to avoid duplication with piles above)
-    for (int i = 192; i < 256; i++)
-    {
-        do
-        {
-            emit sendInfoLogMessage("Tried to place target "+QString::number(clusters_placed)+" at " + QString::number(proposed_x) + " " + QString::number(proposed_y));
-            proposed_x = d - ((float) rand()) / RAND_MAX*2*d;
-            proposed_y = d - ((float) rand()) / RAND_MAX*2*d;
-        }
-        while (sim_mgr.isLocationOccupied(proposed_x, proposed_y, target_cluster_size_1_clearance));
-
-        progress_dialog.setValue(i*100.0f/256);
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        emit sendInfoLogMessage("<font color=green>Succeeded.</font>");
-        output+= sim_mgr.addModel(QString("at")+QString::number(0), QString("at")+QString::number(i), proposed_x, proposed_y, 0, target_cluster_size_1_clearance);
-    }
+            
+            
+			    foodPlaced++;
+			    if (foodPlaced == singleClusterCount + h * otherClusterCount) break;
+		      }
+               proposed_y2 += target_cluster_size_1_clearance;
+               
+		      if (foodPlaced == singleClusterCount + h * otherClusterCount) break;
+	      }
+		  emit sendInfoLogMessage("<font color=green>Succeeded.</font>");
+		  
+		  if (foodPlaced == singleClusterCount + h * otherClusterCount) break;
+	  }
+	}
 
     return output;
 }
@@ -2858,6 +2908,26 @@ void RoverGUIPlugin::receiveDiagsDataUpdate(QString rover_name, QString text, QC
 void RoverGUIPlugin::refocusKeyboardEventHandler()
 {
     widget->setFocus();
+}
+
+// Publish the waypoint commands recieved from MapFrame to ROS
+void RoverGUIPlugin::receiveWaypointCmd(WaypointCmd cmd, int id, float x, float y)
+{
+    std::set<std::string>::iterator it = rover_names.find(selected_rover_name);
+
+    if(it == rover_names.end())
+    {
+      emit sendInfoLogMessage("Waypoints Error: a valid rover is not selected!");
+      return;
+    }
+
+    swarmie_msgs::Waypoint msg;
+    msg.action = cmd;
+    msg.id = id;
+    msg.x = x;
+    msg.y = y;
+    
+    waypoint_cmd_publishers[selected_rover_name].publish(msg);
 }
 
 // Clean up memory when this object is deleted

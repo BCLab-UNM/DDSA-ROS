@@ -8,9 +8,12 @@
 #include "ObstacleController.h"
 #include "DriveController.h"
 #include "RangeController.h"
+#include "ManualWaypointController.h"
 
 #include <vector>
 #include <queue>
+#include <stdlib.h>
+#include <random_numbers/random_numbers.h>
 
 using namespace std;
 
@@ -37,7 +40,7 @@ public:
   bool ShouldInterrupt() override;
   bool HasWork() override;
 
-  void SetAprilTags(vector<TagPoint> tags);
+  void SetAprilTags(vector<Tag> tags);
   void SetSonarData(float left, float center, float right);
   void SetPositionData(Point currentLocation);
   void SetMapPositionData(Point currentLocationMap);
@@ -47,6 +50,37 @@ public:
   void SetCenterLocationMap(Point centerLocationMap);
   void SetSwarmSize(size_t size);
   void SetRoverIndex(size_t idx);
+
+  int getCollisionCalls();
+  // Passthrough for providing new waypoints to the
+  // ManualWaypointController.
+  void AddManualWaypoint(Point wpt, int waypoint_id);
+
+  
+  // Passthrough for removing waypoints from the
+  // ManualWaypointController.
+  void RemoveManualWaypoint(int waypoint_id);
+
+  
+  // Passthrough for getting the list of manual waypoints that have
+  // been visited. 
+  std::vector<int> GetClearedWaypoints();
+
+  
+  // Put the logic controller into manual mode. Changes process state
+  // to PROCESS_STATE_MANUAL and logic state to LOGIC_STATE_INTERRUPT.
+  
+  // If the logic controller is already in manual mode this has no
+  // effect.
+  void SetModeManual();
+
+  
+  // Put the logic controller into autonomous mode. Resets the logic
+  // controller and clears all manual waypoints.
+  //
+  // If the logic controller is already in autonomous mode, then this
+  // has no effect.
+  void SetModeAuto();
 
   void SetCurrentTimeInMilliSecs( long int time );
 
@@ -72,7 +106,8 @@ private:
     PROCCESS_STATE_SEARCHING = 0,
     PROCCESS_STATE_TARGET_PICKEDUP,
     PROCCESS_STATE_DROP_OFF,
-    _LAST
+    _LAST,
+    PROCCESS_STATE_MANUAL // robot is under manual control
   };
 
   LogicState logicState;
@@ -83,7 +118,8 @@ private:
   SearchController searchController;
   ObstacleController obstacleController;
   DriveController driveController;
-  RangeController range_controller; 
+  RangeController rangeController;
+  ManualWaypointController manualWaypointController;
 
   std::vector<PrioritizedController> prioritizedControllers;
   priority_queue<PrioritizedController> control_queue;
@@ -91,6 +127,7 @@ private:
   void controllerInterconnect();
 
   long int current_time = 0;
+  random_numbers::RandomNumberGenerator* rng;
 };
 
 #endif // LOGICCONTROLLER_H
