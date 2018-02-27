@@ -19,23 +19,23 @@ class MapData
 public:
     MapData();
 
-    void addToGPSRoverPath(std::string rover, float x, float y);
-    void addToEncoderRoverPath(std::string rover, float x, float y);
-    void addToEKFRoverPath(std::string rover, float x, float y);
-    void addTargetLocation(std::string rover, float x, float y);
-    void addCollectionPoint(std::string rover, float x, float y);
+    void AddToGPSRoverPath(std::string rover, float x, float y);
+    void AddToEncoderRoverPath(std::string rover, float x, float y);
+    void AddToEKFRoverPath(std::string rover, float x, float y);
+    void AddTargetLocation(std::string rover, float x, float y);
+    void AddCollectionPoint(std::string rover, float x, float y);
 
     // Add a waypoint for the specified rover name
     // Returns the id of the waypoint. IDs are use to issue waypoint commands to the rover.
-    int addToWaypointPath(std::string rover, float x, float y);
+    int AddToWaypointPath(std::string rover, float x, float y);
 
-    void removeFromWaypointPath(std::string rover, int id);
-    void reachedWaypoint(int waypoint_id);
+    void RemoveFromWaypointPath(std::string rover, int id);
+    void ReachedWaypoint(int waypoint_id);
 
     void SetGlobalOffset(bool display);
     void SetGlobalOffsetForRover(std::string rover, float x, float y);
-    std::pair<float,float> getGlobalOffsetForRover(std::string rover);
-    bool isDisplayingGlobalOffset();
+    std::pair<float,float> GetGlobalOffsetForRover(std::string rover);
+    bool IsDisplayingGlobalOffset();
 
     void clear();
     void clear(std::string rover_name);
@@ -49,9 +49,8 @@ public:
     std::vector< std::pair<float,float> >* getCollectionPoints(std::string rover_name);
     std::map< int, std::tuple<float,float,bool> >* getWaypointPath(std::string rover_name);
 
-    void resetAllWaypointPaths();
-    void resetWaypointPathForSelectedRover(std::string rover);
-
+    void ResetAllWaypointPaths();
+    void ResetWaypointPathForSelectedRover(std::string rover);
     // These functions provide a fast way to get the min and max coords
     float getMaxGPSX(std::string rover_name);
     float getMaxGPSY(std::string rover_name);
@@ -68,9 +67,9 @@ public:
     float getMinEncoderX(std::string rover_name);
     float getMinEncoderY(std::string rover_name);
 
-    bool inManualMode(std::string rover_name);
-    void setAutonomousMode(std::string rover_name);
-    void setManualMode(std::string rover_name);
+    bool InManualMode(std::string rover_name);
+    void SetAutonomousMode(std::string rover_name);
+    void SetManualMode(std::string rover_name);
 
     ~MapData();
 

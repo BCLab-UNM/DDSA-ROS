@@ -1,5 +1,7 @@
 #include "DropOffController.h"
 
+using namespace std;
+
 DropOffController::DropOffController() {
 
   reachedCollectionPoint = false;
@@ -18,11 +20,15 @@ DropOffController::DropOffController() {
 
   countLeft = 0;
   countRight = 0;
+  pitches = 0.0;
 
   isPrecisionDriving = false;
   startWaypoint = false;
   timerTimeElapsed = -1;
-
+ 
+  currentLocation.x = 0;
+  currentLocation.y = 0;
+  currentLocation.theta = 0; 
 }
 
 DropOffController::~DropOffController() {
@@ -53,6 +59,7 @@ Result DropOffController::DoWork() {
         result.type = behavior;
         result.b = nextProcess;
         result.reset = true;
+        targetHeld = false; //qilu 02/2018
         return result;
       }
       else
@@ -150,44 +157,53 @@ Result DropOffController::DoWork() {
 
     if (seenEnoughCenterTags) //if we have seen enough tags
     {
-      if ((countLeft-5) > countRight) //and there are too many on the left
+	  if (pitches < -0.5) //turn to the left
       {
-        right = false; //then we say none on the right to cause us to turn right
-      }
-      else if ((countRight-5) > countLeft)
+		left = true;  
+        right = false; 
+        }
+      else if (pitches > 0.5)//turn to the right
       {
-        left = false; //or left in this case
-      }
+        left = false;
+        right = true;
+        }
     }
+    else //not seen enough tags, then drive forward
+    {
+		left = false;
+		right = false;
+		}
 
     float turnDirection = 1;
-    float current_search_velocity = searchVelocity;
+    //float current_search_velocity = searchVelocity;
     
     //reverse tag rejection when we have seen enough tags that we are on a
     //trajectory in to the square we dont want to follow an edge.
-    //increase turning power to more strongly turn inwards or on occasion outwards
-    //drive more slowly so turning radius is smaller
-    if (seenEnoughCenterTags) 
-    {
-      turnDirection = -4;
-      current_search_velocity = 0.05;
-    }
+    if (seenEnoughCenterTags) turnDirection = -3;
 
     result.type = precisionDriving;
 
     //otherwise turn till tags on both sides of image then drive straight
-    if (!(left ^ right)) {
-      result.pd.cmdVel = current_search_velocity;
+    if (left && right) 
+    {
+	  result.pd.cmdVel = searchVelocity;
       result.pd.cmdAngularError = 0.0;
     }
-    else if (right) {
+    else if (right) 
+    {
+	  result.pd.cmdVel = -0.1 * turnDirection;
+      result.pd.cmdAngularError = centeringTurnRate*turnDirection;
+    }
+    else if (left)
+    {
       result.pd.cmdVel = -0.1 * turnDirection;
       result.pd.cmdAngularError = -centeringTurnRate*turnDirection;
     }
-    else if (left){
-      result.pd.cmdVel = -0.1 * turnDirection;
-      result.pd.cmdAngularError = centeringTurnRate*turnDirection;
-    }
+    else
+    {
+      result.pd.cmdVel = searchVelocity;
+      result.pd.cmdAngularError = 0.0;
+      }
 
     //must see greater than this many tags before assuming we are driving into the center and not along an edge.
     if (count > centerTagThreshold)
@@ -204,7 +220,7 @@ Result DropOffController::DoWork() {
     float timeSinceSeeingEnoughCenterTags = elapsed/1e3; // Convert from milliseconds to seconds
 
     //we have driven far enough forward to have passed over the circle.
-    if (count < 1 && seenEnoughCenterTags && timeSinceSeeingEnoughCenterTags > dropDelay) {
+    if (count < 5 && seenEnoughCenterTags && timeSinceSeeingEnoughCenterTags > dropDelay) {
       centerSeen = false;
     }
     centerApproach = true;
@@ -275,6 +291,7 @@ void DropOffController::Reset() {
 
   countLeft = 0;
   countRight = 0;
+  pitches = 0.0;
 
 
   //reset flags
@@ -291,9 +308,10 @@ void DropOffController::Reset() {
 
 }
 
-void DropOffController::SetTargetData(vector<Tag> tags) {
+void DropOffController::SetTagData(vector<Tag> tags) {
   countRight = 0;
   countLeft = 0;
+  pitches = 0.0;
 
   if(targetHeld) {
     // if a target is detected and we are looking for center tags
@@ -304,14 +322,18 @@ void DropOffController::SetTargetData(vector<Tag> tags) {
         if (tags[i].getID() == 256) {
 
           // checks if tag is on the right or left side of the image
-          if (tags[i].getPositionX() + cameraOffsetCorrection > 0) {
+          if (tags[i].getPositionX() + cameraOffsetCorrection > 0) 
+          {
             countRight++;
-
-          } else {
+          } 
+          else 
+          {
             countLeft++;
           }
+          pitches += tags[i].calcPitch();
         }
       }
+      pitches /= (countLeft + countRight);
     }
   }
 

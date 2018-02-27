@@ -166,11 +166,11 @@ namespace rqt_rover_gui
     connect(ui.override_num_rovers_checkbox, SIGNAL(toggled(bool)), this, SLOT(overrideNumRoversCheckboxToggledEventHandler(bool)));
     connect(ui.create_savable_world_checkbox, SIGNAL(toggled(bool)), this, SLOT(createSavableWorldCheckboxToggledEventHandler(bool)));
 
-    connect(this, SIGNAL(updateMapFrameWithCurrentRoverName(QString)), ui.map_frame, SLOT(receiveCurrentRoverName(QString)));
+    connect(this, SIGNAL(updateMapFrameWithCurrentRoverName(QString)), ui.map_frame, SLOT(ReceiveCurrentRoverName(QString)));
 
     // Receive waypoint commands from MapFrame
     connect(ui.map_frame, SIGNAL(sendWaypointCmd(WaypointCmd, int, float, float)), this, SLOT(receiveWaypointCmd(WaypointCmd, int, float, float)));
-    connect(this, SIGNAL(sendWaypointReached(int)), ui.map_frame, SLOT(receiveWaypointReached(int)));
+    connect(this, SIGNAL(sendWaypointReached(int)), ui.map_frame, SLOT(ReceiveWaypointReached(int)));
     
     // Receive log messages from contained frames
     connect(ui.map_frame, SIGNAL(sendInfoLogMessage(QString)), this, SLOT(receiveInfoLogMessage(QString)));
@@ -190,10 +190,10 @@ namespace rqt_rover_gui
     rover_poll_timer->start(5000);
 
     // Setup the initial display parameters for the map
-    ui.map_frame->setMapData(map_data);
-    ui.map_frame->createPopoutWindow(map_data); // This has to happen before the display radio buttons are set
-    ui.map_frame->setDisplayGPSData(ui.gps_checkbox->isChecked());
-    ui.map_frame->setDisplayEncoderData(ui.encoder_checkbox->isChecked());
+    ui.map_frame->SetMapData(map_data);
+    ui.map_frame->CreatePopoutWindow(map_data); // This has to happen before the display radio buttons are set
+    ui.map_frame->SetDisplayGPSData(ui.gps_checkbox->isChecked());
+    ui.map_frame->SetDisplayEncoderData(ui.encoder_checkbox->isChecked());
     ui.map_frame->SetDisplayEKFData(ui.ekf_checkbox->isChecked());
 
     ui.joystick_frame->setHidden(false);
@@ -389,7 +389,7 @@ void RoverGUIPlugin::EKFEventHandler(const ros::MessageEvent<const nav_msgs::Odo
     string rover_name = publisher_name.substr(1,found-1);
 
     // Store map info for the appropriate rover name
-    ui.map_frame->addToEKFRoverPath(rover_name, x, y);
+    ui.map_frame->AddToEKFRoverPath(rover_name, x, y);
 }
 
 
@@ -413,7 +413,7 @@ void RoverGUIPlugin::encoderEventHandler(const ros::MessageEvent<const nav_msgs:
     string rover_name = topic.substr(1,found-1);
 
     // Store map info for the appropriate rover name
-   ui.map_frame->addToEncoderRoverPath(rover_name, x, y);
+   ui.map_frame->AddToEncoderRoverPath(rover_name, x, y);
 }
 
 
@@ -435,7 +435,7 @@ void RoverGUIPlugin::GPSEventHandler(const ros::MessageEvent<const nav_msgs::Odo
     string rover_name = publisher_name.substr(1,found-1);
 
     // Store map info for the appropriate rover name
-    ui.map_frame->addToGPSRoverPath(rover_name, x, y);
+    ui.map_frame->AddToGPSRoverPath(rover_name, x, y);
 }
 
 void RoverGUIPlugin::GPSNavSolutionEventHandler(const ros::MessageEvent<const ublox_msgs::NavSOL> &event) {
@@ -721,7 +721,7 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
     //If there are no rovers connected to the GUI, reset the obstacle call count to 0
     if(ui.rover_list->count() == 0)
     {
-		obstacle_call_count = 0;
+        obstacle_call_count = 0;
     }
 
     // Returns rovers that have created a status topic
@@ -784,7 +784,7 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
         control_mode_publishers.erase(*it);
         waypoint_cmd_publishers.erase(*it);
 
-        ui.map_frame->resetWaypointPathForSelectedRover(*it);
+        ui.map_frame->ResetWaypointPathForSelectedRover(*it);
     }
 
     // Wait for a rover to connect
@@ -1162,7 +1162,7 @@ void RoverGUIPlugin::mapSelectionListItemChangedHandler(QListWidgetItem* changed
 
 void RoverGUIPlugin::GPSCheckboxToggledEventHandler(bool checked)
 {
-    ui.map_frame->setDisplayGPSData(checked);
+    ui.map_frame->SetDisplayGPSData(checked);
 }
 
 void RoverGUIPlugin::EKFCheckboxToggledEventHandler(bool checked)
@@ -1172,7 +1172,7 @@ void RoverGUIPlugin::EKFCheckboxToggledEventHandler(bool checked)
 
 void RoverGUIPlugin::encoderCheckboxToggledEventHandler(bool checked)
 {
-    ui.map_frame->setDisplayEncoderData(checked);
+    ui.map_frame->SetDisplayEncoderData(checked);
 }
 
 void RoverGUIPlugin::globalOffsetCheckboxToggledEventHandler(bool checked)
@@ -1291,7 +1291,7 @@ void RoverGUIPlugin::autonomousRadioButtonEventHandler(bool marked)
     ui.joystick_frame->setHidden(true);
 
     // disable waypoint input in map frame
-    ui.map_frame->disableWaypoints(selected_rover_name);
+    ui.map_frame->DisableWaypoints(selected_rover_name);
 }
 
 void RoverGUIPlugin::joystickRadioButtonEventHandler(bool marked)
@@ -1337,7 +1337,7 @@ void RoverGUIPlugin::joystickRadioButtonEventHandler(bool marked)
     ui.joystick_frame->setHidden(false);
 
     // enable wayoint input in the map frame
-    ui.map_frame->enableWaypoints(selected_rover_name);
+    ui.map_frame->EnableWaypoints(selected_rover_name);
 }
 
 void RoverGUIPlugin::allAutonomousButtonEventHandler()
@@ -1699,13 +1699,13 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
 
     if (ui.final_radio_button->isChecked() && !ui.create_savable_world_checkbox->isChecked())
     {
-         arena_dim = 23.1;
+         arena_dim = 10; //origin is 23.1;
          addFinalsWalls();
          emit sendInfoLogMessage(QString("Set arena size to ")+QString::number(arena_dim)+"x"+QString::number(arena_dim));
     }
     else if (ui.prelim_radio_button->isChecked() && !ui.create_savable_world_checkbox->isChecked())
     {
-        arena_dim = 15;
+        arena_dim = 8;//origin is 15;
         addPrelimsWalls();
         emit sendInfoLogMessage(QString("Set arena size to ")+QString::number(arena_dim)+"x"+QString::number(arena_dim));
     }
@@ -2083,7 +2083,7 @@ void RoverGUIPlugin::clearSimulationButtonEventHandler()
     ui.clear_simulation_button->setStyleSheet("color: grey; border:2px solid grey;");
 
     // reset waypoints
-    ui.map_frame->resetAllWaypointPaths();
+    ui.map_frame->ResetAllWaypointPaths();
 
     // Clear the task status values
     obstacle_call_count = 0;

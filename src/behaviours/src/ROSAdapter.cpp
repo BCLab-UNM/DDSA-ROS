@@ -26,6 +26,7 @@
 // Include Controllers
 #include "LogicController.h"
 #include <vector>
+#include <map>
 
 #include "Point.h"
 #include "Tag.h"
@@ -36,6 +37,8 @@
 #include <signal.h>
 
 #include <exception> // For exception handling
+
+#define CENTER_TAG_ID 256
 
 using namespace std;
 
@@ -82,7 +85,7 @@ void resultHandler();
 Point updateCenterLocation();
 void transformMapCentertoOdom();
 
-
+float distanceToCenter(); //qilu 12/2017
 // Numeric Variables for rover positioning
 geometry_msgs::Pose2D currentLocation;
 geometry_msgs::Pose2D currentLocationMap;
@@ -117,6 +120,7 @@ Result result;
 
 std_msgs::String msg;
 
+float arena_dim =0.0; //qilu 01/2018
 
 geometry_msgs::Twist velocity;
 char host[128];
@@ -130,12 +134,12 @@ size_t self_index = (size_t)(-1);
 size_t swarm_size = 0;
 
 // Publishers
-ros::Publisher stateMachinePublish;
+ros::Publisher stateMachinePublisher;
 ros::Publisher status_publisher;
-ros::Publisher fingerAnglePublish;
-ros::Publisher wristAnglePublish;
+ros::Publisher fingerAnglePublisher;
+ros::Publisher wristAnglePublisher;
 ros::Publisher infoLogPublisher;
-ros::Publisher driveControlPublish;
+ros::Publisher driveControlPublisher;
 ros::Publisher heartbeatPublisher;
 ros::Publisher waypointFeedbackPublisher;
 ros::Publisher namePublish;
@@ -230,11 +234,11 @@ int main(int argc, char **argv) {
   obstaclePubisher = mNH.advertise<std_msgs::UInt8>((publishedName + "/obstacle"), 10, true);
   
   status_publisher = mNH.advertise<std_msgs::String>((publishedName + "/status"), 1, true);
-  stateMachinePublish = mNH.advertise<std_msgs::String>((publishedName + "/state_machine"), 1, true);
-  fingerAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/fingerAngle/cmd"), 1, true);
-  wristAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/wristAngle/cmd"), 1, true);
+  stateMachinePublisher = mNH.advertise<std_msgs::String>((publishedName + "/state_machine"), 1, true);
+  fingerAnglePublisher = mNH.advertise<std_msgs::Float32>((publishedName + "/fingerAngle/cmd"), 1, true);
+  wristAnglePublisher = mNH.advertise<std_msgs::Float32>((publishedName + "/wristAngle/cmd"), 1, true);
   infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);
-  driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
+  driveControlPublisher = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
   heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
   waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
   namePublish = mNH.advertise<std_msgs::String>("/names", 6, true);
@@ -361,45 +365,36 @@ void behaviourStateMachine(const ros::TimerEvent&)
     {
       sendDriveCommand(0.0,0.0);
       std_msgs::Float32 angle;
-      
       angle.data = prevFinger;
-      fingerAnglePublish.publish(angle);
+      fingerAnglePublisher.publish(angle);
       angle.data = prevWrist;
-      wristAnglePublish.publish(angle);
+      wristAnglePublisher.publish(angle);
     }
-    
     //normally interpret logic controllers actuator commands and deceminate them over the appropriate ROS topics
     else
     {
-      
       sendDriveCommand(result.pd.left,result.pd.right);
-      
 
       //Alter finger and wrist angle is told to reset with last stored value if currently has -1 value
       std_msgs::Float32 angle;
       if (result.fingerAngle != -1)
       {
         angle.data = result.fingerAngle;
-        fingerAnglePublish.publish(angle);
+        fingerAnglePublisher.publish(angle);
         prevFinger = result.fingerAngle;
       }
 
       if (result.wristAngle != -1)
       {
         angle.data = result.wristAngle;
-        wristAnglePublish.publish(angle);
+        wristAnglePublisher.publish(angle);
         prevWrist = result.wristAngle;
       }
     }
-
-
   collision_msg.data = logicController.getCollisionCalls();  
   obstaclePubisher.publish(collision_msg); 
-
     //publishHandeling here
     //logicController.getPublishData(); suggested
-    
-    
     //adds a blank space between sets of debugging data to easily tell one tick from the next
     cout << endl;
     
@@ -441,7 +436,7 @@ void behaviourStateMachine(const ros::TimerEvent&)
   // publish state machine string for user, only if it has changed, though
   if (strcmp(stateMachineMsg.data.c_str(), prev_state_machine) != 0)
   {
-    stateMachinePublish.publish(stateMachineMsg);
+    stateMachinePublisher.publish(stateMachineMsg);
     sprintf(prev_state_machine, "%s", stateMachineMsg.data.c_str());
   }
 }
@@ -450,9 +445,8 @@ void sendDriveCommand(double left, double right)
 {
   velocity.linear.x = left,
       velocity.angular.z = right;
-  
   // publish the drive commands
-  driveControlPublish.publish(velocity);
+  driveControlPublisher.publish(velocity);
 }
 
 /*************************
@@ -461,22 +455,37 @@ void sendDriveCommand(double left, double right)
 
 void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& message) {
 
-  // Don't pass April tag data to the logic controller if the robot is not in autonomous mode.
+
+   // Don't pass April tag data to the logic controller if the robot is not in autonomous mode.
   // This is to make sure autonomous behaviours are not triggered while the rover is in manual mode. 
   if(currentMode == 0 || currentMode == 1) 
   { 
     return; 
   }
 
+  bool ignored_tag = false;
+  // Number of resource tags
+  int num_cube_tags = 0;
+  int num_center_tags =0;
   if (message->detections.size() > 0) {
     vector<Tag> tags;
 
-    for (int i = 0; i < message->detections.size(); i++) {
+    for (int i = 0; i < message->detections.size(); i++) 
+    {
 
       // Package up the ROS AprilTag data into our own type that does not rely on ROS.
       Tag loc;
-      loc.setID( message->detections[i].id );
+      loc.setID( message->detections[i].id);
 
+      if (loc.getID() == 0) 
+      {
+        num_cube_tags++;
+      }
+      else if(loc.getID() == CENTER_TAG_ID)
+      {
+	    num_center_tags++;
+	  }
+	  
       // Pass the position of the AprilTag
       geometry_msgs::PoseStamped tagPose = message->detections[i].pose;
       loc.setPosition( make_tuple( tagPose.pose.position.x,
@@ -490,6 +499,18 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 							    tagPose.pose.orientation.w ) );
       tags.push_back(loc);
     }
+    if(num_center_tags >= 5)// reset the location of the center
+    {
+		cout<<"TestStatus: currentLocation=["<<currentLocation.x<<", "<<currentLocation<<"]"<<endl;
+		centerLocationMap.x = currentLocationMap.x + 1.0*cos(currentLocationMap.theta);
+        centerLocationMap.y = currentLocationMap.y + 1.0*sin(currentLocationMap.theta);
+        centerLocationOdom.x = currentLocation.x + 1.0*cos(currentLocation.theta);
+        centerLocationOdom.y = currentLocation.y + + 1.0*sin(currentLocation.theta);  
+        cout<<"TestStatus: centerLocationMap=["<<centerLocationMap.x<<", "<<centerLocationMap.y<<"]"<<endl;
+        cout<<"TestStatus: centerLocationOdom=["<<centerLocationOdom.x<<", "<<centerLocationOdom.y<<"]"<<endl;
+	}
+    
+        
     
     logicController.SetAprilTags(tags);
   }
@@ -507,8 +528,8 @@ void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
   sendDriveCommand(0.0, 0.0);
 }
 
-void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight) {
-  
+void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight) 
+{  
   logicController.SetSonarData(sonarLeft->range, sonarCenter->range, sonarRight->range);
   
 }

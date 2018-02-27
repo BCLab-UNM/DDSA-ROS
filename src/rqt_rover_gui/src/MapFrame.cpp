@@ -56,11 +56,11 @@ MapFrame::MapFrame(QWidget *parent, Qt::WindowFlags flags) : QFrame(parent)
 
 // This can't go in the constructor or there will be an infinite regression.
 // Instead call from the main UI in it's startup routine.
-void MapFrame::createPopoutWindow( MapData * map_data )
+void MapFrame::CreatePopoutWindow( MapData * map_data )
 {
   popout_window = new QMainWindow();
   popout_mapframe = new MapFrame(popout_window, 0);
-  popout_mapframe->setMapData(map_data);
+  popout_mapframe->SetMapData(map_data);
 
   QGridLayout* layout = new QGridLayout();
   layout->addWidget(popout_mapframe);
@@ -82,7 +82,8 @@ void MapFrame::createPopoutWindow( MapData * map_data )
 
 }
 
-void MapFrame::paintEvent(QPaintEvent* event) {
+void MapFrame::paintEvent(QPaintEvent* event) 
+{
   // Begin drawing the map
   QPainter painter(this);
   painter.setPen(Qt::white);
@@ -531,8 +532,6 @@ void MapFrame::paintEvent(QPaintEvent* event) {
 
     painter.setPen(Qt::white);
 
-    hardware_rover_color_index = (hardware_rover_color_index + 1) % 8;
-
   } // End rover display list set iteration
 
   map_data->unlock();
@@ -554,18 +553,18 @@ void MapFrame::paintEvent(QPaintEvent* event) {
 }
 
 
-void MapFrame::setDisplayEncoderData(bool display)
+void MapFrame::SetDisplayEncoderData(bool display)
 {
   display_encoder_data = display;
 
-  if(popout_mapframe) popout_mapframe->setDisplayEncoderData(display);
+  if(popout_mapframe) popout_mapframe->SetDisplayEncoderData(display);
 }
 
-void MapFrame::setDisplayGPSData(bool display)
+void MapFrame::SetDisplayGPSData(bool display)
 {
   display_gps_data = display;
 
-  if(popout_mapframe) popout_mapframe->setDisplayGPSData(display);
+  if(popout_mapframe) popout_mapframe->SetDisplayGPSData(display);
 }
 
 void MapFrame::SetDisplayEKFData(bool display)
@@ -635,7 +634,7 @@ void MapFrame::mousePressEvent(QMouseEvent *event)
     return;
   }
   // Failure condition: don't accept waypoints for rovers in autonomous mode
-  else if(! map_data->inManualMode(rover_currently_selected))
+  else if(! map_data->InManualMode(rover_currently_selected))
   {
     return;
   }
@@ -651,9 +650,9 @@ void MapFrame::mousePressEvent(QMouseEvent *event)
     // We must "adjust" the clicked position when "global frame" is selected in the GUI
     // If we do not do this here, then the rover will NOT move to where a user clicks,
     //     but to a position offset by the selected rover's global offset.
-    if(map_data->isDisplayingGlobalOffset())
+    if(map_data->IsDisplayingGlobalOffset())
     {
-      std::pair<float,float> offset = map_data->getGlobalOffsetForRover(rover_currently_selected);
+      std::pair<float,float> offset = map_data->GetGlobalOffsetForRover(rover_currently_selected);
       mouse_map_x -= offset.first;
       mouse_map_y -= offset.second;
     }
@@ -680,7 +679,7 @@ emit sendInfoLogMessage(" x1: " + QString::number(x1)
       if ( sqrt( pow( x1 - x2, 2 ) + pow( y1 - y2, 2 ) ) < waypoint_click_tolerance ) 
       {
         int waypoint_id = it->first;
-        removeWaypoint( rover_currently_selected, waypoint_id );
+        RemoveWaypoint( rover_currently_selected, waypoint_id );
         waypoint_removed = true;
       }
     }
@@ -688,7 +687,7 @@ emit sendInfoLogMessage(" x1: " + QString::number(x1)
     if ( !waypoint_removed )
     {
       emit sendInfoLogMessage(" Adding waypoint at x: " + QString::number(mouse_map_x) + " y: " + QString::number(mouse_map_y));
-      addWaypoint(rover_currently_selected, mouse_map_x, mouse_map_y);
+      AddWaypoint(rover_currently_selected, mouse_map_x, mouse_map_y);
     }
   }
   else if ( event->buttons() == Qt::LeftButton )
@@ -851,42 +850,42 @@ void MapFrame::popout()
   if (popout_window) popout_window->show();
 }
 
- void MapFrame::setMapData(MapData* data)
+ void MapFrame::SetMapData(MapData* data)
  {
    map_data = data;
  }
 
- void MapFrame::addToGPSRoverPath(std::string rover, float x, float y)
+ void MapFrame::AddToGPSRoverPath(std::string rover, float x, float y)
  {
    if (map_data)
    {
-      map_data->addToGPSRoverPath(rover, x, y);
+      map_data->AddToGPSRoverPath(rover, x, y);
       emit delayedUpdate();
    }
  }
 
-void MapFrame::addToEncoderRoverPath(std::string rover, float x, float y)
+void MapFrame::AddToEncoderRoverPath(std::string rover, float x, float y)
 {
-     if (map_data)
-     {
-        map_data->addToEncoderRoverPath(rover, x, y);
-        emit delayedUpdate();
-     }
-}
-
-void MapFrame::addToEKFRoverPath(std::string rover, float x, float y)
-{
-     if (map_data)
-     {
-         map_data->addToEKFRoverPath(rover, x, y);
-         emit delayedUpdate();
-     }
-}
-
-void MapFrame::addWaypoint( string rover, float x, float y ) {
   if (map_data)
   {
-    int id = map_data->addToWaypointPath(rover, x, y);
+    map_data->AddToEncoderRoverPath(rover, x, y);
+    emit delayedUpdate();
+  }
+}
+
+void MapFrame::AddToEKFRoverPath(std::string rover, float x, float y)
+{
+  if (map_data)
+  {
+    map_data->AddToEKFRoverPath(rover, x, y);
+    emit delayedUpdate();
+  }
+}
+
+void MapFrame::AddWaypoint( string rover, float x, float y ) {
+  if (map_data)
+  {
+    int id = map_data->AddToWaypointPath(rover, x, y);
     cout << "Waypoint created. There are now " << map_data->getWaypointPath(rover_currently_selected)->size() << " waypoints" << endl;
     emit delayedUpdate();
     // The y coordinate must be negated to translatAe between the
@@ -895,50 +894,51 @@ void MapFrame::addWaypoint( string rover, float x, float y ) {
   }
 }
 
-void MapFrame::removeWaypoint( string rover, int id ) {
+void MapFrame::RemoveWaypoint( string rover, int id ) {
   if (map_data)
   {
-    map_data->removeFromWaypointPath(rover, id );
+    map_data->RemoveFromWaypointPath(rover, id );
     cout << "Waypoint removed. There are now " << map_data->getWaypointPath(rover_currently_selected)->size() << " waypoints" << endl;
     emit delayedUpdate();
     emit sendWaypointCmd(REMOVE, id, 0, 0); // x and y are 0 here because they are unused in a remove command
   }
 }
 
-void MapFrame::resetAllWaypointPaths()
+void MapFrame::ResetAllWaypointPaths()
 {
-  map_data->resetAllWaypointPaths();
+  map_data->ResetAllWaypointPaths();
 }
 
-void MapFrame::resetWaypointPathForSelectedRover(string rover)
+void MapFrame::ResetWaypointPathForSelectedRover(string rover)
 {
-  map_data->resetWaypointPathForSelectedRover(rover);
+  map_data->ResetWaypointPathForSelectedRover(rover);
 }
 
-void MapFrame::receiveWaypointReached(int waypoint_id)
+
+void MapFrame::ReceiveWaypointReached(int waypoint_id)
 {
-  map_data->reachedWaypoint(waypoint_id);
+  map_data->ReachedWaypoint(waypoint_id);
 }
 
-void MapFrame::receiveCurrentRoverName( QString rover_name )
+void MapFrame::ReceiveCurrentRoverName( QString rover_name )
 {
   this->rover_currently_selected = rover_name.toStdString();
 
   // Forward the change to the popout map if it exists
   if (popout_mapframe)
   {
-      popout_mapframe->receiveCurrentRoverName(rover_name);
+      popout_mapframe->ReceiveCurrentRoverName(rover_name);
   }
 }
 
-void MapFrame::enableWaypoints(string rover_name)
+void MapFrame::EnableWaypoints(string rover_name)
 {
-  map_data->setManualMode(rover_name);
+  map_data->SetManualMode(rover_name);
 }
 
-void MapFrame::disableWaypoints(string rover_name)
+void MapFrame::DisableWaypoints(string rover_name)
 {
-  map_data->setAutonomousMode(rover_name);
+  map_data->SetAutonomousMode(rover_name);
 }
 
 MapFrame::~MapFrame()

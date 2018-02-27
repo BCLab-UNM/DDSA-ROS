@@ -2,6 +2,8 @@
 #include <cmath> // For square root function
 #include <iostream>
 
+using namespace std;
+
 RangeShape::RangeShape()
 {
 }

@@ -1,5 +1,6 @@
 #include "DriveController.h"
 
+using namespace std;
 DriveController::DriveController() {
 
   fastVelPID.SetConfiguration(fastVelConfig());
@@ -24,6 +25,11 @@ void DriveController::Reset()
   {
     stateMachineState = STATE_MACHINE_WAYPOINTS;
   }
+}
+
+void DriveController::SetCurrentTimeInMilliSecs( long int time )
+{
+  current_time = time;
 }
 
 Result DriveController::DoWork()
@@ -103,6 +109,7 @@ Result DriveController::DoWork()
     //if we are out of waypoints then interupt and return to logic controller
     if (waypoints.empty())
     {
+      result.wpts.waypoints.clear();//qilu 02/2018
       stateMachineState = STATE_MACHINE_WAITING;
       result.type = behavior;
       interupt = true;
@@ -139,8 +146,8 @@ Result DriveController::DoWork()
     result.pd.setPointVel = 0.0;
     //Calculate absolute value of angle
 
-    float abs_error = fabs(angles::shortest_angular_distance(currentLocation.theta, waypoints.back().theta));
-
+    //float abs_error = fabs(angles::shortest_angular_distance(currentLocation.theta, waypoints.back().theta));
+    float abs_error = fabs(errorYaw);
     // If angle > rotateOnlyAngleTolerance radians rotate but dont drive forward.
     if (abs_error > rotateOnlyAngleTolerance)
     {
@@ -188,7 +195,8 @@ Result DriveController::DoWork()
         fastPID((searchVelocity-linearVelocity) ,errorYaw, result.pd.setPointVel, result.pd.setPointYaw);
       }
     }
-    else {
+    else 
+	{
       // stopno change
       left = 0.0;
       right = 0.0;

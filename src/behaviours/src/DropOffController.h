@@ -5,6 +5,9 @@
 #include "Controller.h"
 #include "Tag.h"
 #include <math.h>
+#include <vector>
+#include <std_msgs/Float32.h>
+#include <random_numbers/random_numbers.h>
 
 class DropOffController : virtual Controller
 {
@@ -22,12 +25,12 @@ public:
   void SetCurrentLocation(Point current);
   void SetTargetPickedUp();
   void SetBlockBlockingUltrasound(bool blockBlock);
-  void SetTargetData(vector<Tag> tags);
+  void SetTagData(std::vector<Tag> tags);
   bool HasTarget() {return targetHeld;}
 
   float GetSpinner() {return spinner;}
 
-  void UpdateData(vector<Tag> tags);
+  void UpdateData(std::vector<Tag> tags);
 
   void SetCurrentTimeInMilliSecs( long int time );
 
@@ -39,7 +42,7 @@ private:
 
   const float cameraOffsetCorrection = 0.020; //meters
   const float centeringTurnRate = 0.15; //radians
-  const int centerTagThreshold = 8;
+  const int centerTagThreshold = 4;//original is 8. Rovers move back and forth repeatedly if we set it to be a larger number;
   const int lostCenterCutoff = 4; //seconds before giving up on drop off beacuse center cannot be seen anymore
   const float collectionPointVisualDistance = 0.2; //in meters
   const float initialSpinSize = 0.05; //in meters aka 10cm
@@ -48,7 +51,7 @@ private:
   const float dropDelay = 0.4; //delay in seconds for dropOff
 
 
-
+  random_numbers::RandomNumberGenerator* rng;
   //Instance Variables
 
   /*
@@ -75,7 +78,8 @@ private:
   //Count of tags on the left and right, respectively
   int countLeft;
   int countRight;
-
+  
+  float pitches;
   //Center and current locations as of the last call to setLocationData
   Point centerLocation;
   Point currentLocation;

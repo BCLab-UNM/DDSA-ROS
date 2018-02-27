@@ -20,6 +20,7 @@ public:
   void SetVelocityData(float linearVelocity,float angularVelocity);
   void SetCurrentLocation(Point currentLocation) {this->currentLocation = currentLocation;}
 
+  void SetCurrentTimeInMilliSecs( long int time );
 private:
 
   Result result;
@@ -31,8 +32,8 @@ private:
 
   bool interupt = false; //hold if interupt has occured yet
 
-  float rotateOnlyAngleTolerance = 0.05;  //May be too low?
-  float finalRotationTolerance = 0.1; //dead code not used
+  float rotateOnlyAngleTolerance = 0.01;  //The original is 0.05.
+  float finalRotationTolerance = 0.1;
   const float waypointTolerance = 0.15; //15 cm tolerance.
 
   //0.65 MAX value
@@ -45,7 +46,9 @@ private:
   Point currentLocation;
   Point currentLocationMap;
   Point currentLocationAverage;
-
+  long int current_time = 0;
+  
+  
   Point centerLocation;
   Point centerLocationMap;
   Point centerLocationOdom;

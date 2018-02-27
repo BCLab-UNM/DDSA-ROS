@@ -1,3 +1,5 @@
+#ifndef RESULT_H
+#define RESULT_H
 // Defines the Result type which used to standardize the information that
 // can be returned by a controller object.
 
@@ -81,3 +83,5 @@ struct Result {
 
   bool reset; //holds a reset command where logic controller will reset the controller that asks
 };
+
+#endif

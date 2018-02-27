@@ -2,6 +2,8 @@
 #include <limits> // For numeric limits
 #include <cmath> // For hypot
 
+using namespace std;
+
 PickUpController::PickUpController()
 {
   lockTarget = false;
@@ -229,9 +231,10 @@ cout << "PickUPController -> 10" << endl;
 
     float grasp_time_begin = 1.5;
     float raise_time_begin = 2.0;
-    //float reverse_to_before_reaquire_begin = 4.4; //is declared in header for class usage but refrence is left hear for clarity
-    float target_reaquire_begin= 5.0;
-    float target_pickup_task_time_limit = 5.6;
+    float lower_gripper_time_begin = 4.0;
+	float target_reaquire_begin= 4.2;
+    float target_pickup_task_time_limit = 4.8;
+
     float done_center_begin_reversing = 1.0;
     //cout << "blockDistance DOWORK:  " << blockDistance << endl;
 
@@ -268,10 +271,10 @@ cout << "PickUPController -> 10" << endl;
         result.pd.cmdAngularError = -blockYawError;
       }
       //If in a counting state and has been counting for 1 second.
-      else if (Td > done_center_begin_reversing && Td < target_pickup_task_time_limit)
+      else if (Td > 1.0 && Td < target_pickup_task_time_limit)
       {
         // The rover will reverse straight backwards without turning.
-        result.pd.cmdVel = -0.10;
+        result.pd.cmdVel = -0.25;
         result.pd.cmdAngularError= 0.0;
       }
     }
@@ -292,7 +295,7 @@ cout << "PickUPController -> 10" << endl;
     else if (!lockTarget) //if a target hasn't been locked lock it and enter a counting state while slowly driving forward.
     {
       lockTarget = true;
-      result.pd.cmdVel = 0.18;
+      result.pd.cmdVel = 0.25;
       result.pd.cmdAngularError= 0.0;
       timeOut = true;
       ignoreCenterSonar = true;
@@ -318,11 +321,13 @@ cout << "PickUPController -> 10" << endl;
       lockTarget = false;
       ignoreCenterSonar = true;
     }
+        //if enough time has passed enter a recovery state to re-attempt a pickup
 
-    //if enough time has passed enter a recovery state to re-attempt a pickup
-    else if (Td > reverse_to_before_reaquire_begin && timeOut) //if enough time has passed enter a recovery state to re-attempt a pickup
+    else if (Td > lower_gripper_time_begin && timeOut) //if enough time has passed enter a recovery state to re-attempt a pickup
     {
-      result.pd.cmdVel = -0.2;
+      //cout << "CPFAStatus if enough time has passed enter a recovery state to re-attempt a pickup..."<<endl;
+
+      result.pd.cmdVel = -0.15;
       result.pd.cmdAngularError= 0.0;
       //set gripper to open and down
       result.fingerAngle = M_PI_2;

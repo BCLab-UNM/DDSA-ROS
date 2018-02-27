@@ -293,7 +293,7 @@ void LogicController::controllerInterconnect()
   }
 
   //obstacle controller is running driveController needs to clear its waypoints
-  if(obstacleController.getShouldClearWaypoints()) 
+  if(obstacleController.GetShouldClearWaypoints())
   {
     driveController.Reset();
   }
@@ -330,7 +330,7 @@ void LogicController::SetAprilTags(vector<Tag> tags)
 {
   pickUpController.SetTagData(tags);
   obstacleController.SetTagData(tags);
-  dropOffController.SetTargetData(tags);
+  dropOffController.SetTagData(tags);
 }
 
 void LogicController::SetSonarData(float left, float center, float right) 
