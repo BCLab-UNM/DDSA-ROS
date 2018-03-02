@@ -90,7 +90,7 @@ void ObstacleController::avoidCollectionZone() {
       }   
     result.pd.setPointVel = 0.0;
     //result.pd.cmdVel = 0.0;
-	double vel = rng->uniformReal(0.05, 0.15);
+	double vel = rng->uniformReal(0.05, 0.1);
       
     result.pd.cmdVel = vel; //qilu 02/2018
 
