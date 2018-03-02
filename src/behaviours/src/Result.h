@@ -36,6 +36,41 @@
 
 using namespace std;
 
+/**
+ * The CPFAState enum contains all possible CPFA States for rover to be in
+ */
+enum CPFAState
+{
+  start_state,
+  set_target_location,
+  travel_to_search_site,//2
+  reach_search_site,
+  switched_to_search,
+  search_with_uninformed_walk,
+  search_with_informed_walk,
+  sense_local_resource_density,
+  avoid_obstacle,//8
+  return_to_nest,//9
+  reached_nest//10
+};
+
+/**
+ *  The CPFASearchType enum contains all possible travel states for the rover to be in
+ */
+enum CPFASearchType
+{
+  random_search,
+  site_fidelity,
+  pheromone
+};
+
+/**
+ * This class implements the search control algorithm for the rovers. The code
+ * here should be modified and enhanced to improve search performance.
+ *
+ * The search controller is implemented with the CPFA.
+ * (Central Place Foraging Algorithm)
+ */
 enum PIDType {
   FAST_PID, //quickest turn reasponse time
   SLOW_PID, //slower turn reasponse time
@@ -52,7 +87,9 @@ enum BehaviorTrigger {
   wait, //used by logic controller to indicate to ROSAdapter indicate when nothing should happen
   prevProcess, //when the process state should revert to the previouse state according to the controller
   noChange, //guard used by logic controller against faulty configurations
-  nextProcess //when the process state should advance tot he next state according to the controller
+  nextProcess, //when the process state should advance tot he next state according to the controller
+  COMPLETED,
+  FAILED //giveup search and return to nest
 };
 
 struct PrecisionDriving {
@@ -71,6 +108,8 @@ struct Waypoints {
 };
 
 struct Result {
+  CPFAState cpfa_state;
+  CPFASearchType cpfa_search_type;
   ResultType type; //stores the type of the result
 
   BehaviorTrigger b; //hold the behaviour type
@@ -82,6 +121,7 @@ struct Result {
   PIDType PIDMode; //hold the PID type selected for use
 
   bool reset; //holds a reset command where logic controller will reset the controller that asks
+  bool lay_pheromone = false;
 };
 
 #endif

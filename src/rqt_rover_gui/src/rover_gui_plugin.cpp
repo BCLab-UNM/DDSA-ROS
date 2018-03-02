@@ -69,6 +69,7 @@ namespace rqt_rover_gui
     joystickGripperInterface = NULL;
 
     obstacle_call_count = 0;
+
     arena_dim = 20;
 
     display_sim_visualization = false;
@@ -529,8 +530,8 @@ set<string> RoverGUIPlugin::findConnectedRovers()
 void RoverGUIPlugin::statusEventHandler(const ros::MessageEvent<std_msgs::String const> &event)
 {
     const ros::M_string& header = event.getConnectionHeader();
-    //ros::Time receipt_time = ros::Time::now();
-    ros::Time receipt_time = event.getReceiptTime();
+    ros::Time receipt_time = ros::Time::now();
+
     // Extract rover name from the message source
 
     // This method is used rather than reading the publisher name to accomodate teams that changed the node name.
@@ -567,10 +568,10 @@ void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs
 
     // 0 for no obstacle, 1 for right side obstacle, and 2 for left side obsticle
     int code = msg->data;
-    
+
     if (code != 0)
     {
-		emit updateObstacleCallCount("<font color='white'>"+QString::number(++obstacle_call_count)+"</font>");	
+        emit updateObstacleCallCount("<font color='white'>"+QString::number(++obstacle_call_count)+"</font>");
     }
 }
 
@@ -850,7 +851,7 @@ void RoverGUIPlugin::pollRoversTimerEventHandler()
     }
     else
     {
-		rover_names = new_rover_names;
+    rover_names = new_rover_names;
     
 	    emit sendInfoLogMessage("List of connected rovers has changed");
 	    selected_rover_name = "";
@@ -1638,25 +1639,6 @@ void RoverGUIPlugin::customWorldRadioButtonEventHandler(bool toggled)
     }
 }
 
-// Currently, we cannot use the power law distribution with custon numbers of cubes.
-// I.E., we always use 256 tags, so disable the option to change the number of cubes when
-// generating a power law distribution. If we add dynamic power law distribution generation
-// in the future this block can be removed.
-/*void RoverGUIPlugin::powerlawDistributionRadioButtonEventHandler(bool toggled)
-{
-    ui.number_of_tags_combobox->setEnabled(!toggled);
-
-    if(!toggled)
-    {
-        ui.number_of_tags_label->setStyleSheet("color: white;");
-        ui.number_of_tags_combobox->setStyleSheet("color: white; border:2px solid white; padding: 1px 0px 1px 3px");
-    }
-    else
-    {
-        ui.number_of_tags_label->setStyleSheet("color: grey;");
-        ui.number_of_tags_combobox->setStyleSheet("color: grey; border:2px solid grey; padding: 1px 0px 1px 3px");
-    }
-}*/
 
 void RoverGUIPlugin::unboundedRadioButtonEventHandler(bool toggled)
 {
@@ -1868,11 +1850,24 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
           -0.785, // -0.25 * PI
            2.356  //  0.75 * PI
         };
-
+         
+        rover_publisher = nh.advertise<swarmie_msgs::RoverInfo>("/rovers", 10, this); 
+        swarmie_msgs::RoverInfo msg_rover;
+        //std_msgs::string roverName;
+        geometry_msgs::Pose2D pos;
+        
         // Add rovers to the simulation and start the associated ROS nodes
         for (int i = 0; i < n_rovers; i++)
         {
-            // add the global offset for sim rovers
+			
+			pos.x = rover_positions[i].x();
+	        pos.y = rover_positions[i].y(); 
+        
+        
+			msg_rover.names.push_back(rovers[i].toStdString());
+			msg_rover.positions.push_back(pos);
+			
+			// add the global offset for sim rovers
             ui.map_frame->SetGlobalOffsetForRover(rovers[i].toStdString(), rover_positions[i].x(), rover_positions[i].y());
             ui.map_frame->SetUniqueRoverColor(rovers[i].toStdString(), rover_colors[i]);
 
@@ -1892,6 +1887,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
               sleep(rover_load_delay); // Gives plugins enough time to finish loading
             }
         }
+        rover_publisher.publish(msg_rover);
     }
     else
     {
@@ -1942,8 +1938,8 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
 
     if (ui.start_visualization_on_build_checkbox->isChecked())
     {
-   // Visualize the simulation by default call button event handler
-   visualizeSimulationButtonEventHandler();
+        // Visualize the simulation by default call button event handler
+        visualizeSimulationButtonEventHandler();
         display_sim_visualization = true;
     }
     else

@@ -17,13 +17,20 @@
 
 using namespace std;
 
+// This struct contains a controller object and ties it to a priority value as
+// well as providing functionality to compare priorities with the < operator.
 struct PrioritizedController {
   int priority = -1;
   Controller* controller = nullptr;
 
-  PrioritizedController(int pri, Controller* cntrl) : priority(pri), controller(cntrl) {}
+  PrioritizedController(int pri, Controller* cntrl) :
+    priority(pri),
+    controller(cntrl)
+  {
+  }
 
-  inline bool operator <(const PrioritizedController& other) const {
+  inline bool operator <(const PrioritizedController& other) const
+  {
     return priority < other.priority;
   }
 };
@@ -40,6 +47,9 @@ public:
   bool ShouldInterrupt() override;
   bool HasWork() override;
 
+  // Give the controller a list of visible april tags.
+  // NOTE: This function may be named SetTagData() in other classes
+  //       but they are the same function.
   void SetAprilTags(vector<Tag> tags);
   void SetSonarData(float left, float center, float right);
   void SetPositionData(Point currentLocation);
@@ -48,33 +58,26 @@ public:
   void SetMapVelocityData(float linearVelocity, float angularVelocity);
   void SetCenterLocationOdom(Point centerLocationOdom);
   void SetCenterLocationMap(Point centerLocationMap);
-  void SetSwarmSize(size_t size);
-  void SetRoverIndex(size_t idx);
-
+  void SetArenaSize(int size);
+  
   int getCollisionCalls();
   // Passthrough for providing new waypoints to the
   // ManualWaypointController.
   void AddManualWaypoint(Point wpt, int waypoint_id);
 
-  
   // Passthrough for removing waypoints from the
   // ManualWaypointController.
   void RemoveManualWaypoint(int waypoint_id);
 
-  
   // Passthrough for getting the list of manual waypoints that have
-  // been visited. 
   std::vector<int> GetClearedWaypoints();
 
-  
   // Put the logic controller into manual mode. Changes process state
   // to PROCESS_STATE_MANUAL and logic state to LOGIC_STATE_INTERRUPT.
-  
   // If the logic controller is already in manual mode this has no
   // effect.
   void SetModeManual();
 
-  
   // Put the logic controller into autonomous mode. Resets the logic
   // controller and clears all manual waypoints.
   //
@@ -83,12 +86,18 @@ public:
   void SetModeAuto();
 
   void SetCurrentTimeInMilliSecs( long int time );
+ //void SetCPFAState(CPFAState state) override;
+  //CPFAState GetCPFAState() override;
 
   // Tell the logic controller whether rovers should automatically
   // resstrict their foraging range. If so provide the shape of the
   // allowed range.
   void setVirtualFenceOn( RangeShape* range );
   void setVirtualFenceOff( );
+  void printCPFAState();
+  void printCPFASearchType();
+  
+  Point GetCurrentLocation(); //qilu 12/2017
 
 protected:
   void ProcessData();
@@ -107,9 +116,10 @@ private:
     PROCCESS_STATE_TARGET_PICKEDUP,
     PROCCESS_STATE_DROP_OFF,
     _LAST,
-    PROCCESS_STATE_MANUAL // robot is under manual control
+    PROCCESS_STATE_MANUAL
   };
-
+     
+  
   LogicState logicState;
   ProcessState processState;
 
@@ -131,3 +141,4 @@ private:
 };
 
 #endif // LOGICCONTROLLER_H
+

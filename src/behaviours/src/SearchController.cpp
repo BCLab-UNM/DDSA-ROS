@@ -16,7 +16,8 @@ SearchController::SearchController() {
   cout << "SearchController -> 0" << endl;
 
   result.type = waypoint;
-
+result.fingerAngle = M_PI/2;
+  result.wristAngle = M_PI/4;
 }
 
 void SearchController::Reset() {
@@ -24,15 +25,22 @@ void SearchController::Reset() {
   cout << "SearchController -> 1" << endl;
 
 }
-
+	
+void SearchController::SetArenaSize(int size)
+{
+	arena_size = size;
+}
+	
 /**
  * This code implements a basic random walk search.
  */
-Result SearchController::DoWork() {
+Result SearchController::DoWork() 
+{
   int searchState;
-  cout << "SearchController -> 2" << endl;
+  cout << "TestStatus: SearchController DoWork()" << endl;
 
-  if(!init){
+  if(!init)
+  {
       init = true;
       spiralLocation.x = centerLocation.x;
       spiralLocation.y = centerLocation.y + spacing * CalculateSides(0, 0);
@@ -43,60 +51,57 @@ Result SearchController::DoWork() {
       //cout << "tag: spiral point at corner No. " << cornerNum <<" :" << spiralLocation.x << " , "<< spiralLocation.y << " centerLocation.y : " << centerLocation.y << endl;
       return result;
   }
-  else {
+  else 
+  {
 
     ReachedCheckPoint();
     ReachedSearchLocation();
 
-    if(succesfullPickup){
+    if (succesfullPickup) 
+    {
       searchState = INSERT_CHECKPOINT;
-      cout << "SearchController -> 3" << endl;
-
+      cout << "TestStatus: SearchController -> 3" << endl;
     }
-
-    else if (checkpointReached) {
+    else if (checkpointReached) 
+    {
       searchState = TARGET_CURRENTCORNER;
-      cout << "SearchController -> 4" << endl;
+      cout << "TestStatus: SearchController -> checkpoint reached..." << endl;
 
-      if(searchlocationReached){
+      if(searchlocationReached)
+      {
         searchState = TARGET_NEWCORNER;
         cout << "SearchController -> 5" << endl;
-
       }
-
     }
   }
-
-  switch(searchState){
-  case INSERT_CHECKPOINT:{
-    cout << "SearchController -> 6" << endl;
-
-    succesfullPickup = false;
-    result.wpts.waypoints.clear();
-    result.wpts.waypoints.insert(result.wpts.waypoints.end(), checkPoint);
-    return result;
-    break;
-
-  }
-  case TARGET_CURRENTCORNER:{
-    cout << "SearchController -> 7" << endl;
-
-    result.wpts.waypoints.clear();
-    result.wpts.waypoints.insert(result.wpts.waypoints.end(), searchLocation);
-    return result;
-    break;
-
-  }
-  case TARGET_NEWCORNER:{
-    cout << "SearchController -> 8" << endl;
-
-    searchlocationReached = false;
-    result.wpts.waypoints.clear();
-    searchLocation = SpiralSearching();
-    return result;
-    break;
-
-  }
+  switch(searchState)
+  {
+    case INSERT_CHECKPOINT:
+    {
+      cout << "TestStatus: SearchController -> insert checkpoint" << endl;
+      succesfullPickup = false;
+      result.wpts.waypoints.clear();
+      result.wpts.waypoints.insert(result.wpts.waypoints.end(), checkPoint);
+      return result;
+      break;
+    }
+    case TARGET_CURRENTCORNER:
+    {
+      cout << "SearchController -> 7" << endl;
+      result.wpts.waypoints.clear();
+      result.wpts.waypoints.insert(result.wpts.waypoints.end(), searchLocation);
+      return result;
+      break;
+    }
+    case TARGET_NEWCORNER:
+    {
+      cout << "SearchController -> 8" << endl;
+      searchlocationReached = false;
+      result.wpts.waypoints.clear();
+      searchLocation = SpiralSearching();
+      return result;
+      break;
+    }
   }
 }
 
@@ -105,12 +110,13 @@ void SearchController::SetCenterLocation(Point centerLocation) {
   float diffX = this->centerLocation.x - centerLocation.x;
   float diffY = this->centerLocation.y - centerLocation.y;
   this->centerLocation = centerLocation;
-  
   if (!result.wpts.waypoints.empty())
   {
+	  //cout<<"TestStatus: SearchCTRL waypoint reset:["<<result.wpts.waypoints.back().x<<", "<<result.wpts.waypoints.back().y<<"]"<<endl;
+  
   result.wpts.waypoints.back().x -= diffX;
   result.wpts.waypoints.back().y -= diffY;
-  }
+   }
   
 }
 
@@ -127,6 +133,7 @@ bool SearchController::ShouldInterrupt(){
 
   return false;
 }
+
 
 bool SearchController::HasWork() {
   return true;
@@ -150,7 +157,6 @@ Point SearchController::SpiralSearching(){
     stepsIntoSpiral += 1;
   }
   cout << "SearchController -> 13" << endl;
-
   sideLength = spacing * CalculateSides(stepsIntoSpiral, cornerNum);
   spiralLocation.x = spiralLocation.x + (sideLength * cos(corner));
   spiralLocation.y = spiralLocation.y + (sideLength * sin(corner));
@@ -269,4 +275,29 @@ float SearchController::CalculateSides( int circuitNum, int slot){
   cout << "SearchController -> 18" << endl;
 
 
+}	
+
+void SearchController::SetReachedWaypoint(bool reached)
+{
+	reachedWaypoint = reached;
+	}
+  
+	
+bool SearchController::OutOfArena(Point location)
+{
+	double lower = -arena_size/2.0;
+	double upper = arena_size/2.0;
+	if(location.x -0.5 <= lower || location.y -0.5 <= lower || location.x +0.5 >= upper || location.y +0.5 >= upper)
+	{
+		return true;
+    }
+	return false;
 }
+void SearchController::SetCurrentTimeInMilliSecs( long int time )
+{
+  current_time = time;
+}
+
+Point SearchController::GetCurrentLocation(){
+	return this->currentLocation;
+	}

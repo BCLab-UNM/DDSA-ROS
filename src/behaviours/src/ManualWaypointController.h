@@ -57,10 +57,17 @@ public:
    // This should be called regularly to prevent memory leaks.
    std::vector<int> ReachedWaypoints();
    
+   //void SetCPFAState(CPFAState state) override;
+  //CPFAState GetCPFAState() override;
 protected:
    void ProcessData() override;
    
 private:
+  
+   CPFAState cpfa_state = start_state;
+  //struct for returning data to the ROS adapter
+  Result result;
+  
    Point currentLocation;
    // list of manual waypoints
    std::map<int,Point> waypoints;

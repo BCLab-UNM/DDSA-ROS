@@ -82,7 +82,6 @@ link_directories(
   lib
 )
 
-
 add_library(
   rqt_rover_gui
   ${version_file}

@@ -21,14 +21,14 @@ public:
   bool HasWork() override;
   void SetIgnoreCenterSonar();
   void SetCurrentTimeInMilliSecs( long int time );
-  void SetTargetHeld ();
-  void GetObstacleCall();
+  void SetTargetHeld();
 
   // Checks if a target is held and if so resets the state of the obestacle controller otherwise does nothing
   void SetTargetHeldClear();
   //Asked by logiccontroller to determine if drive controller should have its waypoints cleared
   bool GetShouldClearWaypoints() {bool tmp = clearWaypoints; clearWaypoints = false; return tmp;}
-
+  //void SetCPFAState(CPFAState state) override;
+  //CPFAState GetCPFAState() override;
 protected:
 
   void ProcessData();
@@ -45,13 +45,12 @@ private:
   // and are those AprilTags oriented towards or away from the camera.
   bool checkForCollectionZoneTags( vector<Tag> );
   
-  const float K_angular = 1.2; //origin is 1.0; radians a second turn rate to avoid obstacles
+  const float K_angular = 1.0; //origin is 1.2; radians a second turn rate to avoid obstacles
   const float reactivate_center_sonar_threshold = 0.8; //reactive center sonar if it goes back above this distance, assuming it is deactivated
   const int targetCountPivot = 6; ///unused variable
   const float obstacleDistancePivot = 0.2526; ///unused variable
-  //const float center_trigger_distance = 0.4;
-  //const float side_trigger_distance = 0.3;
   const float triggerDistance = 0.8;
+
   /*
      * Member variables
      */
@@ -63,9 +62,9 @@ private:
   bool obstacleAvoided; //record if an obstacke has been avoided
   bool clearWaypoints = false;  //record if drivecontrollers waypoints should be cleared
 
-  float left = 10; //distance on left ultrasound
-  float center = 10; //distance on center ultrasound
-  float right = 10; //distance on right ultrasound
+  float left = 0; //distance on left ultrasound
+  float center = 0; //distance on center ultrasound
+  float right = 0; //distance on right ultrasound
   
   float pitches = 0.0;
 
