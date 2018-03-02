@@ -535,7 +535,7 @@ void RoverGUIPlugin::statusEventHandler(const ros::MessageEvent<std_msgs::String
 // Counts the number of obstacle avoidance calls
 void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs::UInt8> &event)
 {
-    const std::string& publisher_name = event.getPublisherName();
+	const std::string& publisher_name = event.getPublisherName();
     const ros::M_string& header = event.getConnectionHeader();
     ros::Time receipt_time = event.getReceiptTime();
 
@@ -548,13 +548,16 @@ void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs
 
     if (code != 0)
     {
-        emit updateObstacleCallCount("<font color='white'>"+QString::number(++obstacle_call_count)+"</font>");
+		if(current_simulated_time_in_seconds < timer_stop_time_in_seconds || !is_timer_on)
+		{
+			emit updateObstacleCallCount("<font color='white'>"+QString::number(++obstacle_call_count)+"</font>");
+	    }
     }
 }
 
 // Takes the published score value from the ScorePlugin and updates the GUI
 void RoverGUIPlugin::scoreEventHandler(const ros::MessageEvent<const std_msgs::String> &event) {
-    const std::string& publisher_name = event.getPublisherName();
+	const std::string& publisher_name = event.getPublisherName();
     const ros::M_string& header = event.getConnectionHeader();
     ros::Time receipt_time = event.getReceiptTime();
 
@@ -588,7 +591,7 @@ void RoverGUIPlugin::simulationTimerEventHandler(const rosgraph_msgs::Clock& msg
 
     if (is_timer_on == true) {
         if (current_simulated_time_in_seconds >= timer_stop_time_in_seconds) {
-            is_timer_on = false;
+            //is_timer_on = false;
             emit allStopButtonSignal();
             emit sendInfoLogMessage("\nSimulation timer complete at: " +
                                     QString::number(getHours(current_simulated_time_in_seconds)) + " hours, " +
@@ -1673,6 +1676,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
         float collection_disk_radius = 0.5; // meters
         sim_mgr.addModel("collection_disk", "collection_disk", 0, 0, 0, collection_disk_radius);
         score_subscriber = nh.subscribe("/collectionZone/score", 10, &RoverGUIPlugin::scoreEventHandler, this);
+        
         simulation_timer_subscriber = nh.subscribe("/clock", 10, &RoverGUIPlugin::simulationTimerEventHandler, this);
     }
     else
