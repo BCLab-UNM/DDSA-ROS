@@ -479,6 +479,15 @@ void LogicController::SetCurrentTimeInMilliSecs( long int time )
   searchController.SetCurrentTimeInMilliSecs( time);
 }
 
+void LogicController::SetSwarmSize(size_t size) {
+  searchController.SetSwarmSize(size);
+}
+
+void LogicController::SetRoverIndex(size_t idx) {
+  searchController.SetRoverIndex(idx);
+
+}
+
 Point LogicController::GetCurrentLocation() {
   return searchController.GetCurrentLocation();
 }

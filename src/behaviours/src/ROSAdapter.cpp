@@ -342,9 +342,21 @@ void behaviourStateMachine(const ros::TimerEvent&)
   }
 
   // Robot is in automode
-  if (currentMode == 2 || currentMode == 3)
+  if (currentMode == 2 || currentMode == 3) 
   {
-    
+    if(!first_auto) {
+      cout <<"tag:" << publishedName << " - known rovers list:\n";
+      for(size_t i = 0; i < rover_names.size(); i++) {
+        cout << "\t" <<"tag:"<< rover_names[i] << "\n";
+      }
+
+      cout << "\n";
+
+      first_auto = true;
+      logicController.SetRoverIndex(self_index);
+      logicController.SetSwarmSize(rover_names.size());
+    }
+
     humanTime();
     
     //update the time used by all the controllers

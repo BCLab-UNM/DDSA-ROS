@@ -59,12 +59,12 @@ public:
   void SetCenterLocationOdom(Point centerLocationOdom);
   void SetCenterLocationMap(Point centerLocationMap);
   void SetArenaSize(int size);
-  
+   void SetSwarmSize(size_t size);
   int getCollisionCalls();
   // Passthrough for providing new waypoints to the
   // ManualWaypointController.
   void AddManualWaypoint(Point wpt, int waypoint_id);
-
+  void SetRoverIndex(size_t idx);
   // Passthrough for removing waypoints from the
   // ManualWaypointController.
   void RemoveManualWaypoint(int waypoint_id);
