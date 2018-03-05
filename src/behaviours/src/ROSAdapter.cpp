@@ -177,7 +177,8 @@ time_t timerStartTime;
 // An initial delay to allow the rover to gather enough position data to 
 // average its location.
 unsigned int startDelayInSeconds = 30;
-float timerTimeElapsed = 0;
+unsigned int timerTimeElapsed = 0;
+int collision_count = 0;
 
 //Transforms
 tf::TransformListener *tfListener;
@@ -204,16 +205,21 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
 
+
+      
 int main(int argc, char **argv) {
   
   gethostname(host, sizeof (host));
   string hostname(host);
   
-  if (argc >= 2) {
+  if (argc >= 2) 
+  {
     publishedName = argv[1];
     cout << "Welcome to the world of tomorrow " << publishedName
          << "!  Behaviour turnDirectionule started." << endl;
-  } else {
+  } 
+  else 
+  {
     publishedName = hostname;
     cout << "No Name Selected. Default is: " << publishedName << endl;
   }
@@ -277,7 +283,6 @@ int main(int argc, char **argv) {
   }
 
   timerStartTime = time(0);
-  
   ros::spin();
   
   return EXIT_SUCCESS;
@@ -416,13 +421,17 @@ void behaviourStateMachine(const ros::TimerEvent&)
         prevWrist = result.wristAngle;
       }
     }
-  collision_msg.data = logicController.getCollisionCalls();  
-  obstaclePubisher.publish(collision_msg); 
+    
+    
+    
+    collision_count = logicController.getCollisionCalls();
+    collision_msg.data = collision_count;
+    obstaclePubisher.publish(collision_msg);
+   
     //publishHandeling here
     //logicController.getPublishData(); suggested
     //adds a blank space between sets of debugging data to easily tell one tick from the next
-    cout << endl;
-    
+    //cout << endl;
   }
   
   // mode is NOT auto

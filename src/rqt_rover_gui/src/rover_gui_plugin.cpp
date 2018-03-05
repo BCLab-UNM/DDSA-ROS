@@ -573,6 +573,27 @@ void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs
     {
         emit updateObstacleCallCount("<font color='white'>"+QString::number(++obstacle_call_count)+"</font>");
     }
+    
+    foragingElapsed = current_simulated_time_in_seconds - timer_start_time_in_seconds;
+    
+    //record the collision into files    
+    if(timer_start_time_in_seconds > 0)//start to froaging
+    {	
+	    current_collisions = obstacle_call_count - previous_collisions;
+	        
+	    if(((int)foragingElapsed % 60 < 5 && foragingElapsed >= 58 && foragingElapsed - lastCollisionElapsedTime >= 58) || current_simulated_time_in_seconds >= timer_stop_time_in_seconds)
+	    {
+			previous_collisions += current_collisions;
+			lastCollisionElapsedTime = foragingElapsed;
+			if(current_simulated_time_in_seconds >= timer_stop_time_in_seconds)
+			{
+				collision_data.close();
+			}
+		}
+		
+	}
+	
+	
 }
 
 // Takes the published score value from the ScorePlugin and updates the GUI
@@ -585,6 +606,23 @@ void RoverGUIPlugin::scoreEventHandler(const ros::MessageEvent<const std_msgs::S
     std::string tags_collected = msg->data;
 
     emit updateNumberOfTagsCollected("<font color='white'>"+QString::fromStdString(tags_collected)+"</font>");
+    
+	//record the score into files    
+    if(timer_start_time_in_seconds > 0)//start to froaging
+    {	
+	    current_collected_tags = stoi(tags_collected) - previous_collected_tags;
+	    
+	    if(((int)foragingElapsed % 60 < 5 && (int)foragingElapsed >= 58) || current_simulated_time_in_seconds + 2 >= timer_stop_time_in_seconds)
+	    {
+			score_data << current_collected_tags <<endl;
+			previous_collected_tags += current_collected_tags;
+			
+			if(current_simulated_time_in_seconds + 2 >= timer_stop_time_in_seconds)
+			{
+				score_data.close();
+			}
+		}
+	}	
 }
 
 void RoverGUIPlugin::simulationTimerEventHandler(const rosgraph_msgs::Clock& msg) {
@@ -595,7 +633,7 @@ void RoverGUIPlugin::simulationTimerEventHandler(const rosgraph_msgs::Clock& msg
 
     // only update the current time once per second; faster update rates make the GUI unstable
     // and in the worst cases it will hang and/or crash
-    if (updateTimeLabel == true) {
+    if (updateTimeLabel) {
         emit updateCurrentSimulationTimeLabel("<font color='white'>" +
                                               QString::number(getHours(current_simulated_time_in_seconds)) + " hours, " +
                                               QString::number(getMinutes(current_simulated_time_in_seconds)) + " minutes, " +
@@ -608,8 +646,8 @@ void RoverGUIPlugin::simulationTimerEventHandler(const rosgraph_msgs::Clock& msg
     if (current_simulated_time_in_seconds <= 0.0) {
         return;
     }
-
-    if (is_timer_on == true) {
+    
+    if (is_timer_on) {
         if (current_simulated_time_in_seconds >= timer_stop_time_in_seconds) {
             is_timer_on = false;
             emit allStopButtonSignal();
@@ -1479,7 +1517,13 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
             ui.simulation_timer_combobox->setStyleSheet("color: grey; border:2px solid grey;");
         }
     }
-
+     score_data_filename += "_"+to_string((int)getMinutes(current_simulated_time_in_seconds))+"_"+to_string((int)getSeconds(current_simulated_time_in_seconds))+".txt";
+        score_data.open("/home/lukey/Research/DDSA-ROS/results/"+score_data_filename);
+        
+        collision_data_filename += "_"+to_string((int)getMinutes(current_simulated_time_in_seconds))+"_"+to_string((int)getSeconds(current_simulated_time_in_seconds))+".txt";
+        collision_data.open("/home/lukey/Research/DDSA-ROS/results/"+collision_data_filename);
+        
+        
     // Experiment Timer END
 }
 

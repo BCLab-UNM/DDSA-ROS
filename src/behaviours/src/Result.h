@@ -121,7 +121,6 @@ struct Result {
   PIDType PIDMode; //hold the PID type selected for use
 
   bool reset; //holds a reset command where logic controller will reset the controller that asks
-  bool lay_pheromone = false;
 };
 
 #endif
