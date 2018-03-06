@@ -583,6 +583,7 @@ void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs
 	        
 	    if(((int)foragingElapsed % 60 < 5 && foragingElapsed >= 58 && foragingElapsed - lastCollisionElapsedTime >= 58) || current_simulated_time_in_seconds >= timer_stop_time_in_seconds)
 	    {
+			collision_data<<current_collisions<<endl;
 			previous_collisions += current_collisions;
 			lastCollisionElapsedTime = foragingElapsed;
 			if(current_simulated_time_in_seconds >= timer_stop_time_in_seconds)
@@ -1518,10 +1519,10 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
         }
     }
      score_data_filename += "_"+to_string((int)getMinutes(current_simulated_time_in_seconds))+"_"+to_string((int)getSeconds(current_simulated_time_in_seconds))+".txt";
-        score_data.open("/home/lukey/Research/DDSA-ROS/results/"+score_data_filename);
+        score_data.open("/home/lukey15/Research/DDSA-ROS/results/"+score_data_filename);
         
         collision_data_filename += "_"+to_string((int)getMinutes(current_simulated_time_in_seconds))+"_"+to_string((int)getSeconds(current_simulated_time_in_seconds))+".txt";
-        collision_data.open("/home/lukey/Research/DDSA-ROS/results/"+collision_data_filename);
+        collision_data.open("/home/lukey15/Research/DDSA-ROS/results/"+collision_data_filename);
         
         
     // Experiment Timer END
