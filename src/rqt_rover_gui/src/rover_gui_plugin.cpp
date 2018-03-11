@@ -1518,12 +1518,17 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
             ui.simulation_timer_combobox->setStyleSheet("color: grey; border:2px solid grey;");
         }
     }
-    rng = new random_numbers::RandomNumberGenerator();
-     score_data_filename += "_"+to_string((int)getMinutes(current_simulated_time_in_seconds))+"_"+to_string((int)getSeconds(current_simulated_time_in_seconds))+"_"+to_string((int)rng->uniformReal(0.0, 10000))+".txt";
-        score_data.open("results/"+score_data_filename);
+    /* initialize random seed: */
+    srand (time(NULL));
+
+    /* generate number between 0 and 1000: */
+    int randNum = rand() % 5000;
+  
+    score_data_filename += "_"+to_string(randNum)+".txt";
+    score_data.open("results/"+score_data_filename);
         
-        collision_data_filename += "_"+to_string((int)getMinutes(current_simulated_time_in_seconds))+"_"+to_string((int)getSeconds(current_simulated_time_in_seconds))+"_"+to_string((int)rng->uniformReal(0.0, 10000))+".txt";
-        collision_data.open("results/"+collision_data_filename);
+    collision_data_filename += "_"+to_string(randNum)+".txt";
+    collision_data.open("results/"+collision_data_filename);
         
         
     // Experiment Timer END

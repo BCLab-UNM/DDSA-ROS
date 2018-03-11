@@ -130,8 +130,8 @@ Result ObstacleController::DoWork() {
     else
     {
 		cout<<"TestStatusA: ****normal sample wpt..."<<endl;
-		forward.x = currentLocation.x + (0.5 * cos(currentLocation.theta));
-        forward.y = currentLocation.y + (0.5 * sin(currentLocation.theta));
+		forward.x = currentLocation.x + (0.2 * cos(currentLocation.theta));
+        forward.y = currentLocation.y + (0.2 * sin(currentLocation.theta));
     }
     //haveAvoidCollectionZone = false;
     //cout<<"TestStatusA: obstacleCTRL sampled waypoint=["<<forward.x<<","<<forward.y<<"]"<<endl;
