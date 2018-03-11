@@ -492,3 +492,15 @@ PIDConfig DriveController::constYawConfig() {
   return config;
 
 }
+CPFAState DriveController::GetCPFAState() 
+{
+  return cpfa_state;
+}
+
+void DriveController::SetCPFAState(CPFAState state) {
+  cpfa_state = state;
+  result.cpfa_state = state;
+ //cout<<"set state result.cpfa_state ="<<result.cpfa_state <<endl;
+}
+
+

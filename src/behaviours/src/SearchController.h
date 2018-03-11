@@ -41,6 +41,8 @@ public:
   
   // sets the value of the current location
   //void UpdateData(geometry_msgs::Pose2D currentLocation, geometry_msgs::Pose2D centerLocation);
+  CPFAState GetCPFAState() override;
+  void SetCPFAState(CPFAState state) override;
   bool OutOfArena(Point location);
   void SetCurrentLocation(Point currentLocation);
   Point GetCurrentLocation(); //qilu 12/2017
@@ -68,6 +70,7 @@ protected:
 
 private:
 
+  CPFAState cpfa_state = start_state;
   int arena_size;
   random_numbers::RandomNumberGenerator* rng;
   Point currentLocation;

@@ -24,7 +24,8 @@ public:
   void SetCenterLocation(Point center);
   void SetCurrentLocation(Point current);
   void SetTargetPickedUp();
-
+  void SetRoverInitLocation(Point location);
+  
   void SetBlockBlockingUltrasound(bool blockBlock);
   void SetTagData(std::vector<Tag> tags);
   bool HasTarget() {return targetHeld;}
@@ -35,8 +36,9 @@ public:
 
   void SetCurrentTimeInMilliSecs( long int time );
   
-  //void SetCPFAState(CPFAState state) override;
-  //CPFAState GetCPFAState() override;
+  void SetCPFAState(CPFAState state) override;
+  CPFAState GetCPFAState() override;
+  
 private:
 
   void ProcessData();
@@ -51,7 +53,7 @@ private:
   const float initialSpinSize = 0.05; //in meters aka 10cm
   const float spinSizeIncrement = 0.50; //in meters
   const float searchVelocity = 0.15; //in meters per second
-  const float dropDelay = 0.4; //delay in seconds for dropOff
+  const float dropDelay = 0.45; //delay in seconds for dropOff
 
 
   random_numbers::RandomNumberGenerator* rng;
@@ -87,6 +89,7 @@ private:
   Point centerLocation;
   Point currentLocation;
 
+  Point roverInitLocation;
   //Time since modeTimer was started, in seconds
   float timerTimeElapsed;
 
@@ -125,7 +128,7 @@ private:
   bool precisionInterrupt = false;
   bool finalInterrupt = false;
   bool first_center = true;
-
+  CPFAState cpfa_state = start_state;
 };
 #endif // end header define
 
