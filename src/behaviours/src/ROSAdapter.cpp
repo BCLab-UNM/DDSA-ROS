@@ -178,7 +178,6 @@ time_t timerStartTime;
 // average its location.
 unsigned int startDelayInSeconds = 30;
 unsigned int timerTimeElapsed = 0;
-int collision_count = 0;
 
 //Transforms
 tf::TransformListener *tfListener;
@@ -373,8 +372,6 @@ void behaviourStateMachine(const ros::TimerEvent&)
     //ask logic controller for the next set of actuator commands
     result = logicController.DoWork();
     
-    
-    
     bool wait = false;
     
     //if a wait behaviour is thrown sit and do nothing untill logicController is ready
@@ -422,10 +419,7 @@ void behaviourStateMachine(const ros::TimerEvent&)
       }
     }
     
-    
-    
-    collision_count = logicController.getCollisionCalls();
-    collision_msg.data = collision_count;
+    collision_msg.data = logicController.getCollisionCalls();
     obstaclePubisher.publish(collision_msg);
    
     //publishHandeling here
