@@ -57,15 +57,15 @@ void ManualWaypointController::ProcessData()
 {   
 }
 
-//CPFAState ManualWaypointController::GetCPFAState() 
-//{
- // return cpfa_state;
-//}
+CPFAState ManualWaypointController::GetCPFAState() 
+{
+  return cpfa_state;
+}
 
-//void ManualWaypointController::SetCPFAState(CPFAState state) {
-//  cpfa_state = state;
-//  result.cpfa_state = state;
-//}
+void ManualWaypointController::SetCPFAState(CPFAState state) {
+  cpfa_state = state;
+  result.cpfa_state = state;
+}
 
 void ManualWaypointController::AddManualWaypoint(Point wpt, int id)
 {

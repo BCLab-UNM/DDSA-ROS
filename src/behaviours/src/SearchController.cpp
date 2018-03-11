@@ -22,8 +22,9 @@ result.fingerAngle = M_PI/2;
 
 void SearchController::Reset() {
   result.reset = false;
-  cout << "SearchController -> 1" << endl;
-
+  //attemptCount = 0;
+  result.wpts.waypoints.clear();
+  succesfullPickup = false;
 }
 	
 void SearchController::SetArenaSize(int size)
@@ -105,6 +106,16 @@ Result SearchController::DoWork()
   }
 }
 
+CPFAState SearchController::GetCPFAState() 
+{
+  return cpfa_state;
+}
+
+void SearchController::SetCPFAState(CPFAState state) {
+  cpfa_state = state;
+  result.cpfa_state = state;
+ //cout<<"SearchCtrl: SetCPFAState ="<<result.cpfa_state <<endl;
+}
 void SearchController::SetCenterLocation(Point centerLocation) {
   
   float diffX = this->centerLocation.x - centerLocation.x;

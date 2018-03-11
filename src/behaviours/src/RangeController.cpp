@@ -117,17 +117,17 @@ bool RangeController::ShouldInterrupt()
   return should_interrupt;    
 }
 
-//CPFAState RangeController::GetCPFAState() 
-//{
- // return cpfa_state;
-//}
+CPFAState RangeController::GetCPFAState() 
+{
+  return cpfa_state;
+}
 
-/*void RangeController::SetCPFAState(CPFAState state) {
+void RangeController::SetCPFAState(CPFAState state) {
 	
   cpfa_state = state;
   result.cpfa_state = state;
-  cout<<"SwitchStatus: rangectrl: state="<<cpfa_state<<endl;
-}*/
+  //cout<<"SwitchStatus: rangectrl: state="<<cpfa_state<<endl;
+}
 
 bool RangeController::HasWork() 
 {

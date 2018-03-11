@@ -27,8 +27,9 @@ public:
   void SetTargetHeldClear();
   //Asked by logiccontroller to determine if drive controller should have its waypoints cleared
   bool GetShouldClearWaypoints() {bool tmp = clearWaypoints; clearWaypoints = false; return tmp;}
-  //void SetCPFAState(CPFAState state) override;
-  //CPFAState GetCPFAState() override;
+  void SetCPFAState(CPFAState state) override;
+  CPFAState GetCPFAState() override;
+  
 protected:
 
   void ProcessData();
@@ -88,6 +89,7 @@ private:
   
   bool set_waypoint = false;
   bool can_set_waypoint = false;
+  CPFAState cpfa_state = start_state;
 
   float camera_offset_correction = 0.020; //meters;
 };

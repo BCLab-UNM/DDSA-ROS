@@ -57,7 +57,7 @@ void ObstacleController::avoidObstacle() {
     
     //double vel = rng->uniformReal(0.05, 0.2);
     //result.pd.cmdVel = vel;
-    result.pd.cmdVel = 0.0;
+    result.pd.cmdVel = 0;
     result.pd.setPointYaw = 0;
     
 }
@@ -89,7 +89,7 @@ void ObstacleController::avoidCollectionZone() {
 		  //cout<<"CollisionStatus: avoid disk, turn to left"<<endl;
       }   
     result.pd.setPointVel = 0.0;
-    result.pd.cmdVel = 0.0;
+    result.pd.cmdVel = 0;
 	//double vel = rng->uniformReal(0.05, 0.1);
       
     //result.pd.cmdVel = vel; //qilu 02/2018
@@ -119,18 +119,20 @@ Result ObstacleController::DoWork() {
     result.type = waypoint; 
     result.PIDMode = FAST_PID; //use fast pid for waypoints
     Point forward;            //waypoint is directly ahead of current heading
-    /*if(haveAvoidCollectionZone)// if seen collection zone in the past and avoid it now, sample a further location
+    //if(haveAvoidCollectionZone)// if seen collection zone in the past and avoid it now, sample a further location
+    if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
     {
-		cout<<"TestStatusA: ****sample a further location..."<<endl;
-		double stepSize = rng->uniformReal(1.0, 2.0);
-		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
-        forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
+		cout<<"TestStatusA: ****sample another location to avoid collection disk..."<<endl;
+		//double stepSize = rng->uniformReal(1.0, 2.0);
+		forward.x = currentLocation.x + (0.2 * cos(currentLocation.theta));
+        forward.y = currentLocation.y + (0.2 * sin(currentLocation.theta));
 	}
     else
-    {*/
+    {
+		cout<<"TestStatusA: ****normal sample wpt..."<<endl;
 		forward.x = currentLocation.x + (0.5 * cos(currentLocation.theta));
         forward.y = currentLocation.y + (0.5 * sin(currentLocation.theta));
-    //}
+    }
     //haveAvoidCollectionZone = false;
     //cout<<"TestStatusA: obstacleCTRL sampled waypoint=["<<forward.x<<","<<forward.y<<"]"<<endl;
     result.wpts.waypoints.clear();
@@ -165,11 +167,11 @@ void ObstacleController::ProcessData() {
 	  //cout<<"TestStatus: set collection_zone_seen to false; "<<collection_zone_seen<<endl;
     collection_zone_seen = false; 
     phys= false;
-    //if (!obstacleAvoided)
-    //{
-		cout<<"TestStatus: obstacle not avoid..."<<endl;
+    if (!obstacleAvoided)
+    {
+		cout<<"TestStatusA: obstacle not avoid..."<<endl;
       can_set_waypoint = true;
-    //}
+    }
   }
 
   //If we are ignoring the center sonar
@@ -298,7 +300,15 @@ bool ObstacleController::ShouldInterrupt() {
     if(obstacleAvoided && obstacleDetected)
     {
       Reset();
-      return true;
+      //cout<<"TestStatus: obstacle interrupt: GetCPFAState()="<<GetCPFAState()<<endl;
+      if(GetCPFAState() == return_to_nest)
+      {
+		  cout<<"TestStatusA: Obstacle avoid and set to reach nest... interrupt...true"<<endl;
+		  SetCPFAState(reached_nest);
+	  }
+      
+      
+    return true;
     } else {
       return false;
     }
@@ -348,3 +358,15 @@ void ObstacleController::SetTargetHeldClear()
     ignore_center_sonar = false;
   }
 }
+CPFAState ObstacleController::GetCPFAState() 
+{
+  return cpfa_state;
+}
+
+void ObstacleController::SetCPFAState(CPFAState state) {
+  cpfa_state = state;
+  result.cpfa_state = state;
+ //cout<<"Obstacle set state: result.cpfa_state ="<<result.cpfa_state <<endl;
+}
+
+

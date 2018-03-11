@@ -131,8 +131,8 @@ class RangeController : virtual Controller {
   // Destructor
   ~RangeController();
 
-//void SetCPFAState(CPFAState state) override;
- // CPFAState GetCPFAState() override;
+void SetCPFAState(CPFAState state) override;
+  CPFAState GetCPFAState() override;
   
  private:
 

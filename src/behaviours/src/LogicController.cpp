@@ -439,6 +439,11 @@ void LogicController::SetCenterLocationOdom(Point centerLocationOdom)
   //pheromoneController.SetCenterLocation(centerLocationOdom);
 }
 
+void LogicController::SetRoverInitLocation(Point location) //for mapping the locations of pheromone trails to other rovers.
+{
+  dropOffController.SetRoverInitLocation(location);
+}
+
 void LogicController::AddManualWaypoint(Point manualWaypoint, int waypoint_id)
 {
   manualWaypointController.AddManualWaypoint(manualWaypoint, waypoint_id);
@@ -482,6 +487,23 @@ void LogicController::SetCurrentTimeInMilliSecs( long int time )
 void LogicController::SetSwarmSize(size_t size) {
   searchController.SetSwarmSize(size);
 }
+void LogicController::printCPFAState() {
+  cout << "CPFAState: ";
+  /*if(cpfa_state == set_target_location)
+    cout << "set_target_location" << endl;
+  else if(cpfa_state == travel_to_search_site)
+    cout << "travel_to_search_site" << endl;
+  else if(cpfa_state == search_with_uninformed_walk)
+    cout << "search_with_uninformed_walk" << endl;
+  else if(cpfa_state == search_with_informed_walk)
+    cout << "search_with_informed_walk" << endl;
+  else if(cpfa_state == sense_local_resource_density)
+    cout << "sense_local_resource_density" << endl;
+  else if (cpfa_state == return_to_nest)
+    cout << "return_to_nest" << endl;
+  else
+    cout << "WTF" << endl;*/
+}
 
 void LogicController::SetRoverIndex(size_t idx) {
   searchController.SetRoverIndex(idx);
@@ -492,9 +514,23 @@ Point LogicController::GetCurrentLocation() {
   return searchController.GetCurrentLocation();
 }
 
-//CPFAState LogicController::GetCPFAState() {
-//  return cpfa_state;
-//}
+void LogicController::SetCPFAState(CPFAState state) {
+  if(state != cpfa_state) {
+    cpfa_state = state;
+   //cout<<"SwitchStatus: logic, state="<<cpfa_state<<endl;
+    for(PrioritizedController cntrlr : prioritizedControllers) {
+      if(state != cntrlr.controller->GetCPFAState()) {
+        cntrlr.controller->SetCPFAState(state);
+      }
+    }
+  }
+
+  printCPFAState();
+}
+
+CPFAState LogicController::GetCPFAState() {
+  return cpfa_state;
+}
 
 
 void LogicController::SetModeAuto() {

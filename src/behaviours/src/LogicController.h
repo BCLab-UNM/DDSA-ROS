@@ -58,6 +58,7 @@ public:
   void SetMapVelocityData(float linearVelocity, float angularVelocity);
   void SetCenterLocationOdom(Point centerLocationOdom);
   void SetCenterLocationMap(Point centerLocationMap);
+  void SetRoverInitLocation(Point location);
   void SetArenaSize(int size);
    void SetSwarmSize(size_t size);
   int getCollisionCalls();
@@ -86,8 +87,8 @@ public:
   void SetModeAuto();
 
   void SetCurrentTimeInMilliSecs( long int time );
- //void SetCPFAState(CPFAState state) override;
-  //CPFAState GetCPFAState() override;
+  void SetCPFAState(CPFAState state) override;
+  CPFAState GetCPFAState() override;
 
   // Tell the logic controller whether rovers should automatically
   // resstrict their foraging range. If so provide the shape of the
@@ -119,6 +120,7 @@ private:
     PROCCESS_STATE_MANUAL
   };
      
+  CPFAState cpfa_state = start_state;
   
   LogicState logicState;
   ProcessState processState;

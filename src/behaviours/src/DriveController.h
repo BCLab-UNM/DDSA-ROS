@@ -19,7 +19,10 @@ public:
   void SetResultData(Result result) {this->result = result;}
   void SetVelocityData(float linearVelocity,float angularVelocity);
   void SetCurrentLocation(Point currentLocation) {this->currentLocation = currentLocation;}
-
+  
+  void SetCPFAState(CPFAState state) override;
+  CPFAState GetCPFAState() override;
+  
   void SetCurrentTimeInMilliSecs( long int time );
   //void SetCPFAState(CPFAState state) override;
   //CPFAState GetCPFAState() override;
@@ -98,6 +101,7 @@ private:
 
   void ProcessData();
 
+  CPFAState cpfa_state = start_state;
 };
 
 #endif // DRIVECONTROLLER_H

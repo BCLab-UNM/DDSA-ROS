@@ -33,8 +33,8 @@ public:
   bool GetTargetFound(){return targetFound;}
   void SetCurrentTimeInMilliSecs( long int time );
   
-  //void SetCPFAState(CPFAState state) override;
-  //CPFAState GetCPFAState() override;
+  void SetCPFAState(CPFAState state) override;
+  CPFAState GetCPFAState() override;
 protected:
 
   void ProcessData();
