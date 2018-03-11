@@ -360,8 +360,43 @@ void LogicController::controllerInterconnect()
       obstacleController.SetTargetHeld();
       searchController.SetSuccesfullPickup();
     }
+    if(obstacleController.HasWork()) 
+    {
+		if(searchController.GetCPFAState() == return_to_nest)
+		{
+			obstacleController.SetCPFAState(return_to_nest);
+		   cout<<"TestStatusA: obstacle set to return to nest..."<<obstacleController.GetCPFAState()<<endl;
+		}
+		else
+		{
+		    searchController.SetCPFAState(avoid_obstacle);
+             cout<<"TestStatusA: SearchCtrl set to avoid obstacle...CPFAStatus="<<searchController.GetCPFAState()<<endl;			
+			}
+			
+			
+	} 
+	if(obstacleController.GetCPFAState() == reached_nest)
+	{
+		cout<<"TestStatusSwitchStatus: interconnect, set reached_nest..."<<endl;
+		searchController.SetCPFAState(reached_nest);
+		//searchController.SetReachedWaypoint(true);
+		obstacleController.SetCPFAState(start_state);
+	}
+    
   }
-
+  
+  if (processState == PROCCESS_STATE_DROP_OFF)
+  {
+	  if(dropOffController.GetCPFAState() == return_to_nest)
+	  {
+		  if(obstacleController.HasWork()) 
+		  {
+			  obstacleController.SetCPFAState(return_to_nest);
+		      cout<<"TestStatusA: obstacle set to return to nest by dropoff..."<<endl;
+		  }
+		
+	  }
+  }		
   //ask if drop off has released the target from the claws yet
   if (!dropOffController.HasTarget()) 
   {
