@@ -2,6 +2,8 @@
 #include <cmath> // For square root function
 #include <iostream>
 
+using namespace std;
+
 RangeShape::RangeShape()
 {
 }
@@ -58,13 +60,13 @@ RangeController::RangeController()
 
 RangeController::RangeController( float backtrack_distance )
 {
-  setBacktrackDistance( backtrack_distance );
+  SetBacktrackDistance( backtrack_distance );
 }
 
 RangeController::RangeController( float backtrack_distance, RangeShape* range )
 {
-  setBacktrackDistance( backtrack_distance );
-  setRangeShape( range );
+  SetBacktrackDistance( backtrack_distance );
+  SetRangeShape( range );
 }
 
 void RangeController::Reset()
@@ -74,7 +76,7 @@ void RangeController::Reset()
 
 Result RangeController::DoWork() 
 {
- 
+ cout<<"RangeController::DoWork()"<<endl;
   Result result;
 
   // Move the rover a parameterised distance towards the origin 
@@ -97,6 +99,7 @@ Result RangeController::DoWork()
 
 bool RangeController::ShouldInterrupt() 
 {
+	cout<<"range controller should interrupt...";
   // Cause an interrupt if the rover leaves the specified foraging range
   // Note use of shortcircuiting "and"
   bool should_interrupt = false;
@@ -109,8 +112,21 @@ bool RangeController::ShouldInterrupt()
       requested_return_to_valid_range = true;
       should_interrupt = true;
     }
-  
+  cout<<should_interrupt<<endl;
+    
   return should_interrupt;    
+}
+
+CPFAState RangeController::GetCPFAState() 
+{
+  return cpfa_state;
+}
+
+void RangeController::SetCPFAState(CPFAState state) {
+	
+  cpfa_state = state;
+  result.cpfa_state = state;
+  //cout<<"SwitchStatus: rangectrl: state="<<cpfa_state<<endl;
 }
 
 bool RangeController::HasWork() 
@@ -129,16 +145,21 @@ bool RangeController::HasWork()
       enabled && range != NULL && !range->isInside(current_location);
       has_work = false;
     }
+  
+  if (has_work)
+  {
+    cout << "Range Controller Has Work" << endl;
+  }
 
   return has_work;
 }
 
-void RangeController::setCurrentLocation( Point current ) 
+void RangeController::SetCurrentLocation( Point current ) 
 {
   current_location = current;
 }
 
-void RangeController::setBacktrackDistance( float backtrack_distance )
+void RangeController::SetBacktrackDistance( float backtrack_distance )
 {
   if (backtrack_distance <= 0) throw RangeControllerInvalidParameterException(" The backtrack distance must be positive.");
 
@@ -146,7 +167,7 @@ void RangeController::setBacktrackDistance( float backtrack_distance )
 }
 
 // Set the shape of the valid foraging range
-void RangeController::setRangeShape( RangeShape* range )
+void RangeController::SetRangeShape( RangeShape* range )
 {
   if ( this->range != NULL ) delete this->range; // Clean up memory
   this->range = range;
@@ -175,7 +196,7 @@ Point RangeController::distAlongLineSegment(Point start, Point end, float dist)
   return P;
 }
 
-void RangeController::setEnabled( bool enabled )
+void RangeController::SetEnabled( bool enabled )
 {
   this->enabled = enabled;
 } 

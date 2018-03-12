@@ -2,7 +2,7 @@
 #define PICKUPCONTROLLER_H
 
 #include "Controller.h"
-#include "TagPoint.h"
+#include "Tag.h"
 
 class PickUpController : virtual Controller
 {
@@ -12,7 +12,9 @@ public:
 
   void Reset() override;
   Result DoWork() override;
-  void SetTagData(vector<TagPoint> tags);
+
+  // Give the controller a list of visible april tags.
+  void SetTagData(vector<Tag> tags);
   bool ShouldInterrupt() override;
   bool HasWork() override;
 
@@ -20,13 +22,19 @@ public:
 
   float getDistance() {return blockDistance;}
   bool GetLockTarget() {return lockTarget;}
+
+  // Give the controller the current ultrasound readings. This is
+  // needed because ultrasound data is used to determine whether a
+  // block has been successfully picked up.
   void SetUltraSoundData(bool blockBlock);
 
   bool GetIgnoreCenter() {return ignoreCenterSonar;}
   bool GetTargetHeld() {return targetHeld;}
-
+  bool GetTargetFound(){return targetFound;}
   void SetCurrentTimeInMilliSecs( long int time );
-
+  
+  void SetCPFAState(CPFAState state) override;
+  CPFAState GetCPFAState() override;
 protected:
 
   void ProcessData();
@@ -44,7 +52,8 @@ private:
   bool timeOut;
   int nTargetsSeen;
   long int millTimer;
-
+  long int target_timer;
+  
   //yaw error to target block
   double blockYawError;
 
@@ -70,13 +79,15 @@ private:
   //before doing its work
   bool interupted = false;
 
+  CPFAState cpfa_state = start_state;
   //interupt in order to release control; i.e., this controller has finished interupting
   bool release_control = false;
 
   //this controller has control~
   bool has_control = false;
   
-  float reverse_to_before_reaquire_begin = 4.4;
+  //float reverse_to_before_reaquire_begin;
+
 };
 
 #endif // end header define

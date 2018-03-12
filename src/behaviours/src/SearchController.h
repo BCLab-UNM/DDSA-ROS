@@ -2,6 +2,8 @@
 #define SEARCH_CONTROLLER
 
 #include <random_numbers/random_numbers.h>
+#include <vector>
+#include <iostream>
 #include "Controller.h"
 #include <ros/console.h>
 
@@ -34,17 +36,33 @@ public:
   bool ShouldInterrupt() override;
   bool HasWork() override;
 
+  //CPFAState GetCPFAState() override;
+  //void SetCPFAState(CPFAState state) override;
+  
   // sets the value of the current location
   //void UpdateData(geometry_msgs::Pose2D currentLocation, geometry_msgs::Pose2D centerLocation);
+  CPFAState GetCPFAState() override;
+  void SetCPFAState(CPFAState state) override;
+  bool OutOfArena(Point location);
   void SetCurrentLocation(Point currentLocation);
+  Point GetCurrentLocation(); //qilu 12/2017
+  
   void SetCenterLocation(Point centerLocation);
+  void setObstacleAvoidance(bool turn_direction);
   void SetSuccesfullPickup();
+  void SetCurrentTimeInMilliSecs( long int time );
   Point SpiralSearching();
   void SetCheckPoint();
+  void setSearchType(bool informed_search);
+  void SetArenaSize(int size);
+  bool ReachedWaypoint();
+  void SetReachedWaypoint(bool reached);
   void ReachedCheckPoint();
   void ReachedSearchLocation();
   void SetSwarmSize(size_t size);
   void SetRoverIndex(size_t idx);
+  
+  
   float CalculateSides(int circuitNum, int slot);
 protected:
 
@@ -52,6 +70,8 @@ protected:
 
 private:
 
+  CPFAState cpfa_state = start_state;
+  int arena_size;
   random_numbers::RandomNumberGenerator* rng;
   Point currentLocation;
   Point centerLocation;
@@ -62,9 +82,12 @@ private:
   float sideLength = 1.5;
   //struct for returning data to ROS adapter
   Result result;
-
+  bool reachedWaypoint = false;
+  
+   
   // Search state
   // Flag to allow special behaviour for the first waypoint
+  long int current_time = 0;
   bool succesfullPickup = false;
   int cornerNum = 0;
   float corner = 2 * M_PI;

@@ -7,7 +7,7 @@ MapData::MapData()
     display_global_offset = false;
 }
 
-void MapData::addToGPSRoverPath(string rover, float x, float y)
+void MapData::AddToGPSRoverPath(string rover, float x, float y)
 {
   // Negate the y direction to orient the map so up is north.
   y = -y;
@@ -29,7 +29,7 @@ void MapData::addToGPSRoverPath(string rover, float x, float y)
 
 }
 
-void MapData::addToEncoderRoverPath(string rover, float x, float y)
+void MapData::AddToEncoderRoverPath(string rover, float x, float y)
 {
   // Negate the y direction to orient the map so up is north.
   y = -y;
@@ -51,8 +51,8 @@ void MapData::addToEncoderRoverPath(string rover, float x, float y)
 
 }
 
-
-void MapData::addToEKFRoverPath(string rover, float x, float y)
+// Expects the input y to be flipped with respect to y the map coordinate system
+void MapData::AddToEKFRoverPath(string rover, float x, float y)
 {
   // Negate the y direction to orient the map so up is north.
   y = -y;
@@ -74,7 +74,65 @@ void MapData::addToEKFRoverPath(string rover, float x, float y)
 
 }
 
-void MapData::addTargetLocation(string rover, float x, float y)
+// Expects the input y to be consistent with the map coordinate system
+int MapData::AddToWaypointPath(string rover, float x, float y)
+{
+  update_mutex.lock();
+
+  float offset_x = rover_global_offsets[rover].first;
+  float offset_y = rover_global_offsets[rover].second;
+  int this_id = waypoint_id_counter++; // Get the next waypoint id.
+
+  global_offset_waypoint_path[rover][this_id]=make_tuple(x+offset_x,y-offset_y,false);
+  waypoint_path[rover][this_id]=make_tuple(x,y,false);
+
+  update_mutex.unlock();
+
+  return this_id;
+}
+
+void MapData::RemoveFromWaypointPath(std::string rover, int id)
+{
+  update_mutex.lock();
+
+  global_offset_waypoint_path[rover].erase(id);
+  waypoint_path[rover].erase(id);
+
+  update_mutex.unlock();
+}
+
+void MapData::ReachedWaypoint(int waypoint_id)
+{
+  update_mutex.lock();
+
+  // Update the reached waypoint in both the normal waypoint path AND the global
+  // waypoint path. We must update both to prevent incorrect color display for
+  // reached waypoints when switching back and forth between the global frame.
+
+  for (auto &rover : global_offset_waypoint_path)
+  {
+    map<int, std::tuple<float,float,bool>>::iterator found;
+
+    if ((found = rover.second.find(waypoint_id)) != rover.second.end())
+    {
+      get<2>(found->second) = true;
+    }
+  }
+
+  for (auto &rover : waypoint_path)
+  {
+    map<int, std::tuple<float,float,bool>>::iterator found;
+
+    if ((found = rover.second.find(waypoint_id)) != rover.second.end())
+    {
+      get<2>(found->second) = true;
+    }
+  }
+   
+  update_mutex.unlock();
+}
+
+void MapData::AddTargetLocation(string rover, float x, float y)
 {
   //The QT drawing coordinate system is reversed from the robot coordinate system in the y direction
     y = -y;
@@ -86,7 +144,7 @@ void MapData::addTargetLocation(string rover, float x, float y)
 }
 
 
-void MapData::addCollectionPoint(string rover, float x, float y)
+void MapData::AddCollectionPoint(string rover, float x, float y)
 {
     // The QT drawing coordinate system is reversed from the robot coordinate system in the y direction
     y = -y;
@@ -97,14 +155,24 @@ void MapData::addCollectionPoint(string rover, float x, float y)
 
 }
 
-void MapData::setGlobalOffset(bool display)
+void MapData::SetGlobalOffset(bool display)
 {
     display_global_offset = display;
 }
 
-void MapData::setGlobalOffsetForRover(string rover, float x, float y)
+void MapData::SetGlobalOffsetForRover(string rover, float x, float y)
 {
     rover_global_offsets[rover] = pair<float,float>(x,y);
+}
+
+std::pair<float,float> MapData::GetGlobalOffsetForRover(string rover)
+{
+  return rover_global_offsets[rover];
+}
+
+bool MapData::IsDisplayingGlobalOffset()
+{
+  return display_global_offset;
 }
 
 void MapData::clear()
@@ -114,11 +182,17 @@ void MapData::clear()
     ekf_rover_path.clear();
     encoder_rover_path.clear();
     gps_rover_path.clear();
+    waypoint_path.clear();
+
     global_offset_ekf_rover_path.clear();
     global_offset_encoder_rover_path.clear();
     global_offset_gps_rover_path.clear();
+    global_offset_waypoint_path.clear();
+
     target_locations.clear();
     collection_points.clear();
+    waypoint_path.clear();
+    rover_mode.clear();
 
     update_mutex.unlock();
 }
@@ -128,19 +202,32 @@ void MapData::clear(string rover)
     update_mutex.lock();
 
     ekf_rover_path[rover].clear();
+    global_offset_ekf_rover_path[rover].clear();
+    ekf_rover_path.erase(rover);
+    global_offset_ekf_rover_path.erase(rover);
+
     encoder_rover_path[rover].clear();
+    global_offset_encoder_rover_path[rover].clear();
+    encoder_rover_path.erase(rover);
+    global_offset_encoder_rover_path.erase(rover);
+
     gps_rover_path[rover].clear();
     global_offset_ekf_rover_path[rover].clear();
     global_offset_encoder_rover_path[rover].clear();
     global_offset_gps_rover_path[rover].clear();
+    gps_rover_path.erase(rover);
+    global_offset_gps_rover_path.erase(rover);
+
+    waypoint_path[rover].clear();
+    global_offset_waypoint_path[rover].clear();
+    waypoint_path.erase(rover);
+    global_offset_waypoint_path.erase(rover);
+
     target_locations[rover].clear();
     collection_points[rover].clear();
-
-    ekf_rover_path.erase(rover);
-    encoder_rover_path.erase(rover);
-    gps_rover_path.erase(rover);
     target_locations.erase(rover);
     collection_points.erase(rover);
+    rover_mode.erase(rover);
 
     update_mutex.unlock();
 }
@@ -183,6 +270,28 @@ std::vector< std::pair<float,float> >* MapData::getTargetLocations(std::string r
 std::vector< std::pair<float,float> >* MapData::getCollectionPoints(std::string rover_name)
 {
     return &collection_points[rover_name];
+}
+
+std::map<int, std::tuple<float,float,bool> >* MapData::getWaypointPath(std::string rover_name) {
+    if(display_global_offset)
+    {
+      return &global_offset_waypoint_path[rover_name];
+    }
+
+    return &waypoint_path[rover_name];
+}
+
+void MapData::ResetAllWaypointPaths()
+{
+    waypoint_path.clear();
+    global_offset_waypoint_path.clear();
+    waypoint_id_counter = 0;
+}
+
+void MapData::ResetWaypointPathForSelectedRover(std::string rover)
+{
+   waypoint_path[rover].clear();
+   global_offset_waypoint_path[rover].clear();
 }
 
 // These functions report the maximum and minimum map values seen. This is useful for the GUI when it is calculating the map coordinate system.
@@ -304,6 +413,26 @@ float MapData::getMinEncoderY(string rover_name)
     }
 
     return min_encoder_seen_y[rover_name];
+}
+
+bool MapData::InManualMode(string rover_name)
+{
+   return rover_mode[rover_name] == 0;
+}
+
+void MapData::SetAutonomousMode(string rover_name)
+{
+   update_mutex.lock();
+   rover_mode[rover_name] = 1;
+   ResetWaypointPathForSelectedRover(rover_name);
+   update_mutex.unlock();
+}
+
+void MapData::SetManualMode(string rover_name)
+{
+   update_mutex.lock();
+   rover_mode[rover_name] = 0;
+   update_mutex.unlock();
 }
 
 void MapData::lock()
