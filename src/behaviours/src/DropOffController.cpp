@@ -114,7 +114,7 @@ Result DropOffController::DoWork() {
   double distanceToCenter = hypot(this->centerLocation.x - this->currentLocation.x, this->centerLocation.y - this->currentLocation.y);
    cout<<"TestTimeout: distanceToCenter="<<distanceToCenter<<endl; 
 	   
-  if(timerTimeElapsed > 50 && !seenEnoughCenterTags)
+  /*if(timerTimeElapsed > 50 && !seenEnoughCenterTags)
   {
 	  cout<<"TestStatusA: timeout and reset to center *****"<<endl;
 	  Point centerPoint;
@@ -138,7 +138,7 @@ Result DropOffController::DoWork() {
     SetCPFAState(return_to_nest);
 
     return result;	  
-  }
+  }*/
 
   //check to see if we are driving to the center location or if we need to drive in a circle and look.
   if (distanceToCenter > collectionPointVisualDistance && !circularCenterSearching && (count == 0)) {
