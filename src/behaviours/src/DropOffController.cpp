@@ -1,10 +1,21 @@
+// This file deals with the rover's ability to drop off cubes to the center collection disk
+// There are only two forms of driving: precision driving and waypoints
+// Precision Driving == any controller (drive, pickup, dropoff, obstacle)
+// continously feeding data into the feedback loop needed for drive controls
+// has more precise control over rover's movements, more accurate of less than 1cm
+
+// Waypoint Driving == drive controller feeding one data point (waypoint coordinates)
+// with an accuracy of at least 15cm
+
 #include "DropOffController.h"
 
+using namespace std;
 DropOffController::DropOffController() {
 
   reachedCollectionPoint = false;
-
+  // The result object is from the Result struct (see Result.h for more information)
   result.type = behavior;
+  // The b is of the BehaviorTrigger enum
   result.b = wait;
   result.wristAngle = 0.7;
   result.reset = false;
@@ -16,13 +27,19 @@ DropOffController::DropOffController() {
   seenEnoughCenterTags = false;
   prevCount = 0;
 
+  // Number of tags viewed
   countLeft = 0;
   countRight = 0;
+  pitches = 0.0;
 
   isPrecisionDriving = false;
   startWaypoint = false;
   timerTimeElapsed = -1;
-
+ 
+  currentLocation.x = 0;
+  currentLocation.y = 0;
+  currentLocation.theta = 0; 
+  returnTimer = 0;
 }
 
 DropOffController::~DropOffController() {
@@ -31,21 +48,37 @@ DropOffController::~DropOffController() {
 
 Result DropOffController::DoWork() {
 
-  cout << "8" << endl;
-
+  cout << "TestStatus: DropOffController::DoWork() " << endl;
+  // Getting the total tag count from the left and the right side of the rover
   int count = countLeft + countRight;
 
+  // If the timer has started
   if(timerTimeElapsed > -1) {
-
+    // Calcuate the elapsed time from the current time and the time since
     long int elapsed = current_time - returnTimer;
     timerTimeElapsed = elapsed/1e3; // Convert from milliseconds to seconds
   }
-
+  else
+  {
+	  returnTimer = current_time;
+	  timerTimeElapsed = 0;
+	  }
+  cout<<"TestTimeout:TestStatusA: timerTimeElapsed="<<timerTimeElapsed<<endl;
+  
+    //cout<<"TestTimeout: seenEnoughCenterTags="<<seenEnoughCenterTags<<endl;
+  //cout<<"TestTimeout: count="<<count<<endl;
+  /*(if(timerTimeElapsed > 60 && !seenEnoughCenterTags)//timeout the dropoff. If the rover can not find the collection disk in certain time, then give up. 
+  {
+	reachedCollectionPoint = true;
+	//returnTimer = current_time;  
+	//finalInterrupt = true;
+	
+	//cout<<"TestTimeout: give up dropoff...."<<endl;
+  }*/
   //if we are in the routine for exiting the circle once we have dropped a block off and reseting all our flags
   //to resart our search.
   if(reachedCollectionPoint)
   {
-    cout << "2" << endl;
     if (timerTimeElapsed >= 5)
     {
       if (finalInterrupt)
@@ -53,12 +86,13 @@ Result DropOffController::DoWork() {
         result.type = behavior;
         result.b = nextProcess;
         result.reset = true;
-        return result;
+        targetHeld = false; //qilu 02/2018
+        return result;       
       }
       else
       {
         finalInterrupt = true;
-        cout << "1" << endl;
+        //cout << "finalInterrupt, true" << endl;
       }
     }
     else if (timerTimeElapsed >= 0.1)
@@ -76,19 +110,52 @@ Result DropOffController::DoWork() {
     return result;
   }
 
+  // Calculates the shortest distance to the center location from the current location
   double distanceToCenter = hypot(this->centerLocation.x - this->currentLocation.x, this->centerLocation.y - this->currentLocation.y);
+   cout<<"TestTimeout: distanceToCenter="<<distanceToCenter<<endl; 
+	   
+  /*if(timerTimeElapsed > 50 && !seenEnoughCenterTags)
+  {
+	  cout<<"TestStatusA: timeout and reset to center *****"<<endl;
+	  Point centerPoint;
+	  centerPoint.x = 2.0 * cos(roverInitLocation.theta);
+      centerPoint.y = 2.0 * sin(roverInitLocation.theta);    
+	  
+	  returnTimer = current_time;
+	  
+	  result.type = waypoint;
+    // Clears all the waypoints in the vector
+    result.wpts.waypoints.clear();
+    // Adds the current location's point into the waypoint vector
+    result.wpts.waypoints.push_back(centerPoint);
+    // Do not start following waypoints
+    startWaypoint = false;
+    // Disable precision driving
+    isPrecisionDriving = false;
+    // Reset elapsed time
+    timerTimeElapsed = 0;
+    circularCenterSearching = true;
+    SetCPFAState(return_to_nest);
+
+    return result;	  
+  }*/
 
   //check to see if we are driving to the center location or if we need to drive in a circle and look.
   if (distanceToCenter > collectionPointVisualDistance && !circularCenterSearching && (count == 0)) {
-
+    // Sets driving mode to waypoint
     result.type = waypoint;
+    // Clears all the waypoints in the vector
     result.wpts.waypoints.clear();
+    // Adds the current location's point into the waypoint vector
     result.wpts.waypoints.push_back(this->centerLocation);
+    // Do not start following waypoints
     startWaypoint = false;
+    // Disable precision driving
     isPrecisionDriving = false;
-
+    // Reset elapsed time
     timerTimeElapsed = 0;
-
+    SetCPFAState(return_to_nest);
+    cout<<"TestStatusA: dropoff: set status to return to nest..."<<endl;
     return result;
 
   }
@@ -116,8 +183,8 @@ Result DropOffController::DoWork() {
     //center since we have a block with us and the above point is
     //greater than collectionPointVisualDistance from the center.
 
-    returnTimer = current_time;
-    timerTimeElapsed = 0;
+    //returnTimer = current_time; 
+    //timerTimeElapsed = 0; 
 
   }
 
@@ -135,7 +202,7 @@ Result DropOffController::DoWork() {
   if (count > 0 || seenEnoughCenterTags || prevCount > 0) //if we have a target and the center is located drive towards it.
   {
 
-    cout << "9" << endl;
+    cout << "TestStatus: drive to center" << endl;
     centerSeen = true;
 
     if (first_center && isPrecisionDriving)
@@ -150,44 +217,51 @@ Result DropOffController::DoWork() {
 
     if (seenEnoughCenterTags) //if we have seen enough tags
     {
-      if ((countLeft-5) > countRight) //and there are too many on the left
+	  if (pitches < -0.5) //turn to the left
       {
-        right = false; //then we say none on the right to cause us to turn right
-      }
-      else if ((countRight-5) > countLeft)
+		left = true;  
+        right = false; 
+        }
+      else if (pitches > 0.5)//turn to the right
       {
-        left = false; //or left in this case
-      }
+        left = false;
+        right = true;
+        }
     }
+    else //not seen enough tags, then drive forward
+    {
+		left = false;
+		right = false;
+		}
 
     float turnDirection = 1;
-    float current_search_velocity = searchVelocity;
-    
     //reverse tag rejection when we have seen enough tags that we are on a
     //trajectory in to the square we dont want to follow an edge.
-    //increase turning power to more strongly turn inwards or on occasion outwards
-    //drive more slowly so turning radius is smaller
-    if (seenEnoughCenterTags) 
-    {
-      turnDirection = -4;
-      current_search_velocity = 0.05;
-    }
+    if (seenEnoughCenterTags) turnDirection = -3;
 
     result.type = precisionDriving;
 
     //otherwise turn till tags on both sides of image then drive straight
-    if (!(left ^ right)) {
-      result.pd.cmdVel = current_search_velocity;
+    if (left && right) 
+    {
+	  result.pd.cmdVel = searchVelocity;
       result.pd.cmdAngularError = 0.0;
     }
-    else if (right) {
+    else if (right) 
+    {
+	  result.pd.cmdVel = -0.1 * turnDirection;
+      result.pd.cmdAngularError = centeringTurnRate*turnDirection;
+    }
+    else if (left)
+    {
       result.pd.cmdVel = -0.1 * turnDirection;
       result.pd.cmdAngularError = -centeringTurnRate*turnDirection;
     }
-    else if (left){
-      result.pd.cmdVel = -0.1 * turnDirection;
-      result.pd.cmdAngularError = centeringTurnRate*turnDirection;
-    }
+    else
+    {
+      result.pd.cmdVel = searchVelocity;
+      result.pd.cmdAngularError = 0.0;
+      }
 
     //must see greater than this many tags before assuming we are driving into the center and not along an edge.
     if (count > centerTagThreshold)
@@ -195,16 +269,16 @@ Result DropOffController::DoWork() {
       seenEnoughCenterTags = true; //we have driven far enough forward to be in and aligned with the circle.
       lastCenterTagThresholdTime = current_time;
     }
-    if (count > 0) //reset gaurd to prevent drop offs due to loosing tracking on tags for a frame or 2.
+    /*if (count > 0) // Reset guard to prevent drop offs due to loosing tracking on tags for a frame or 2.
     {
       lastCenterTagThresholdTime = current_time;
-    }
+    }*/
     //time since we dropped below countGuard tags
     long int elapsed = current_time - lastCenterTagThresholdTime;
     float timeSinceSeeingEnoughCenterTags = elapsed/1e3; // Convert from milliseconds to seconds
 
     //we have driven far enough forward to have passed over the circle.
-    if (count < 1 && seenEnoughCenterTags && timeSinceSeeingEnoughCenterTags > dropDelay) {
+    if (count < 5 && seenEnoughCenterTags && timeSinceSeeingEnoughCenterTags > dropDelay) {
       centerSeen = false;
     }
     centerApproach = true;
@@ -222,7 +296,7 @@ Result DropOffController::DoWork() {
     float timeSinceSeeingEnoughCenterTags = elapsed/1e3; // Convert from milliseconds to seconds
     if (timeSinceSeeingEnoughCenterTags > lostCenterCutoff)
     {
-      cout << "4" << endl;
+      cout << "TestStatus: back to drive to center base location..." << endl;
       //go back to drive to center base location instead of drop off attempt
       reachedCollectionPoint = false;
       seenEnoughCenterTags = false;
@@ -259,7 +333,16 @@ Result DropOffController::DoWork() {
   return result;
 }
 
+void DropOffController::SetRoverInitLocation(Point location) 
+{
+  roverInitLocation = location;
+  cout<<"TestStatus: rover init location=["<<roverInitLocation.x<<","<<roverInitLocation.y<<"]"<<endl;
+}
+
+
+// Reset to default values
 void DropOffController::Reset() {
+  cout<<"DropOffController::Reset()"<<endl;
   result.type = behavior;
   result.b = wait;
   result.pd.cmdVel = 0;
@@ -275,8 +358,9 @@ void DropOffController::Reset() {
 
   countLeft = 0;
   countRight = 0;
+  pitches = 0.0;
 
-
+  returnTimer = 0;//qilu 03/2018
   //reset flags
   reachedCollectionPoint = false;
   seenEnoughCenterTags = false;
@@ -287,13 +371,17 @@ void DropOffController::Reset() {
   targetHeld = false;
   startWaypoint = false;
   first_center = true;
-  cout << "6" << endl;
+  cpfa_state = start_state;
+  
+  
 
 }
 
-void DropOffController::SetTargetData(vector<TagPoint> tags) {
+
+void DropOffController::SetTagData(vector<Tag> tags) {
   countRight = 0;
   countLeft = 0;
+  pitches = 0.0;
 
   if(targetHeld) {
     // if a target is detected and we are looking for center tags
@@ -301,23 +389,30 @@ void DropOffController::SetTargetData(vector<TagPoint> tags) {
 
       // this loop is to get the number of center tags
       for (int i = 0; i < tags.size(); i++) {
-        if (tags[i].id == 256) {
+        if (tags[i].getID() == 256) {
 
           // checks if tag is on the right or left side of the image
-          if (tags[i].x + cameraOffsetCorrection > 0) {
+          if (tags[i].getPositionX() + cameraOffsetCorrection > 0) 
+          {
             countRight++;
-
-          } else {
+          } 
+          else 
+          {
             countLeft++;
           }
+          pitches += tags[i].calcPitch();
         }
       }
+      pitches /= (countLeft + countRight);
     }
   }
 
 }
 
+// Sets the driving mode (precision or waypoint) depending on the
+// number of tags seen on the left and the right side of the rover
 void DropOffController::ProcessData() {
+  // If there are tags seen
   if((countLeft + countRight) > 0) {
     isPrecisionDriving = true;
   } else {
@@ -325,25 +420,32 @@ void DropOffController::ProcessData() {
   }
 }
 
+
 bool DropOffController::ShouldInterrupt() {
   ProcessData();
   if (startWaypoint && !interrupt) {
     interrupt = true;
     precisionInterrupt = false;
+    cout<<"D: true d1"<<endl;
     return true;
   }
   else if (isPrecisionDriving && !precisionInterrupt) {
     precisionInterrupt = true;
+    cout<<"D: true d2"<<endl;
     return true;
   }
   if (finalInterrupt) {
+	  cout<<"D: true d3"<<endl;
     return true;
   }
 }
 
-bool DropOffController::HasWork() {
 
+bool DropOffController::HasWork() {
+  // If the timer has started
   if(timerTimeElapsed > -1) {
+    // Calcuate the elapsed time from the current time and the time since
+    // it dropped a target (cube) to the center collection disk
     long int elapsed = current_time - returnTimer;
     timerTimeElapsed = elapsed/1e3; // Convert from milliseconds to seconds
   }
@@ -351,31 +453,50 @@ bool DropOffController::HasWork() {
   if (circularCenterSearching && timerTimeElapsed < 2 && !isPrecisionDriving) {
     return false;
   }
-
   return ((startWaypoint || isPrecisionDriving));
 }
 
+// Checking function to see if the driving mode (precision or waypoint) has been changed
 bool DropOffController::IsChangingMode() {
   return isPrecisionDriving;
 }
 
+// Setter function to set the center location (the collection disk)
+// Of the Point class (x, y, theta)
 void DropOffController::SetCenterLocation(Point center) {
   centerLocation = center;
 }
 
+// Setter function to set the current location of the Point class (x, y, theta)
 void DropOffController::SetCurrentLocation(Point current) {
   currentLocation = current;
 }
 
+// Setter function to set the variable to true if a target (cube) has been picked up
+// And that it is currently holding the target (cube)
 void DropOffController::SetTargetPickedUp() {
   targetHeld = true;
 }
 
+// Setter function to stop the ultrasound from being blocked
+// In other words, to block the ultrasound or not
 void DropOffController::SetBlockBlockingUltrasound(bool blockBlock) {
   targetHeld = targetHeld || blockBlock;
 }
 
+// Setter function to set the current time (in milliseconds)
 void DropOffController::SetCurrentTimeInMilliSecs( long int time )
 {
   current_time = time;
 }
+CPFAState DropOffController::GetCPFAState() 
+{
+  return cpfa_state;
+}
+
+void DropOffController::SetCPFAState(CPFAState state) {
+  cpfa_state = state;
+  result.cpfa_state = state;
+}
+
+

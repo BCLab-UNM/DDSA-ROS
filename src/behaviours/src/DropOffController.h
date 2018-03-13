@@ -3,8 +3,11 @@
 #define HEADERFILE_H
 
 #include "Controller.h"
-#include "TagPoint.h"
+#include "Tag.h"
 #include <math.h>
+#include <vector>
+#include <std_msgs/Float32.h>
+#include <random_numbers/random_numbers.h>
 
 class DropOffController : virtual Controller
 {
@@ -21,16 +24,21 @@ public:
   void SetCenterLocation(Point center);
   void SetCurrentLocation(Point current);
   void SetTargetPickedUp();
+  void SetRoverInitLocation(Point location);
+  
   void SetBlockBlockingUltrasound(bool blockBlock);
-  void SetTargetData(vector<TagPoint> tags);
+  void SetTagData(std::vector<Tag> tags);
   bool HasTarget() {return targetHeld;}
 
   float GetSpinner() {return spinner;}
 
-  void UpdateData(vector<TagPoint> tags);
+  void UpdateData(std::vector<Tag> tags);
 
   void SetCurrentTimeInMilliSecs( long int time );
-
+  
+  void SetCPFAState(CPFAState state) override;
+  CPFAState GetCPFAState() override;
+  
 private:
 
   void ProcessData();
@@ -39,16 +47,16 @@ private:
 
   const float cameraOffsetCorrection = 0.020; //meters
   const float centeringTurnRate = 0.15; //radians
-  const int centerTagThreshold = 8;
+  const int centerTagThreshold = 1;//original is 8. Rovers move back and forth repeatedly if we set it to be a larger number;
   const int lostCenterCutoff = 4; //seconds before giving up on drop off beacuse center cannot be seen anymore
   const float collectionPointVisualDistance = 0.2; //in meters
   const float initialSpinSize = 0.05; //in meters aka 10cm
   const float spinSizeIncrement = 0.50; //in meters
   const float searchVelocity = 0.15; //in meters per second
-  const float dropDelay = 0.4; //delay in seconds for dropOff
+  const float dropDelay = 0.45; //delay in seconds for dropOff
 
 
-
+  random_numbers::RandomNumberGenerator* rng;
   //Instance Variables
 
   /*
@@ -75,11 +83,13 @@ private:
   //Count of tags on the left and right, respectively
   int countLeft;
   int countRight;
-
+  
+  float pitches;
   //Center and current locations as of the last call to setLocationData
   Point centerLocation;
   Point currentLocation;
 
+  Point roverInitLocation;
   //Time since modeTimer was started, in seconds
   float timerTimeElapsed;
 
@@ -89,10 +99,9 @@ private:
   /*
      *  Flags
      */
-
+  
   //Flag indicating that a target has been picked up and is held
   bool targetHeld;
-
   //Flag indicating that we're in the center
   bool reachedCollectionPoint;
 
@@ -119,6 +128,7 @@ private:
   bool precisionInterrupt = false;
   bool finalInterrupt = false;
   bool first_center = true;
-
+  CPFAState cpfa_state = start_state;
 };
 #endif // end header define
+
