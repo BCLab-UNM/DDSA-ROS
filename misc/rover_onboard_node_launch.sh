@@ -1,6 +1,5 @@
 #!/bin/bash
 echo "running pkill on old rosnodes"
-# Todo: replace usb_cam_node with video_stream_opencv here
 pkill usb_cam_node
 pkill behaviours
 pkill obstacle
@@ -57,16 +56,7 @@ echo "Loading calibration data and swarmie_control sketch"
 ./load_swarmie_control_sketch.sh $2
 
 echo "rosrun tf static_transform_publisher"
-<<<<<<< HEAD
-nohup rosrun tf static_transform_publisher __name:=$HOSTNAME\_BASE2CAM 0.12 -0.03 0.195 -1.57 0 -2.22 /$HOSTNAME/base_link /$HOSTNAME/camera_link 100 &
 
-echo "rosrun usb_cam"
-nohup rosrun usb_cam usb_cam_node __name:=$HOSTNAME\_CAMERA /$HOSTNAME\_CAMERA/image_raw:=/$HOSTNAME/camera/image _camera_info_url:=file://$HOME/SwarmBaseCode-ROS/camera_info/head_camera.yaml _image_width:=320 _image_height:=240 &
-
-echo "rosrun behaviours"
-nohup rosrun behaviours behaviours &
-
-=======
 nohup > logs/$HOSTNAME"_transform_log.txt" rosrun tf static_transform_publisher __name:=$HOSTNAME\_BASE2CAM 0.12 -0.03 0.195 -1.57 0 -2.22 /$HOSTNAME/base_link /$HOSTNAME/camera_link 100 &
 echo "rosrun video_stream_opencv"
 
@@ -78,7 +68,6 @@ echo $(realpath ..)/camera_info/head_camera.yaml
 
 echo "rosrun behaviours"
 nohup > logs/$HOSTNAME"_behaviours_log.txt" rosrun behaviours behaviours &
->>>>>>> f6db1c09141a11ec4ae3bc4d6206ef314c01dd98
 echo "rosrun obstacle_detection"
 nohup rosrun obstacle_detection obstacle &
 
