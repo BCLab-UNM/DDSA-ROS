@@ -321,9 +321,10 @@ bool LogicController::HasWork()
 
 int LogicController::getCollisionCalls()
 {
+	//cout<<"TestStatusB: collision call frequency="<< current_time<<endl;
 	if(obstacleController.HasWork())
 	{
-		cout<<"ObstacleState: get one obstacle avoidance call..."<<endl;
+		//cout<<"ObstacleState: get one obstacle avoidance call..."<<endl;
 		return 1;
 		}
 		
