@@ -1825,8 +1825,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
                                    /* dark orange   */ QColor(255, 140,   0),
                                    /* gray          */ QColor(155, 155, 155),
                                    /* hot pink      */ QColor(255, 105, 180),
-                                   /* chocolate     */ QColor(210, 105,  30),
-                                   /* indigo        */ QColor( 75,   0, 130) };
+                                   /* chocolate     */ QColor(210, 105,  30) };
 
         /**
          * The distance to the rover from a corner position is calculated differently
