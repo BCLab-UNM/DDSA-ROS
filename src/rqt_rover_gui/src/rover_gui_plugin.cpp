@@ -1819,10 +1819,11 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
         QString rovers[8] = {"achilles", "aeneas", "ajax", "diomedes", "hector", "paris", "thor", "zeus"};
 
         QColor rover_colors[8] = { /* green         */ QColor(  0, 255,   0),
-                                   /* yellow        */ QColor(255, 255,   0),
-                                   /* white         */ QColor(255, 255, 255),
-                                   /* red           */ QColor(255,   0,   0),
+                                   /* black         */ QColor(0, 0,   0),
                                    /* deep sky blue */ QColor(  0, 191, 255),
+                                   /* red           */ QColor(255,   0,   0),
+                                   /* dark orange   */ QColor(255, 140,   0),
+                                   /* gray          */ QColor(155, 155, 155),
                                    /* hot pink      */ QColor(255, 105, 180),
                                    /* chocolate     */ QColor(210, 105,  30),
                                    /* indigo        */ QColor( 75,   0, 130) };
