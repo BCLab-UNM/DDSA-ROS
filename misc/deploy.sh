@@ -109,7 +109,6 @@ Run()
 	gnome-terminal --tab -x bash -c "echo -n -e '\033]0;$roverIP\007';
 		ssh -t swarmie@$roverIP 'echo 'Running $roverIP';
     cd $dirName/misc;
-
 		./rover_onboard_node_launch.sh $hostName $calFile;
 		exit 1;
 		exit 1;
@@ -676,4 +675,3 @@ else
 fi
 
 done
-
