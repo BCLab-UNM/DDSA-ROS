@@ -100,7 +100,7 @@ int currentMode = 0;
 const float behaviourLoopTimeStep = 0.1; // time between the behaviour loop calls
 const float status_publish_interval = 1;
 const float heartbeat_publish_interval = 2;
-const float waypointTolerance = 0.1; //10 cm tolerance.
+//const float waypointTolerance = 1; //10 cm tolerance. //qilu no reference
 
 // used for calling code once but not in main
 bool initilized = false;
@@ -114,7 +114,7 @@ long int startTime = 0;
 float minutesTime = 0;
 float hoursTime = 0;
 
-float drift_tolerance = 0.5; // meters
+float drift_tolerance = 0.5;
 
 Result result;
 
@@ -300,56 +300,53 @@ void behaviourStateMachine(const ros::TimerEvent&)
   // time since timerStartTime was set to current time
   timerTimeElapsed = time(0) - timerStartTime;
   
-  // init code goes here. (code that runs only once at start of
-  // auto mode but wont work in main goes here)
-  if (!initilized)
-  {
-
-    if (timerTimeElapsed > startDelayInSeconds)
-    {
-
-      // initialization has run
-      //cout<<"initialization has run..."<<endl;
-      initilized = true;
-      //TODO: this just sets center to 0 over and over and needs to change
-      Point centerOdom;
-      centerOdom.x = 1.3 * cos(currentLocation.theta);
-      centerOdom.y = 1.3 * sin(currentLocation.theta);
-      centerOdom.theta = centerLocation.theta;
-      logicController.SetCenterLocationOdom(centerOdom);
-      
-      Point centerMap;
-      centerMap.x = currentLocationMap.x + (1.3 * cos(currentLocationMap.theta));
-      centerMap.y = currentLocationMap.y + (1.3 * sin(currentLocationMap.theta));
-      centerMap.theta = centerLocationMap.theta;
-      logicController.SetCenterLocationMap(centerMap);
-      
-      centerLocationMap.x = centerMap.x;
-      centerLocationMap.y = centerMap.y;
-      
-      centerLocationOdom.x = centerOdom.x;
-      centerLocationOdom.y = centerOdom.y;
-      
-      startTime = getROSTimeInMilliSecs();
-      
-	  logicController.SetArenaSize(arena_dim);
-	  
       std_msgs::String name_msg;
       name_msg.data = publishedName;
       namePublish.publish(name_msg);
-  }
-    else
-    {
-      return;
-    }
-    
-  }
 
   // Robot is in automode
   if (currentMode == 2 || currentMode == 3) 
   {
+	    // init code goes here. (code that runs only once at start of
+  // auto mode but wont work in main goes here)
+      if (!initilized)
+      {
+		if (timerTimeElapsed > startDelayInSeconds)
+	    {
+	
+	      // initialization has run
+	      //cout<<"initialization has run..."<<endl;
+	      initilized = true;
+	      //TODO: this just sets center to 0 over and over and needs to change
+	      Point centerOdom;
+	      centerOdom.x = 1.308 * cos(currentLocation.theta);
+	      centerOdom.y = 1.308 * sin(currentLocation.theta);
+	      centerOdom.theta = centerLocation.theta;
+	      logicController.SetCenterLocationOdom(centerOdom);
+	      
+	      Point centerMap;
+	      centerMap.x = currentLocationMap.x + (1.308 * cos(currentLocationMap.theta));
+	      centerMap.y = currentLocationMap.y + (1.308 * sin(currentLocationMap.theta));
+	      centerMap.theta = centerLocationMap.theta;
+	      logicController.SetCenterLocationMap(centerMap);
+	      
+	      centerLocationMap.x = centerMap.x;
+	      centerLocationMap.y = centerMap.y;
+	      
+	      centerLocationOdom.x = centerOdom.x;
+	      centerLocationOdom.y = centerOdom.y;
+	      
+	      startTime = getROSTimeInMilliSecs();
+	      
+		  logicController.SetArenaSize(arena_dim);
+	    }
+	    else
+	    {
+	      return;
+	    }
+    }
     if(!first_auto) {
-      cout <<"tag:" << publishedName << " - known rovers list:\n";
+      cout <<"SpiralTest: tag:" << publishedName << " - known rovers list:\n";
       for(size_t i = 0; i < rover_names.size(); i++) {
         cout << "\t" <<"tag:"<< rover_names[i] << "\n";
       }
@@ -367,7 +364,11 @@ void behaviourStateMachine(const ros::TimerEvent&)
     logicController.SetCurrentTimeInMilliSecs( getROSTimeInMilliSecs() );
     
     //update center location
-    logicController.SetCenterLocationOdom( updateCenterLocation() );
+    //cout<<"SpiralTest: Update center location..."<<logicController.CreatedFirstWayPoint()<<endl;
+    if(logicController.CreatedFirstWayPoint())
+    {
+		logicController.SetCenterLocationOdom( updateCenterLocation() );
+		}
     
     //ask logic controller for the next set of actuator commands
     result = logicController.DoWork();
@@ -421,7 +422,7 @@ void behaviourStateMachine(const ros::TimerEvent&)
     
     collision_msg.data = logicController.getCollisionCalls();
     obstaclePubisher.publish(collision_msg);
-   
+    	
     //publishHandeling here
     //logicController.getPublishData(); suggested
     //adds a blank space between sets of debugging data to easily tell one tick from the next
@@ -526,15 +527,14 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 							    tagPose.pose.orientation.w ) );
       tags.push_back(loc);
     }
-    if(num_center_tags >= 5)// reset the location of the center
+   
+    if(num_center_tags >= 5)
     {
-		//cout<<"TestStatusA: currentLocation=["<<currentLocation.x<<", "<<currentLocation.y<<"]"<<endl;
+		//cout<<"SpiralTest: "<<publishedName<<" update center..."<<endl;
 		centerLocationMap.x = currentLocationMap.x + 1.0*cos(currentLocationMap.theta);
         centerLocationMap.y = currentLocationMap.y + 1.0*sin(currentLocationMap.theta);
         centerLocationOdom.x = currentLocation.x + 1.0*cos(currentLocation.theta);
         centerLocationOdom.y = currentLocation.y + + 1.0*sin(currentLocation.theta);  
-        //cout<<"TestStatusA: centerLocationMap=["<<centerLocationMap.x<<", "<<centerLocationMap.y<<"]"<<endl;
-        //cout<<"TestStatusA: centerLocationOdom=["<<centerLocationOdom.x<<", "<<centerLocationOdom.y<<"]"<<endl;
 	}
     
         
@@ -832,7 +832,6 @@ void transformMapCentertoOdom()
     infoLogPublisher.publish(msg);
     cout << msg.data << endl;
   }
-  
   // Use the position and orientation provided by the ros transform.
   centerLocationMapRef.x = odomPose.pose.position.x; //set centerLocation in odom frame
   centerLocationMapRef.y = odomPose.pose.position.y;
@@ -843,7 +842,6 @@ void transformMapCentertoOdom()
   float ydiff = centerLocationMapRef.y - centerLocationOdom.y;
   
   float diff = hypot(xdiff, ydiff);
-  
   if (diff > drift_tolerance)
   {
     centerLocationOdom.x += xdiff/diff;

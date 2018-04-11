@@ -63,7 +63,7 @@ Result DropOffController::DoWork() {
 	  returnTimer = current_time;
 	  timerTimeElapsed = 0;
 	  }
-  cout<<"TestTimeout:TestStatusA: timerTimeElapsed="<<timerTimeElapsed<<endl;
+  //cout<<"TestTimeout:TestStatusA: timerTimeElapsed="<<timerTimeElapsed<<endl;
   
     //cout<<"TestTimeout: seenEnoughCenterTags="<<seenEnoughCenterTags<<endl;
   //cout<<"TestTimeout: count="<<count<<endl;
@@ -112,7 +112,7 @@ Result DropOffController::DoWork() {
 
   // Calculates the shortest distance to the center location from the current location
   double distanceToCenter = hypot(this->centerLocation.x - this->currentLocation.x, this->centerLocation.y - this->currentLocation.y);
-   cout<<"TestTimeout: distanceToCenter="<<distanceToCenter<<endl; 
+   //cout<<"TestTimeout: distanceToCenter="<<distanceToCenter<<endl; 
 	   
   /*if(timerTimeElapsed > 50 && !seenEnoughCenterTags)
   {
@@ -155,7 +155,7 @@ Result DropOffController::DoWork() {
     // Reset elapsed time
     timerTimeElapsed = 0;
     SetCPFAState(return_to_nest);
-    cout<<"TestStatusA: dropoff: set status to return to nest..."<<endl;
+    //cout<<"TestStatusA: dropoff: set status to return to nest..."<<endl;
     return result;
 
   }
@@ -202,7 +202,7 @@ Result DropOffController::DoWork() {
   if (count > 0 || seenEnoughCenterTags || prevCount > 0) //if we have a target and the center is located drive towards it.
   {
 
-    cout << "TestStatus: drive to center" << endl;
+    //cout << "TestStatus: drive to center" << endl;
     centerSeen = true;
 
     if (first_center && isPrecisionDriving)
@@ -336,7 +336,7 @@ Result DropOffController::DoWork() {
 void DropOffController::SetRoverInitLocation(Point location) 
 {
   roverInitLocation = location;
-  cout<<"TestStatus: rover init location=["<<roverInitLocation.x<<","<<roverInitLocation.y<<"]"<<endl;
+  //cout<<"TestStatus: rover init location=["<<roverInitLocation.x<<","<<roverInitLocation.y<<"]"<<endl;
 }
 
 
@@ -426,16 +426,16 @@ bool DropOffController::ShouldInterrupt() {
   if (startWaypoint && !interrupt) {
     interrupt = true;
     precisionInterrupt = false;
-    cout<<"D: true d1"<<endl;
+    //cout<<"D: true d1"<<endl;
     return true;
   }
   else if (isPrecisionDriving && !precisionInterrupt) {
     precisionInterrupt = true;
-    cout<<"D: true d2"<<endl;
+    //cout<<"D: true d2"<<endl;
     return true;
   }
   if (finalInterrupt) {
-	  cout<<"D: true d3"<<endl;
+	  //cout<<"D: true d3"<<endl;
     return true;
   }
 }

@@ -1878,15 +1878,23 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
           QPointF( 1.308,  0.000), //             + 30 cm distance_from_center_of_rover_to_edge_of_rover
           QPointF( 0.000,  1.308), // 1.308m = 0.508m + 0.5m + 0.3m
 
+           
           /* corner rovers: Northeast, Southwest */
-          QPointF( 1.072,  1.072), // 1.072 = diagonal_distance_from_center_to_edge_of_collection_zone
-          QPointF(-1.072, -1.072), //             + diagonal_distance_to_move_50cm
+          /* QPointF( 1.074,  1.074), // 1.074 = diagonal_distance_from_center_to_edge_of_collection_zone
+          QPointF(-1.074, -1.074), //             + diagonal_distance_to_move_50cm
                                    //             + diagonal_distance_to_move_30cm
-                                   // 1.072m = 0.508 + 0.354 + 0.212
-
+                                   // 1.074m = 0.508 + 0.354 + 0.212; 
+                                   // the other distance is 0.925; 0.925^2 * 0.925^2 = 1.308^2
           /* corner rovers: Northwest, Southeast */
-          QPointF(-1.072,  1.072),
-          QPointF( 1.072, -1.072)
+          
+          /*QPointF(-1.074,  1.074),
+          QPointF( 1.074, -1.074) */
+          
+          QPointF( 0.925,  0.925),
+          QPointF(-0.925, -0.925), 
+          QPointF(-0.925,  0.925),
+          QPointF( 0.925, -0.925)
+         
         };
 
         /* In this case, the yaw is the value that turns rover "left" and "right" */

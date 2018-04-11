@@ -55,8 +55,9 @@ void ObstacleController::avoidObstacle() {
     result.type = precisionDriving;
     result.pd.setPointVel = 0.0;
     
-    double vel = rng->uniformReal(-0.03, -0.02);
-    result.pd.cmdVel = vel;
+    //double vel = rng->uniformReal(-0.1, -0.02);
+    //cout<<"AvoidanceTest: 1. vel="<<vel<<endl;
+    //result.pd.cmdVel = vel;
     result.pd.cmdVel = 0;
     result.pd.setPointYaw = 0;
     
@@ -90,9 +91,9 @@ void ObstacleController::avoidCollectionZone() {
       }   
     result.pd.setPointVel = 0.0;
     result.pd.cmdVel = 0;
-	double vel = rng->uniformReal(-0.03, -0.02);
-      
-    result.pd.cmdVel = vel; //qilu 04/2018
+	//double vel = rng->uniformReal(-0.1, -0.02);
+    // cout<<"AvoidanceTest: 2. vel="<<vel<<endl; 
+    //result.pd.cmdVel = vel; //qilu 04/2018
     result.pd.setPointYaw = 0;
 }
 
@@ -119,22 +120,24 @@ Result ObstacleController::DoWork() {
     result.type = waypoint; 
     result.PIDMode = FAST_PID; //use fast pid for waypoints
     Point forward;            //waypoint is directly ahead of current heading
-    //if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
-    //{
+    if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
+    {
 		cout<<"TestStatusA: ****sample another location to avoid collection disk..."<<endl;
-		double stepSize = rng->uniformReal(0.2, 0.5);
-		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
-        forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
-	//}
-    /*else
+		//double stepSize = rng->uniformReal(1.0, 2.0);
+		forward.x = currentLocation.x + (0.25 * cos(currentLocation.theta));
+        forward.y = currentLocation.y + (0.25 * sin(currentLocation.theta));
+	}
+    else
     {
 		cout<<"TestStatusA: ****normal sample wpt..."<<endl;
-		double stepSize = rng->uniformReal(0.3, 0.5);
-		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
-        forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
-    }*/
-    //haveAvoidCollectionZone = false;
-    //cout<<"TestStatusA: obstacleCTRL sampled waypoint=["<<forward.x<<","<<forward.y<<"]"<<endl;
+		forward.x = currentLocation.x + (0.5 * cos(currentLocation.theta));
+        forward.y = currentLocation.y + (0.5 * sin(currentLocation.theta));
+    }
+
+    /*double stepSize = rng->uniformReal(0.3, 0.6);
+    forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
+    forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
+    */
     result.wpts.waypoints.clear();
     result.wpts.waypoints.push_back(forward);
   }

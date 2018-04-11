@@ -61,8 +61,7 @@ public:
   void ReachedSearchLocation();
   void SetSwarmSize(size_t size);
   void SetRoverIndex(size_t idx);
-  
-  
+  bool CreatedFirstWayPoint();  
   float CalculateSides(int circuitNum, int slot);
 protected:
 
@@ -82,8 +81,6 @@ private:
   float sideLength = 1.5;
   //struct for returning data to ROS adapter
   Result result;
-  bool reachedWaypoint = false;
-  
    
   // Search state
   // Flag to allow special behaviour for the first waypoint
@@ -99,8 +96,8 @@ private:
   int stepsIntoSpiral = 0;
   const float spacing = 0.41;
   bool reachedFirstCorner = false;
-
-
+  bool reachedWaypoint = false;
+  bool firstWayPointCreated = false; 
 };
 
 #endif /* SEARCH_CONTROLLER */
