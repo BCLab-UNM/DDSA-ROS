@@ -100,7 +100,7 @@ int currentMode = 0;
 const float behaviourLoopTimeStep = 0.1; // time between the behaviour loop calls
 const float status_publish_interval = 1;
 const float heartbeat_publish_interval = 2;
-const float waypointTolerance = 0.1; //10 cm tolerance.
+//const float waypointTolerance = 1; //10 cm tolerance. //qilu no reference
 
 // used for calling code once but not in main
 bool initilized = false;
@@ -300,54 +300,51 @@ void behaviourStateMachine(const ros::TimerEvent&)
   // time since timerStartTime was set to current time
   timerTimeElapsed = time(0) - timerStartTime;
   
-  // init code goes here. (code that runs only once at start of
-  // auto mode but wont work in main goes here)
-  if (!initilized)
-  {
-
-    if (timerTimeElapsed > startDelayInSeconds)
-    {
-
-      // initialization has run
-      //cout<<"initialization has run..."<<endl;
-      initilized = true;
-      //TODO: this just sets center to 0 over and over and needs to change
-      Point centerOdom;
-      centerOdom.x = 1.3 * cos(currentLocation.theta);
-      centerOdom.y = 1.3 * sin(currentLocation.theta);
-      centerOdom.theta = centerLocation.theta;
-      logicController.SetCenterLocationOdom(centerOdom);
-      
-      Point centerMap;
-      centerMap.x = currentLocationMap.x + (1.3 * cos(currentLocationMap.theta));
-      centerMap.y = currentLocationMap.y + (1.3 * sin(currentLocationMap.theta));
-      centerMap.theta = centerLocationMap.theta;
-      logicController.SetCenterLocationMap(centerMap);
-      
-      centerLocationMap.x = centerMap.x;
-      centerLocationMap.y = centerMap.y;
-      
-      centerLocationOdom.x = centerOdom.x;
-      centerLocationOdom.y = centerOdom.y;
-      
-      startTime = getROSTimeInMilliSecs();
-      
-	  logicController.SetArenaSize(arena_dim);
-	  
       std_msgs::String name_msg;
       name_msg.data = publishedName;
       namePublish.publish(name_msg);
-  }
-    else
-    {
-      return;
-    }
-    
-  }
 
   // Robot is in automode
   if (currentMode == 2 || currentMode == 3) 
   {
+	    // init code goes here. (code that runs only once at start of
+  // auto mode but wont work in main goes here)
+      if (!initilized)
+      {
+		if (timerTimeElapsed > startDelayInSeconds)
+	    {
+	
+	      // initialization has run
+	      //cout<<"initialization has run..."<<endl;
+	      initilized = true;
+	      //TODO: this just sets center to 0 over and over and needs to change
+	      Point centerOdom;
+	      centerOdom.x = 1.308 * cos(currentLocation.theta);
+	      centerOdom.y = 1.308 * sin(currentLocation.theta);
+	      centerOdom.theta = centerLocation.theta;
+	      logicController.SetCenterLocationOdom(centerOdom);
+	      
+	      Point centerMap;
+	      centerMap.x = currentLocationMap.x + (1.308 * cos(currentLocationMap.theta));
+	      centerMap.y = currentLocationMap.y + (1.308 * sin(currentLocationMap.theta));
+	      centerMap.theta = centerLocationMap.theta;
+	      logicController.SetCenterLocationMap(centerMap);
+	      
+	      centerLocationMap.x = centerMap.x;
+	      centerLocationMap.y = centerMap.y;
+	      
+	      centerLocationOdom.x = centerOdom.x;
+	      centerLocationOdom.y = centerOdom.y;
+	      
+	      startTime = getROSTimeInMilliSecs();
+	      
+		  logicController.SetArenaSize(arena_dim);
+	    }
+	    else
+	    {
+	      return;
+	    }
+    }
     if(!first_auto) {
       cout <<"tag:" << publishedName << " - known rovers list:\n";
       for(size_t i = 0; i < rover_names.size(); i++) {
@@ -367,7 +364,10 @@ void behaviourStateMachine(const ros::TimerEvent&)
     logicController.SetCurrentTimeInMilliSecs( getROSTimeInMilliSecs() );
     
     //update center location
+    if(logicController.CreatedFirstWayPoint())
+    {
     logicController.SetCenterLocationOdom( updateCenterLocation() );
+		}
     
     //ask logic controller for the next set of actuator commands
     result = logicController.DoWork();
