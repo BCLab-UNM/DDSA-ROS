@@ -134,7 +134,7 @@ bool RangeController::HasWork()
   bool has_work = false;
   if (enabled && range != NULL && !range->isInside(current_location)) 
     {
-      cout << "Range controller has work:  current location (" << current_location.x << ", " << current_location.y << ")" << endl;
+      //cout << "Range controller has work:  current location (" << current_location.x << ", " << current_location.y << ")" << endl;
       has_work = true;
       // Report that there is work to be done if the rover is outside the specified forgaing range.
       // Note use of shortcircuiting "and"
