@@ -65,8 +65,8 @@ Result LogicController::DoWork()
 
     //check what controllers have work to do all that say yes will be added to the priority queue.
     for(PrioritizedController cntrlr : prioritizedControllers) {
-		cout <<"priority="<<cntrlr.priority<<endl;
-		cout<< "name="<<cntrlr.controller <<endl;
+		//cout <<"priority="<<cntrlr.priority<<endl;
+		//cout<< "name="<<cntrlr.controller <<endl;
       if(cntrlr.controller->HasWork()) {
         if (cntrlr.priority < 0) {
           continue;
@@ -182,14 +182,14 @@ Result LogicController::DoWork()
     // priority queue so it must be checked here.
     if (result.type == behavior) 
     {
-		cout <<"logic state== waiting; result type == behavior"<<endl;
+		//cout <<"logic state== waiting; result type == behavior"<<endl;
 		if(driveController.ShouldInterrupt()) 
         {
           logicState = LOGIC_STATE_INTERRUPT;
          //cout<<"SwitchStatus: driver controller interrupt...true"<<endl;
           if(processState == PROCCESS_STATE_SEARCHING)
           {
-		   cout<<"TestStatusSwitchStatus: searchCtrl set reached..."<<endl;
+		  // cout<<"TestStatusSwitchStatus: searchCtrl set reached..."<<endl;
 		    searchController.SetReachedWaypoint(true);
 		    
 		  } 
@@ -378,7 +378,7 @@ void LogicController::controllerInterconnect()
 	} 
 	if(obstacleController.GetCPFAState() == reached_nest)
 	{
-		cout<<"TestStatusSwitchStatus: interconnect, set reached_nest..."<<endl;
+		//cout<<"TestStatusSwitchStatus: interconnect, set reached_nest..."<<endl;
 		searchController.SetCPFAState(reached_nest);
 		//searchController.SetReachedWaypoint(true);
 		obstacleController.SetCPFAState(start_state);
@@ -393,7 +393,7 @@ void LogicController::controllerInterconnect()
 		  if(obstacleController.HasWork()) 
 		  {
 			  obstacleController.SetCPFAState(return_to_nest);
-		      cout<<"TestStatusA: obstacle set to return to nest by dropoff..."<<endl;
+		      //cout<<"TestStatusA: obstacle set to return to nest by dropoff..."<<endl;
 		  }
 		
 	  }
@@ -545,6 +545,11 @@ void LogicController::SetRoverIndex(size_t idx) {
   searchController.SetRoverIndex(idx);
 
 }
+
+bool LogicController::CreatedFirstWayPoint()
+{
+	return searchController.CreatedFirstWayPoint();
+	}
 
 Point LogicController::GetCurrentLocation() {
   return searchController.GetCurrentLocation();

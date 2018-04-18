@@ -61,7 +61,7 @@ public:
   void ReachedSearchLocation();
   void SetSwarmSize(size_t size);
   void SetRoverIndex(size_t idx);
-  
+  bool CreatedFirstWayPoint();  
   
   float CalculateSides(int circuitNum, int slot);
 protected:
@@ -100,7 +100,7 @@ private:
   const float spacing = 0.41;
   bool reachedFirstCorner = false;
 
-
+  bool firstWayPointCreated = false; 
 };
 
 #endif /* SEARCH_CONTROLLER */

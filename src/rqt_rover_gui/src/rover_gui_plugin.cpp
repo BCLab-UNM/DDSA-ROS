@@ -1738,7 +1738,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
     }
     else if (ui.prelim_radio_button->isChecked() && !ui.create_savable_world_checkbox->isChecked())
     {
-        arena_dim = 8;//origin is 15;
+        arena_dim = 15;
         addPrelimsWalls();
         emit sendInfoLogMessage(QString("Set arena size to ")+QString::number(arena_dim)+"x"+QString::number(arena_dim));
     }
@@ -1879,14 +1879,14 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
           QPointF( 0.000,  1.308), // 1.308m = 0.508m + 0.5m + 0.3m
 
           /* corner rovers: Northeast, Southwest */
-          QPointF( 1.072,  1.072), // 1.072 = diagonal_distance_from_center_to_edge_of_collection_zone
-          QPointF(-1.072, -1.072), //             + diagonal_distance_to_move_50cm
+          QPointF( 1.074,  1.074), // 1.074 = diagonal_distance_from_center_to_edge_of_collection_zone
+          QPointF(-1.074, -1.074), //             + diagonal_distance_to_move_50cm
                                    //             + diagonal_distance_to_move_30cm
-                                   // 1.072m = 0.508 + 0.354 + 0.212
+                                   // 1.074m = 0.508 + 0.354 + 0.212
 
           /* corner rovers: Northwest, Southeast */
-          QPointF(-1.072,  1.072),
-          QPointF( 1.072, -1.072)
+          QPointF(-1.074,  1.074),
+          QPointF( 1.074, -1.074)
         };
 
         /* In this case, the yaw is the value that turns rover "left" and "right" */

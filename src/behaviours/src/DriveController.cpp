@@ -23,7 +23,7 @@ void DriveController::Reset()
   {
     stateMachineState = STATE_MACHINE_WAYPOINTS;
   }
-  cout<<"TestStatus: stateMachineState="<<stateMachineState<<endl;
+  //cout<<"TestStatus: stateMachineState="<<stateMachineState<<endl;
 }
 void DriveController::SetCurrentTimeInMilliSecs( long int time )
 {
@@ -109,7 +109,7 @@ Result DriveController::DoWork()
     {
       result.wpts.waypoints.clear();//qilu 02/2018
       stateMachineState = STATE_MACHINE_WAITING;
-      cout<<"TestStatus: waiting"<<endl;
+      //cout<<"TestStatus: waiting"<<endl;
       result.type = behavior;
       interupt = true; //reach goal and interupt
       return result;
@@ -145,7 +145,7 @@ Result DriveController::DoWork()
     if (abs_error > rotateOnlyAngleTolerance)
     {
       // rotate but dont drive.
-      cout<<"TestStatus: rotate but dont drive"<<endl;
+      //cout<<"TestStatus: rotate but dont drive"<<endl;
       if (result.PIDMode == FAST_PID)
       {
         fastPID(0.0, errorYaw, result.pd.setPointVel, result.pd.setPointYaw);
@@ -156,7 +156,7 @@ Result DriveController::DoWork()
     else
     {
       //move to differential drive step
-      cout<<"TestStatus:: move to differential drive step..."<<endl;
+      //cout<<"TestStatus:: move to differential drive step..."<<endl;
       stateMachineState = STATE_MACHINE_SKID_STEER;
 
       //fall through on purpose.
@@ -242,7 +242,7 @@ void DriveController::ProcessData()
     result.b = noChange;
 
     if(result.reset) {
-		cout<<"TestStatus: reset driver waypoints..."<<endl;
+		//cout<<"TestStatus: reset driver waypoints..."<<endl;
       waypoints.clear();
     }
 
