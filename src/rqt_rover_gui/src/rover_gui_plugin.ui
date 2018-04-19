@@ -813,7 +813,7 @@ border-color: rgb(255, 255, 255);</string>
         <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
-        <string>Final (23.1X23.1) </string>
+        <string>Final (22X22) </string>
        </property>
       </widget>
       <widget class="QRadioButton" name="unbounded_radio_button">
@@ -1184,7 +1184,7 @@ padding: 1px 0px 1px 3px; /*This makes text colour work*/
       </item>
       <item>
        <property name="text">
-        <string>30 min (Preliminary)</string>
+        <string>40 min</string>
        </property>
       </item>
       <item>
