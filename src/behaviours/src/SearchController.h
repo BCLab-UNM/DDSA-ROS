@@ -11,7 +11,7 @@
 #define M_PI 3.141592653589793238462643383279502884197169399375105820974944592307816406286
 #endif
 
-#define INSERT_CHECKPOINT 0
+#define INSERT_SITEFIDELITY 0
 #define TARGET_CURRENTCORNER 1
 #define TARGET_NEWCORNER 2
 
@@ -52,12 +52,12 @@ public:
   void SetSuccesfullPickup();
   void SetCurrentTimeInMilliSecs( long int time );
   Point SpiralSearching();
-  void SetCheckPoint();
+  void SetSiteFidelity();
   void setSearchType(bool informed_search);
   void SetArenaSize(int size);
   bool ReachedWaypoint();
   void SetReachedWaypoint(bool reached);
-  void ReachedCheckPoint();
+  void ReachedSiteFidelity();
   void ReachedSearchLocation();
   void SetSwarmSize(size_t size);
   void SetRoverIndex(size_t idx);
@@ -75,7 +75,7 @@ private:
   Point currentLocation;
   Point centerLocation;
   Point searchLocation;
-  Point checkPoint;
+  Point siteFidelity;
   Point spiralLocation;
   int attemptCount = 0;
   float sideLength = 1.5;
@@ -88,14 +88,14 @@ private:
   bool succesfullPickup = false;
   int cornerNum = 0;
   float corner = 2 * M_PI;
-  bool checkpointReached = true;
+  bool siteFidelityReached = true;
   bool searchlocationReached = false;
   bool init = false;
   size_t roverID = 0;
   size_t swarmSize = 0;
   int stepsIntoSpiral = 0;
   const float spacing = 0.41;
-  bool reachedFirstCorner = false;
+  //bool reachedFirstCorner = false;
   bool reachedWaypoint = false;
   bool firstWayPointCreated = false; 
 };

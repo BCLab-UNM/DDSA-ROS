@@ -38,7 +38,7 @@ void SearchController::SetArenaSize(int size)
 Result SearchController::DoWork() 
 {
   int searchState;
-  cout << "TestStatus: SearchController DoWork()" << endl;
+  //cout << "DropTest: SearchController DoWork()" << endl;
 
   if(!init)
   {
@@ -47,8 +47,8 @@ Result SearchController::DoWork()
       spiralLocation.y = centerLocation.y + spacing * CalculateSides(0, 0);
       searchLocation.x = spiralLocation.x;
       searchLocation.y = spiralLocation.y;
-      //cout<<"SpiralTest: center=["<<centerLocation.x<<", "<<centerLocation.y<<"]"<<endl;
-      //cout<<"SpiralTest: spiral=["<<spiralLocation.x<<", "<<spiralLocation.y<<"]"<<endl;
+      //cout<<"TestStatus: center=["<<centerLocation.x<<", "<<centerLocation.y<<"]"<<endl;
+      //cout<<"TestStatus: spiral=["<<spiralLocation.x<<", "<<spiralLocation.y<<"]"<<endl;
       firstWayPointCreated = true;
       
       result.wpts.waypoints.clear();
@@ -59,40 +59,64 @@ Result SearchController::DoWork()
   else 
   {
 
-    ReachedCheckPoint();
+    ReachedSiteFidelity();
     ReachedSearchLocation();
-
+    
     if (succesfullPickup) 
     {
-      searchState = INSERT_CHECKPOINT;
-      //cout << "TestStatus: SearchController -> 3" << endl;
+      searchState = INSERT_SITEFIDELITY;
+      //cout << "TestStatus: insert site fidelity..." << endl;
     }
-    else if (checkpointReached) 
+    else if (siteFidelityReached) 
     {
       searchState = TARGET_CURRENTCORNER;
-      //cout << "TestStatus: SearchController -> checkpoint reached..." << endl;
+     // cout << "TestStatus: siteFidelity reached, current corner..." << endl;
 
+      if(GetCPFAState() == avoid_obstacle)
+      {
+          if(attemptCount<10)
+	      {
+	          attemptCount++;//count the times to approach the location. If the rover always see an obstacle, it should give up. 
+		      cout<<"TestStatus: travel to the previous location before avoiding obstacles "<<attemptCount<<endl; 
+		      //SetCPFAState(reach_search_site);
+		      //return result;	
+	      }
+	      else
+	     {
+		      cout<<"TestStatus: Give up to previous location *******"<<endl;
+	  	      //result.wpts.waypoints.clear();	
+              //SetReachedWaypoint(false);
+              searchlocationReached = true;
+              attemptCount = 0;
+	      }      	  	
+      }
+  
+  
       if(searchlocationReached)
       {
         searchState = TARGET_NEWCORNER;
-        //cout << "SearchController -> 5" << endl;
+        attemptCount = 0;
+        //cout << "TestStatus: search location reached, new corner" << endl;
       }
     }
   }
+  
+        
+        
   switch(searchState)
   {
-    case INSERT_CHECKPOINT:
+    case INSERT_SITEFIDELITY:
     {
-     // cout << "TestStatus: SearchController -> insert checkpoint" << endl;
+     //cout << "TestStatus: insert siteFidelity" << endl;
       succesfullPickup = false;
       result.wpts.waypoints.clear();
-      result.wpts.waypoints.insert(result.wpts.waypoints.end(), checkPoint);
+      result.wpts.waypoints.insert(result.wpts.waypoints.end(), siteFidelity);
       return result;
       break;
     }
     case TARGET_CURRENTCORNER:
     {
-      //cout << "SearchController -> 7" << endl;
+      //cout << "TestStatus: target current corner..." << endl;
       result.wpts.waypoints.clear();
       result.wpts.waypoints.insert(result.wpts.waypoints.end(), searchLocation);
       return result;
@@ -100,6 +124,7 @@ Result SearchController::DoWork()
     }
     case TARGET_NEWCORNER:
     {
+		//cout<<"TestStatus: target new corner..."<<endl;
       searchlocationReached = false;
       result.wpts.waypoints.clear();
       searchLocation = SpiralSearching();
@@ -164,9 +189,10 @@ bool SearchController::HasWork() {
 
 void SearchController::SetSuccesfullPickup() {
   succesfullPickup = true;
-  if(checkpointReached){
-    SetCheckPoint();
-    checkpointReached =false;
+  if(siteFidelityReached){
+	  cout<<"TestStatusC: set check point after pickup...&&&&&&"<<endl;
+    SetSiteFidelity();
+    siteFidelityReached =false;
 
   }
 
@@ -184,7 +210,7 @@ Point SearchController::SpiralSearching(){
   sideLength = spacing * CalculateSides(stepsIntoSpiral, cornerNum);
   spiralLocation.x += (sideLength * cos(corner));
   spiralLocation.y += (sideLength * sin(corner));
-  cout<<"SpiralTest: next spiral=["<<spiralLocation.x<<", "<<spiralLocation.y<<"]"<<endl;
+  //cout<<"TestStatus: next spiral=["<<spiralLocation.x<<", "<<spiralLocation.y<<"]"<<endl;
   //cout << "tag: spiral point at corner No. " << cornerNum<<" :" << spiralLocation.x << " , "<< spiralLocation.y << endl;
   //cout << "tag: steps into spiral: " << stepsIntoSpiral << endl;
   result.wpts.waypoints.insert(result.wpts.waypoints.begin(), spiralLocation);
@@ -199,11 +225,11 @@ Point SearchController::SpiralSearching(){
 
 }
 
-void SearchController::SetCheckPoint(){
+void SearchController::SetSiteFidelity(){
   // or set it to current location
   //cout << "SearchController -> 14" << endl;
 
-  this->checkPoint = this->currentLocation;
+  this->siteFidelity = this->currentLocation;
   //cout << "tag: locating which side of the spiral am I" << endl;
   //no need to return 1 meter behind on the spiral path  where the rover picked a cube. 
   /*if(cornerNum == 0){
@@ -226,21 +252,39 @@ void SearchController::SetCheckPoint(){
     this->checkPoint.x += 1.0;
     this->checkPoint.y = searchLocation.y;
   }
-  cout << "SpiralTest: tag: CHECKPOINT LOCATION: "<< checkPoint.x << " , "<< checkPoint.y << endl;
+  cout << "SpiralTest: tag: CHECKPOINT LOCATION: "<< siteFidelity.x << " , "<< siteFidelity.y << endl;
   */
 }
 
-void SearchController::ReachedCheckPoint(){
-  if (hypot(checkPoint.x-currentLocation.x, checkPoint.y-currentLocation.y) < 0.15 || !reachedFirstCorner) {
-    checkpointReached = true;
+void SearchController::ReachedSiteFidelity(){
+	cout << "TestStatusC: siteFidelity(): "<< siteFidelity.x<< " , "<< siteFidelity.y<< endl;
+	//cout << "TestStatusC: currentLocation=["<< currentLocation.x << ", "<< currentLocation.y<<"]"<<endl;
+	cout << "TestStatusC: dist="<<hypot(siteFidelity.x-currentLocation.x, siteFidelity.y-currentLocation.y)<<endl;
+	//cout << "TestStatusC: reachedFirstCorner="<<reachedFirstCorner<<endl;
+  //if (hypot(checkPoint.x-currentLocation.x, checkPoint.y-currentLocation.y) < 0.15 || !reachedFirstCorner) {
+  if (siteFidelity.x == 0 && siteFidelity.y == 0){
+	  siteFidelityReached = true;  
+	  //cout << "TestStatusC: no siteFidelity: ***"<<siteFidelityReached<< endl;
+	  }
+  else if (hypot(siteFidelity.x-currentLocation.x, siteFidelity.y-currentLocation.y) < 0.15) {
+    siteFidelityReached = true;
+    siteFidelity.x = 0;
+    siteFidelity.y = 0;
+    //cout << "TestStatusC: siteFidelityReached: ***"<<siteFidelityReached<< endl;
+  }
+  else{
+	  siteFidelityReached = false;
+	 // cout << "TestStatusC: siteFidelityReached: ***"<<siteFidelityReached<< endl;
   }
   
 }
 
 void SearchController::ReachedSearchLocation(){
+	//cout << "TestStatusC: searchLocation = ["<< searchLocation.x<< " , "<< searchLocation.y<<"]"<<endl;
   if (hypot(searchLocation.x-currentLocation.x, searchLocation.y-currentLocation.y) < 0.15) {
     searchlocationReached = true;
-    reachedFirstCorner = true; 
+    //reachedFirstCorner = true; 
+    //cout << "TestStatusC: reached the Searchlocation(): **** ****" << endl;
   }
 
 }

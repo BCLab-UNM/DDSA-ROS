@@ -411,10 +411,9 @@ void behaviourStateMachine(const ros::TimerEvent&)
         fingerAnglePublisher.publish(angle);
         prevFinger = result.fingerAngle;
       }
-
       if (result.wristAngle != -1)
       {
-        angle.data = result.wristAngle;
+	    angle.data = result.wristAngle;
         wristAnglePublisher.publish(angle);
         prevWrist = result.wristAngle;
       }

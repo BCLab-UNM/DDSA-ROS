@@ -41,10 +41,10 @@ using namespace std;
  */
 enum CPFAState
 {
-  start_state,
-  avoid_obstacle,
-  return_to_nest,//9
-  reached_nest//10
+  start_state,//0
+  avoid_obstacle,//1
+  return_to_nest,//2
+  reached_nest//3
 };
 
 /**

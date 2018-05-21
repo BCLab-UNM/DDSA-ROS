@@ -18,7 +18,7 @@ LogicController::~LogicController() {}
 
 void LogicController::Reset() {
 
-  std::cout << "LogicController.Reset()" << std::endl;
+  //std::cout << "LogicController.Reset()" << std::endl;
   logicState = LOGIC_STATE_INTERRUPT;
   processState = PROCCESS_STATE_SEARCHING;
 
@@ -35,7 +35,7 @@ Result LogicController::DoWork()
 {
   Result result;
   
-  cout << "LogicController:DoWork()...Proccess State is " << processState << endl;
+  //cout << "LogicController:DoWork()...Proccess State is " << processState << endl;
   //first a loop runs through all the controllers who have a priority of 0 or above with the largest number being
   // above with the largest number being most important. A priority of less than
   // 0 is an ignored controller (we will use -1 as the standard for an ignored
@@ -45,7 +45,7 @@ Result LogicController::DoWork()
   {
     if(cntrlr.controller->ShouldInterrupt() && cntrlr.priority >= 0)
     {
-	  cout<<" is interrupt..."<<endl;
+	  //cout<<" is interrupt..."<<endl;
       logicState = LOGIC_STATE_INTERRUPT;
       //do not break all shouldInterupts may need calling in order to properly pre-proccess data.
     }
@@ -110,7 +110,7 @@ Result LogicController::DoWork()
 
       //ask for the procces state to change to the next state or loop around to the begining
       if(result.b == nextProcess) {
-		 cout<<"TestStatus: next process..."<<endl;
+		 //cout<<"TestStatus: next process..."<<endl;
         if (processState == _LAST - 1) {
           processState = _FIRST;
         }
@@ -141,7 +141,7 @@ Result LogicController::DoWork()
     // command of the robots actuators. LogicController facilitates the command
     // pass through in the LOGIC_STATE_PRECISION_COMMAND switch case.
     else if(result.type == precisionDriving) {
-     cout<<"TestStatus: result type == precisionDriving..."<<endl;
+     //cout<<"TestStatus: result type == precisionDriving..."<<endl;
       logicState = LOGIC_STATE_PRECISION_COMMAND;
      //cout<<"logicState="<<logicState<<endl;
       break; 
@@ -366,12 +366,12 @@ void LogicController::controllerInterconnect()
 		if(searchController.GetCPFAState() == return_to_nest)
 		{
 			obstacleController.SetCPFAState(return_to_nest);
-		   cout<<"TestStatusA: obstacle set to return to nest..."<<obstacleController.GetCPFAState()<<endl;
+		   //cout<<"TestStatusA: obstacle set to return to nest..."<<obstacleController.GetCPFAState()<<endl;
 		}
 		else
 		{
 		    searchController.SetCPFAState(avoid_obstacle);
-             cout<<"TestStatusA: SearchCtrl set to avoid obstacle...CPFAStatus="<<searchController.GetCPFAState()<<endl;			
+             //cout<<"TestStatusA: SearchCtrl set to avoid obstacle...CPFAStatus="<<searchController.GetCPFAState()<<endl;			
 			}
 			
 			

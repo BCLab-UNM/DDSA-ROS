@@ -48,7 +48,7 @@ DropOffController::~DropOffController() {
 
 Result DropOffController::DoWork() {
 
-  cout << "TestStatus: DropOffController::DoWork() " << endl;
+  cout << "DropTest: DropOffController::DoWork() " << endl;
   // Getting the total tag count from the left and the right side of the rover
   int count = countLeft + countRight;
 
@@ -78,8 +78,8 @@ Result DropOffController::DoWork() {
   //if we are in the routine for exiting the circle once we have dropped a block off and reseting all our flags
   //to resart our search.
   if(reachedCollectionPoint)
-  {
-    if (timerTimeElapsed >= 5)
+  {  
+    if (timerTimeElapsed >= 6)
     {
       if (finalInterrupt)
       {
@@ -102,7 +102,7 @@ Result DropOffController::DoWork() {
 
       result.fingerAngle = M_PI_2; //open fingers
       result.wristAngle = 0; //raise wrist
-
+      //result.wristAngle = -0.7; //raise wrist
       result.pd.cmdVel = -0.3;
       result.pd.cmdAngularError = 0.0;
     }
@@ -154,6 +154,7 @@ Result DropOffController::DoWork() {
     isPrecisionDriving = false;
     // Reset elapsed time
     timerTimeElapsed = 0;
+    
     SetCPFAState(return_to_nest);
     //cout<<"TestStatusA: dropoff: set status to return to nest..."<<endl;
     return result;
@@ -202,9 +203,12 @@ Result DropOffController::DoWork() {
   if (count > 0 || seenEnoughCenterTags || prevCount > 0) //if we have a target and the center is located drive towards it.
   {
 
-    //cout << "TestStatus: drive to center" << endl;
+    //cout << "DropTest: drive to center" << endl;
     centerSeen = true;
-
+    if(count>8){
+        //cout<<"DropTest: ***reached nest, raise wrist..."<<endl;
+        result.wristAngle = -0.7; //raise wrist
+    }
     if (first_center && isPrecisionDriving)
     {
       first_center = false;
@@ -268,6 +272,8 @@ Result DropOffController::DoWork() {
     {
       seenEnoughCenterTags = true; //we have driven far enough forward to be in and aligned with the circle.
       lastCenterTagThresholdTime = current_time;
+      //result.wristAngle = -1; //raise wrist
+      //cout<<"DropTest: seen enough tags...-1"<<endl;
     }
     /*if (count > 0) // Reset guard to prevent drop offs due to loosing tracking on tags for a frame or 2.
     {
@@ -291,12 +297,12 @@ Result DropOffController::DoWork() {
   //was on approach to center and did not seenEnoughCenterTags
   //for lostCenterCutoff seconds so reset.
   else if (centerApproach) {
-
+     
     long int elapsed = current_time - lastCenterTagThresholdTime;
     float timeSinceSeeingEnoughCenterTags = elapsed/1e3; // Convert from milliseconds to seconds
     if (timeSinceSeeingEnoughCenterTags > lostCenterCutoff)
     {
-      cout << "TestStatus: back to drive to center base location..." << endl;
+      //cout << "TestStatus: back to drive to center base location..." << endl;
       //go back to drive to center base location instead of drop off attempt
       reachedCollectionPoint = false;
       seenEnoughCenterTags = false;
@@ -328,6 +334,7 @@ Result DropOffController::DoWork() {
     reachedCollectionPoint = true;
     centerApproach = false;
     returnTimer = current_time;
+    
   }
 
   return result;
@@ -342,12 +349,12 @@ void DropOffController::SetRoverInitLocation(Point location)
 
 // Reset to default values
 void DropOffController::Reset() {
-  cout<<"DropOffController::Reset()"<<endl;
+  //cout<<"DropOffController::Reset()"<<endl;
   result.type = behavior;
   result.b = wait;
   result.pd.cmdVel = 0;
   result.pd.cmdAngularError = 0;
-  result.fingerAngle = -1;
+  result.fingerAngle = 0.7;
   result.wristAngle = 0.7;
   result.reset = false;
   result.wpts.waypoints.clear();

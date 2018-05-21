@@ -46,7 +46,7 @@ void PickUpController::SetTagData(vector<Tag> tags)
       {
 
         targetFound = true;
-	    cout <<"target found..."<<endl;
+	    //cout <<"target found..."<<endl;
         //absolute distance to block from camera lens
         double test = hypot(hypot(tags[i].getPositionX(), tags[i].getPositionY()), tags[i].getPositionZ()); //absolute distance to block from camera lens
       
@@ -178,7 +178,7 @@ bool PickUpController::ShouldInterrupt()
   // saw center tags, so don't try to pick up the cube.
   if (release_control)
   {
-    cout << "PickUPController -> 8" << endl;
+    //cout << "PickUPController -> 8" << endl;
     release_control = false;
     has_control = false;
    //cout<<"P: true d1"<<endl;
@@ -213,7 +213,7 @@ bool PickUpController::ShouldInterrupt()
 
 Result PickUpController::DoWork()
 {
- cout<<"CPFAStatus: PickUpController::DoWork()"<<endl;
+ //cout<<"DropTest: PickUpController::DoWork()"<<endl;
 
   has_control = true;
 
