@@ -71,10 +71,11 @@ Result SearchController::DoWork()
     {
       searchState = TARGET_CURRENTCORNER;
      // cout << "TestStatus: siteFidelity reached, current corner..." << endl;
-
-      if(GetCPFAState() == avoid_obstacle)
+    }
+    
+     if(GetCPFAState() == avoid_obstacle)
       {
-          if(attemptCount<10)
+          if(attemptCount<15)
 	      {
 	          attemptCount++;//count the times to approach the location. If the rover always see an obstacle, it should give up. 
 		      cout<<"TestStatus: travel to the previous location before avoiding obstacles "<<attemptCount<<endl; 
@@ -96,9 +97,13 @@ Result SearchController::DoWork()
       {
         searchState = TARGET_NEWCORNER;
         attemptCount = 0;
+        siteFidelity.x == 0;
+        siteFidelity.y == 0;
+        
         //cout << "TestStatus: search location reached, new corner" << endl;
       }
-    }
+      
+      
   }
   
         
