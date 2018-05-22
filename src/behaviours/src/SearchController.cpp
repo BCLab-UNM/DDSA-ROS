@@ -262,34 +262,23 @@ void SearchController::SetSiteFidelity(){
 }
 
 void SearchController::ReachedSiteFidelity(){
-	cout << "TestStatusC: siteFidelity(): "<< siteFidelity.x<< " , "<< siteFidelity.y<< endl;
-	//cout << "TestStatusC: currentLocation=["<< currentLocation.x << ", "<< currentLocation.y<<"]"<<endl;
-	cout << "TestStatusC: dist="<<hypot(siteFidelity.x-currentLocation.x, siteFidelity.y-currentLocation.y)<<endl;
-	//cout << "TestStatusC: reachedFirstCorner="<<reachedFirstCorner<<endl;
-  //if (hypot(checkPoint.x-currentLocation.x, checkPoint.y-currentLocation.y) < 0.15 || !reachedFirstCorner) {
   if (siteFidelity.x == 0 && siteFidelity.y == 0){
 	  siteFidelityReached = true;  
-	  //cout << "TestStatusC: no siteFidelity: ***"<<siteFidelityReached<< endl;
 	  }
   else if (hypot(siteFidelity.x-currentLocation.x, siteFidelity.y-currentLocation.y) < 0.15) {
     siteFidelityReached = true;
     siteFidelity.x = 0;
     siteFidelity.y = 0;
-    //cout << "TestStatusC: siteFidelityReached: ***"<<siteFidelityReached<< endl;
   }
   else{
 	  siteFidelityReached = false;
-	 // cout << "TestStatusC: siteFidelityReached: ***"<<siteFidelityReached<< endl;
   }
   
 }
 
 void SearchController::ReachedSearchLocation(){
-	//cout << "TestStatusC: searchLocation = ["<< searchLocation.x<< " , "<< searchLocation.y<<"]"<<endl;
   if (hypot(searchLocation.x-currentLocation.x, searchLocation.y-currentLocation.y) < 0.15) {
     searchlocationReached = true;
-    //reachedFirstCorner = true; 
-    //cout << "TestStatusC: reached the Searchlocation(): **** ****" << endl;
   }
 
 }
