@@ -33,7 +33,7 @@ void ObstacleController::avoidObstacle() {
     }
     else if (right < left && right < center && right < triggerDistance) //turn left
     {
-	  result.pd.cmdAngular = K_angular;
+	  result.pd.cmdAngular = 1.5*K_angular;
     }
     else //the obstacle is in front 
     {
@@ -41,7 +41,7 @@ void ObstacleController::avoidObstacle() {
       if(p <= 0.5) //turn left
       {
     //obstacle on right side
-		result.pd.cmdAngular = K_angular;
+		result.pd.cmdAngular = 1.5*K_angular;
       }
       else //turn right
       {
