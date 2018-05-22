@@ -72,7 +72,7 @@ Result SearchController::DoWork()
       searchState = TARGET_CURRENTCORNER;
      // cout << "TestStatus: siteFidelity reached, current corner..." << endl;
     }
-    
+    cout<<"TestStatus: GetCPFAState()="<<GetCPFAState()<<endl;
      if(GetCPFAState() == avoid_obstacle)
       {
           if(attemptCount<15)

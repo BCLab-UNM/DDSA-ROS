@@ -27,20 +27,17 @@ void ObstacleController::Reset() {
 // Avoid crashing into objects detected by the ultraound
 void ObstacleController::avoidObstacle() {
 	//cout<<"TestStatus: avoidObstacle..."<<endl;
- 	//cout<<"CollisionStatus: left="<<left<<", center="<<center<<", right="<<right<<endl;
-    if (left <= right && left <= center && left <triggerDistance) 
+ 	if (left <= right && left <= center && left <triggerDistance) 
     {  
-		//cout<<"CollisionStatus: 1. turn to right"<<endl;
-      result.pd.cmdAngular = -K_angular; 
+	  result.pd.cmdAngular = -K_angular; 
     }
     else if (right < left && right < center && right < triggerDistance) //turn left
     {
-		//cout<<"CollisionStatus: 1. turn to left"<<endl;
-      result.pd.cmdAngular = K_angular;
+	  result.pd.cmdAngular = K_angular;
     }
     else //the obstacle is in front 
     {
-		double p = rng->uniformReal(0, 1.0);
+	  double p = rng->uniformReal(0, 1.0);
       if(p <= 0.5) //turn left
       {
     //obstacle on right side
@@ -48,16 +45,12 @@ void ObstacleController::avoidObstacle() {
       }
       else //turn right
       {
-		  //cout<<"CollisionStatus: 2. turn to right"<<endl;
-        result.pd.cmdAngular = -K_angular;
+		result.pd.cmdAngular = -K_angular;
 	  }
     }
     result.type = precisionDriving;
     result.pd.setPointVel = 0.0;
     
-    //double vel = rng->uniformReal(-0.1, -0.02);
-    //cout<<"AvoidanceTest: 1. vel="<<vel<<endl;
-    //result.pd.cmdVel = vel;
     result.pd.cmdVel = 0;
     result.pd.setPointYaw = 0;
     
@@ -69,32 +62,17 @@ void ObstacleController::avoidCollectionZone() {
  //cout<<"TestStatusA: avoid collection zone..."<<endl;
     result.type = precisionDriving;
 
-    //result.pd.cmdVel = 0.0;
-
-    // Decide which side of the rover sees the most april tags and turn away
-    // from that side
-    /*if(count_left_collection_zone_tags < count_right_collection_zone_tags) {
-      result.pd.cmdAngular = K_angular;
-    } else {
-      result.pd.cmdAngular = -K_angular;
-    }*/
-    
     if (pitches < 0) //turn to the right
       {
 		  result.pd.cmdAngular = -K_angular;
-		  //cout<<"CollisionStatus: avoid disk, turn to right"<<endl;
       }
       else //turn to the left
       {
 		  result.pd.cmdAngular = K_angular;
-		  //cout<<"CollisionStatus: avoid disk, turn to left"<<endl;
       }   
     result.pd.setPointVel = 0.0;
     result.pd.cmdVel = 0;
-	//double vel = rng->uniformReal(-0.1, -0.02);
-    // cout<<"AvoidanceTest: 2. vel="<<vel<<endl; 
-    //result.pd.cmdVel = vel; //qilu 04/2018
-    result.pd.setPointYaw = 0;
+	result.pd.setPointYaw = 0;
 }
 
 
@@ -120,18 +98,20 @@ Result ObstacleController::DoWork() {
     result.type = waypoint; 
     result.PIDMode = FAST_PID; //use fast pid for waypoints
     Point forward;            //waypoint is directly ahead of current heading
+    double stepSize;
     if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
     {
 		//cout<<"TestStatusA: ****sample another location to avoid collection disk..."<<endl;
-		//double stepSize = rng->uniformReal(1.0, 2.0);
-		forward.x = currentLocation.x + (0.2 * cos(currentLocation.theta));
-        forward.y = currentLocation.y + (0.2 * sin(currentLocation.theta));
+		stepSize = rng->uniformReal(0.1, 0.3);
+		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
+        forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
 	}
     else
     {
 		//cout<<"TestStatusA: ****normal sample wpt..."<<endl;
-		forward.x = currentLocation.x + (0.5 * cos(currentLocation.theta));
-        forward.y = currentLocation.y + (0.5 * sin(currentLocation.theta));
+		stepSize = rng->uniformReal(0.3, 0.6);
+		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
+        forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
     }
 
     /*double stepSize = rng->uniformReal(0.3, 0.6);
