@@ -114,7 +114,7 @@ long int startTime = 0;
 float minutesTime = 0;
 float hoursTime = 0;
 
-float drift_tolerance = 1.0;
+float drift_tolerance = 1.0; // meters
 
 Result result;
 
@@ -311,8 +311,8 @@ void behaviourStateMachine(const ros::TimerEvent&)
   // auto mode but wont work in main goes here)
       if (!initilized)
       {
-		if (timerTimeElapsed > startDelayInSeconds)
-	    {
+          if (timerTimeElapsed > startDelayInSeconds)
+	  {
 	
 	      // initialization has run
 	      //cout<<"initialization has run..."<<endl;
@@ -344,18 +344,18 @@ void behaviourStateMachine(const ros::TimerEvent&)
 	    {
 	      return;
 	    }
-    }
-    if(!first_auto) {
-      cout <<"SpiralTest: tag:" << publishedName << " - known rovers list:\n";
-      for(size_t i = 0; i < rover_names.size(); i++) {
-        cout << "\t" <<"tag:"<< rover_names[i] << "\n";
-      }
+        }
+        if(!first_auto) {
+          cout <<"SpiralTest: tag:" << publishedName << " - known rovers list:\n";
+          for(size_t i = 0; i < rover_names.size(); i++) {
+          cout << "\t" <<"tag:"<< rover_names[i] << "\n";
+        }
 
-      cout << "\n";
+        cout << "\n";
 
-      first_auto = true;
-      logicController.SetRoverIndex(self_index);
-      logicController.SetSwarmSize(rover_names.size());
+        first_auto = true;
+        logicController.SetRoverIndex(self_index);
+        logicController.SetSwarmSize(rover_names.size());
     }
 
     humanTime();
@@ -413,7 +413,7 @@ void behaviourStateMachine(const ros::TimerEvent&)
       }
       if (result.wristAngle != -1)
       {
-	    angle.data = result.wristAngle;
+	angle.data = result.wristAngle;
         wristAnglePublisher.publish(angle);
         prevWrist = result.wristAngle;
       }
@@ -529,7 +529,6 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
    
     if(num_center_tags >= 5)
     {
-		//cout<<"SpiralTest: "<<publishedName<<" update center..."<<endl;
 		centerLocationMap.x = currentLocationMap.x + 1.0*cos(currentLocationMap.theta);
         centerLocationMap.y = currentLocationMap.y + 1.0*sin(currentLocationMap.theta);
         centerLocationOdom.x = currentLocation.x + 1.0*cos(currentLocation.theta);

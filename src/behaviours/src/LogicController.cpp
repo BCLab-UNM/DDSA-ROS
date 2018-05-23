@@ -45,7 +45,7 @@ Result LogicController::DoWork()
   {
     if(cntrlr.controller->ShouldInterrupt() && cntrlr.priority >= 0)
     {
-	  //cout<<" is interrupt..."<<endl;
+	//cout<<" is interrupt..."<<endl;
       logicState = LOGIC_STATE_INTERRUPT;
       //do not break all shouldInterupts may need calling in order to properly pre-proccess data.
     }

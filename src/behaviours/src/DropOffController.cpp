@@ -122,7 +122,6 @@ Result DropOffController::DoWork() {
     timerTimeElapsed = 0;
     
     SetCPFAState(return_to_nest);
-    //cout<<"TestStatusA: dropoff: set status to return to nest..."<<endl;
     return result;
 
   }
@@ -171,10 +170,6 @@ Result DropOffController::DoWork() {
 
     //cout << "DropTest: drive to center" << endl;
     centerSeen = true;
-    /*if(count>8){
-        //cout<<"DropTest: ***reached nest, raise wrist..."<<endl;
-        result.wristAngle = -0.7; //raise wrist
-    }*/
     if (first_center && isPrecisionDriving)
     {
       first_center = false;
@@ -238,8 +233,6 @@ Result DropOffController::DoWork() {
     {
       seenEnoughCenterTags = true; //we have driven far enough forward to be in and aligned with the circle.
       lastCenterTagThresholdTime = current_time;
-      //result.wristAngle = -1; //raise wrist
-      //cout<<"DropTest: seen enough tags...-1"<<endl;
     }
     /*if (count > 0) // Reset guard to prevent drop offs due to loosing tracking on tags for a frame or 2.
     {
@@ -320,7 +313,7 @@ void DropOffController::Reset() {
   result.b = wait;
   result.pd.cmdVel = 0;
   result.pd.cmdAngularError = 0;
-  result.fingerAngle = 0.7;
+  result.fingerAngle = -1;
   result.wristAngle = 0.7;
   result.reset = false;
   result.wpts.waypoints.clear();

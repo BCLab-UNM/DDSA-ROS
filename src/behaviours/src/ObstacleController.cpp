@@ -37,7 +37,7 @@ void ObstacleController::avoidObstacle() {
     }
     else //the obstacle is in front 
     {
-	  double p = rng->uniformReal(0, 1.0);
+	double p = rng->uniformReal(0, 1.0);
       if(p <= 0.5) //turn left
       {
     //obstacle on right side
@@ -114,10 +114,6 @@ Result ObstacleController::DoWork() {
         forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
     }
 
-    /*double stepSize = rng->uniformReal(0.3, 0.6);
-    forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
-    forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
-    */
     result.wpts.waypoints.clear();
     result.wpts.waypoints.push_back(forward);
   }
@@ -152,7 +148,7 @@ void ObstacleController::ProcessData() {
     phys= false;
     if (!obstacleAvoided)
     {
-		//cout<<"TestStatusA: obstacle not avoid..."<<endl;
+	//cout<<"TestStatusA: obstacle not avoid..."<<endl;
       can_set_waypoint = true;
     }
   }

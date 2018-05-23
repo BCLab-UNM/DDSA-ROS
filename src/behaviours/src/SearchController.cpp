@@ -13,7 +13,6 @@ SearchController::SearchController() {
   centerLocation.y = 0;
   centerLocation.theta = 0;
   result.PIDMode = FAST_PID;
-  cout << "SearchController -> 0" << endl;
 
   result.type = waypoint;
 result.fingerAngle = M_PI/2;
@@ -72,7 +71,6 @@ Result SearchController::DoWork()
       searchState = TARGET_CURRENTCORNER;
      // cout << "TestStatus: siteFidelity reached, current corner..." << endl;
     }
-    cout<<"TestStatus: GetCPFAState()="<<GetCPFAState()<<endl;
      if(GetCPFAState() == avoid_obstacle)
       {
           if(attemptCount<15)
@@ -80,13 +78,10 @@ Result SearchController::DoWork()
 	          attemptCount++;//count the times to approach the location. If the rover always see an obstacle, it should give up. 
 		      cout<<"TestStatus: travel to the previous location before avoiding obstacles "<<attemptCount<<endl; 
 		      //SetCPFAState(reach_search_site);
-		      //return result;	
 	      }
 	      else
 	     {
 		      cout<<"TestStatus: Give up to previous location *******"<<endl;
-	  	      //result.wpts.waypoints.clear();	
-              //SetReachedWaypoint(false);
               searchlocationReached = true;
               attemptCount = 0;
 	      }      	  	
@@ -121,7 +116,6 @@ Result SearchController::DoWork()
     }
     case TARGET_CURRENTCORNER:
     {
-      //cout << "TestStatus: target current corner..." << endl;
       result.wpts.waypoints.clear();
       result.wpts.waypoints.insert(result.wpts.waypoints.end(), searchLocation);
       return result;
@@ -160,14 +154,11 @@ void SearchController::SetCenterLocation(Point centerLocation) {
   float diffX = this->centerLocation.x - centerLocation.x;
   float diffY = this->centerLocation.y - centerLocation.y;
   this->centerLocation = centerLocation;
-  //cout<<"SpiralTest: diffX="<<diffX<<", diffY="<<diffY<<endl;
-  //cout<<"SpiralTest: this->centerLocation=["<<this->centerLocation.x <<", "<<this->centerLocation.y<<"]"<<endl;
   if (!result.wpts.waypoints.empty())
   {
 	//  cout<<"SpiralTest: before waypoint reset:["<<result.wpts.waypoints.back().x<<", "<<result.wpts.waypoints.back().y<<"]"<<endl;
   result.wpts.waypoints.back().x -= diffX;
   result.wpts.waypoints.back().y -= diffY;
-  //cout<<"SpiralTest: after waypoint reset:["<<result.wpts.waypoints.back().x<<", "<<result.wpts.waypoints.back().y<<"]"<<endl;
    }
    
   
