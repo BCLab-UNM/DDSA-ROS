@@ -101,9 +101,9 @@ Result ObstacleController::DoWork() {
     double stepSize;
     if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
     {
-		stepSize = rng->uniformReal(0.2, 0.4);
-		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
-        forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
+		stepSize = rng->uniformReal(0.1, 0.2);
+		forward.x = currentLocation.x + (-stepSize * cos(currentLocation.theta));
+        forward.y = currentLocation.y + (-stepSize * sin(currentLocation.theta));
 	}
     else
     {
