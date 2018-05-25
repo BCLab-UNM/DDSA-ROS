@@ -133,7 +133,7 @@ char prev_state_machine[128];
 vector<string> rover_names;
 bool first_auto = false;
 size_t self_index = (size_t)(-1);
-size_t swarm_size = 0;
+//size_t swarm_size = 0;
 
 // Publishers
 ros::Publisher stateMachinePublisher;
