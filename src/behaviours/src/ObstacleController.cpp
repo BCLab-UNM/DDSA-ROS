@@ -27,13 +27,13 @@ void ObstacleController::Reset() {
 // Avoid crashing into objects detected by the ultraound
 void ObstacleController::avoidObstacle() {
 	//cout<<"TestStatus: avoidObstacle..."<<endl;
- 	if (left <= right && left <= center && left <triggerDistance) 
+    if (left <= right && left <= center && left <triggerDistance) 
     {  
-	  result.pd.cmdAngular = -K_angular; 
+	result.pd.cmdAngular = -K_angular; 
     }
     else if (right < left && right < center && right < triggerDistance) //turn left
     {
-	  result.pd.cmdAngular = 1.5*K_angular;
+	result.pd.cmdAngular = 1.5*K_angular;
     }
     else //the obstacle is in front 
     {
@@ -45,7 +45,7 @@ void ObstacleController::avoidObstacle() {
       }
       else //turn right
       {
-		result.pd.cmdAngular = -K_angular;
+	result.pd.cmdAngular = -K_angular;
 	  }
     }
     result.type = precisionDriving;
@@ -101,15 +101,14 @@ Result ObstacleController::DoWork() {
     double stepSize;
     if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
     {
-		//cout<<"TestStatusA: ****sample another location to avoid collection disk..."<<endl;
-		stepSize = rng->uniformReal(0.1, 0.3);
+		stepSize = rng->uniformReal(0.3, 0.5);
 		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
         forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
 	}
     else
     {
 		//cout<<"TestStatusA: ****normal sample wpt..."<<endl;
-		stepSize = rng->uniformReal(0.3, 0.6);
+		stepSize = rng->uniformReal(0.4, 0.8);
 		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
         forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
     }
@@ -289,7 +288,7 @@ bool ObstacleController::ShouldInterrupt() {
       
     return true;
     } else {
-      return false;
+    return false;
     }
   }
 }

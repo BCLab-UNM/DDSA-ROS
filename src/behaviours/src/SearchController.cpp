@@ -323,7 +323,7 @@ void SearchController::SetReachedWaypoint(bool reached)
 	}
   
 	
-bool SearchController::OutOfArena(Point location)
+/*bool SearchController::OutOfArena(Point location)
 {
 	double lower = -arena_size/2.0;
 	double upper = arena_size/2.0;
@@ -332,7 +332,7 @@ bool SearchController::OutOfArena(Point location)
 		return true;
     }
 	return false;
-}
+}*/
 void SearchController::SetCurrentTimeInMilliSecs( long int time )
 {
   current_time = time;

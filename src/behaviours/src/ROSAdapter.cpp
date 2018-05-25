@@ -22,7 +22,6 @@
 #include <apriltags_ros/AprilTagDetectionArray.h>
 #include <std_msgs/Float32MultiArray.h>
 #include "swarmie_msgs/Waypoint.h"
-#include "swarmie_msgs/RoverInfo.h"
 // Include Controllers
 #include "LogicController.h"
 #include <vector>
@@ -120,9 +119,9 @@ Result result;
 
 std_msgs::String msg;
 
-float arena_dim =0.0; //qilu 01/2018
+float arena_dim =15.0; //qilu 01/2018
 
-vector<Point> roverPositions;
+//vector<Point> roverPositions;
 vector<string> roverNames;
 	
 geometry_msgs::Twist velocity;
@@ -194,7 +193,7 @@ void mapHandler(const nav_msgs::Odometry::ConstPtr& message);
 void nameHandler(const std_msgs::String::ConstPtr& message);
 void virtualFenceHandler(const std_msgs::Float32MultiArray& message);
 void arenaDimHandler(const std_msgs::Float32::ConstPtr& message);
-void roverHandler(const swarmie_msgs::RoverInfo& message);
+//void roverHandler(const swarmie_msgs::RoverInfo& message);
 void manualWaypointHandler(const swarmie_msgs::Waypoint& message);
 void behaviourStateMachine(const ros::TimerEvent&);
 void publishStatusTimerEventHandler(const ros::TimerEvent& event);
@@ -236,7 +235,7 @@ int main(int argc, char **argv) {
   odometrySubscriber = mNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
   mapSubscriber = mNH.subscribe((publishedName + "/odom/ekf"), 10, mapHandler);
   
-  roverSubscriber = mNH.subscribe("/rovers", 10, roverHandler);
+  //roverSubscriber = mNH.subscribe("/rovers", 10, roverHandler);
   nameSubscriber = mNH.subscribe("/names", 36, nameHandler);
   virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);
   arenaDimSubscriber = mNH.subscribe("/arena_dim", 10, arenaDimHandler); //qilu 08/2017
@@ -302,6 +301,7 @@ void behaviourStateMachine(const ros::TimerEvent&)
   
       std_msgs::String name_msg;
       name_msg.data = publishedName;
+      //cout <<"nameTest: inside behavior state machine publishedName="<<publishedName<<endl;  
       namePublish.publish(name_msg);
 
   // Robot is in automode
@@ -564,7 +564,7 @@ void arenaDimHandler(const std_msgs::Float32::ConstPtr& message)
 }
 
 
-void roverHandler(const swarmie_msgs::RoverInfo& message)
+/*void roverHandler(const swarmie_msgs::RoverInfo& message)
 {
 	swarmie_msgs::RoverInfo rover_info = message;
 	
@@ -578,7 +578,7 @@ void roverHandler(const swarmie_msgs::RoverInfo& message)
 		Point pos(rover_info.positions[i].x, rover_info.positions[i].y, rover_info.positions[i].theta);
 		roverPositions.push_back(pos);		 
 	} 
-}
+}*/
 	
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
   //Get (x,y) location directly from pose
@@ -706,6 +706,7 @@ void nameHandler(const std_msgs::String::ConstPtr& message)
   if(rover_names.empty()) {
     rover_names.push_back(message->data);
     self_index = 1;
+    //cout <<"nameTest: first rover_name="<<rover_names[0]<<endl;
   } else {
     cout<< "tag: roverlist is Not empty" << endl;
     size_t pos = rover_names.size();
@@ -714,10 +715,13 @@ void nameHandler(const std_msgs::String::ConstPtr& message)
 
       if(message->data < rover_names[i]) {
         pos = i;
+        //cout<< "nameTest: published name "<<message->data<<"<"<<rover_names[i]<<endl;
         break;
       }
 
       if(message->data == rover_names[i]) {
+		//cout<< "nameTest: published name "<<message->data<<"=="<<rover_names[i]<<endl;
+          
         return;
       }
     }
@@ -742,6 +746,7 @@ void nameHandler(const std_msgs::String::ConstPtr& message)
 
   std_msgs::String name_msg;
   name_msg.data = publishedName;
+  //cout <<"nameTest: inside nameHandler **** publishedName="<<publishedName<<endl;
   namePublish.publish(name_msg);
 }
 
