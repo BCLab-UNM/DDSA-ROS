@@ -197,7 +197,8 @@ padding: 1px;</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">border-color: rgb(255, 255, 255);</string>
+      <string notr="true">border-color: rgb(255, 255, 255);
+      background-color: rgb(255, 255, 255);</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -782,7 +783,7 @@ border-color: rgb(255, 255, 255);</string>
         <rect>
          <x>10</x>
          <y>30</y>
-         <width>151</width>
+         <width>171</width>
          <height>22</height>
         </rect>
        </property>
@@ -790,7 +791,7 @@ border-color: rgb(255, 255, 255);</string>
         <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
-        <string>Preliminary (8X8)</string>
+        <string>Preliminary (15X15)</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -804,7 +805,7 @@ border-color: rgb(255, 255, 255);</string>
         <rect>
          <x>10</x>
          <y>50</y>
-         <width>71</width>
+         <width>151</width>
          <height>22</height>
         </rect>
        </property>
@@ -812,7 +813,7 @@ border-color: rgb(255, 255, 255);</string>
         <string notr="true">color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
-        <string>Final </string>
+        <string>Final (23.1X23.1) </string>
        </property>
       </widget>
       <widget class="QRadioButton" name="unbounded_radio_button">
@@ -1099,46 +1100,6 @@ padding: 1px 0px 1px 3px; /*This makes text colour work*/
       <item>
        <property name="text">
         <string>8</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>9</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>10</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>11</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>12</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>13</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>14</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>15</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>16</string>
        </property>
       </item>
      </widget>
