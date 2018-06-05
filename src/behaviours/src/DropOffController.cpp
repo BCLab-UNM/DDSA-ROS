@@ -243,7 +243,8 @@ Result DropOffController::DoWork() {
     float timeSinceSeeingEnoughCenterTags = elapsed/1e3; // Convert from milliseconds to seconds
 
     //we have driven far enough forward to have passed over the circle.
-    if (count < 5 && seenEnoughCenterTags && timeSinceSeeingEnoughCenterTags > dropDelay) {
+    //if (count < 5 && seenEnoughCenterTags && timeSinceSeeingEnoughCenterTags > dropDelay) {
+    if (seenEnoughCenterTags && timeSinceSeeingEnoughCenterTags > dropDelay) {
       centerSeen = false;
     }
     centerApproach = true;

@@ -1737,7 +1737,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
     }
     else if (ui.test_radio_button->isChecked() && !ui.create_savable_world_checkbox->isChecked())
     {
-        arena_dim = 8;
+        arena_dim = 14;
         addTestWalls();
         emit sendInfoLogMessage(QString("Set arena size to ")+QString::number(arena_dim)+"x"+QString::number(arena_dim));
     }
@@ -2937,7 +2937,7 @@ void RoverGUIPlugin::createSavableWorldCheckboxToggledEventHandler(bool checked)
     ui.simulation_timer_label->setEnabled(!checked);
     ui.simulation_timer_combobox->setEnabled(!checked);
 
-    ui.prelim_radio_button->click();
+    ui.test_radio_button->click();
     unboundedRadioButtonEventHandler(false);
 
     // change specific GUI elements to the "disabled" color scheme

@@ -101,14 +101,14 @@ Result ObstacleController::DoWork() {
     double stepSize;
     if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
     {
-		stepSize = rng->uniformReal(0.1, 0.2);
+		stepSize = rng->uniformReal(0.05, 0.1);
 		forward.x = currentLocation.x + (-stepSize * cos(currentLocation.theta));
         forward.y = currentLocation.y + (-stepSize * sin(currentLocation.theta));
 	}
     else
     {
 		//cout<<"TestStatusA: ****normal sample wpt..."<<endl;
-		stepSize = rng->uniformReal(0.4, 0.8);
+		stepSize = rng->uniformReal(0.5, 0.8);
 		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
         forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
     }

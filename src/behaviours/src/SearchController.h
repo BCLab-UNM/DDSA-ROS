@@ -70,7 +70,7 @@ protected:
 private:
 
   CPFAState cpfa_state = start_state;
-  int arena_size = 15.0;
+  int arena_size = 14.0;
   random_numbers::RandomNumberGenerator* rng;
   Point currentLocation;
   Point centerLocation;
