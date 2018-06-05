@@ -33,7 +33,7 @@ void ObstacleController::avoidObstacle() {
     }
     else if (right < left && right < center && right < triggerDistance) //turn left
     {
-	result.pd.cmdAngular = 1.5*K_angular;
+	result.pd.cmdAngular = K_angular;
     }
     else //the obstacle is in front 
     {
@@ -41,7 +41,7 @@ void ObstacleController::avoidObstacle() {
       if(p <= 0.5) //turn left
       {
     //obstacle on right side
-		result.pd.cmdAngular = 1.5*K_angular;
+		result.pd.cmdAngular = K_angular;
       }
       else //turn right
       {
@@ -102,8 +102,8 @@ Result ObstacleController::DoWork() {
     if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
     {
 		stepSize = rng->uniformReal(0.05, 0.1);
-		forward.x = currentLocation.x + (-stepSize * cos(currentLocation.theta));
-        forward.y = currentLocation.y + (-stepSize * sin(currentLocation.theta));
+		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
+        forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
 	}
     else
     {
