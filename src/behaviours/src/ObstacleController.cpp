@@ -29,11 +29,25 @@ void ObstacleController::avoidObstacle() {
 	//cout<<"TestStatus: avoidObstacle..."<<endl;
     if (left <= right && left <= center && left <triggerDistance) 
     {  
-	result.pd.cmdAngular = -K_angular; 
+		if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
+		{
+			result.pd.cmdAngular = -2*K_angular;
+		}
+		else
+		{
+			result.pd.cmdAngular = -K_angular;
+		} 
     }
     else if (right < left && right < center && right < triggerDistance) //turn left
     {
-	result.pd.cmdAngular = K_angular;
+		if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
+		{
+			result.pd.cmdAngular = 2*K_angular;
+		}
+		else
+		{
+	        result.pd.cmdAngular = K_angular;
+        }
     }
     else //the obstacle is in front 
     {
