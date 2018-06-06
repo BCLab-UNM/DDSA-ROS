@@ -186,7 +186,7 @@ void ObstacleController::ProcessData() {
     //this code is to protect against a held block causing a false short distance
     //currently pointless due to above code
     if (center < 3.0) {
-      result.wristAngle = 0.7;
+      result.wristAngle = 0.8;
     }
     else {
       result.wristAngle = -1;

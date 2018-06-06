@@ -166,7 +166,7 @@ void PickUpController::ProcessData()
     //set gripper;
     result.fingerAngle = M_PI_2;
     //result.wristAngle = 1.25;
-    result.wristAngle = 1.2;
+    result.wristAngle = 0.8;
   }
 }
 
@@ -294,7 +294,7 @@ Result PickUpController::DoWork()
         result.pd.cmdVel = 0.0;
         result.pd.cmdAngularError= 0.0;
         //result.wristAngle = 1.25;
-        result.wristAngle = 1.2;
+        result.wristAngle = 0.8;
         // result.fingerAngle does not need to be set here
 
         // We are getting ready to start the pre-programmed pickup routine now! Maybe? <(^_^)/"
