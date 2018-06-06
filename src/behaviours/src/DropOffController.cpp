@@ -17,7 +17,7 @@ DropOffController::DropOffController() {
   result.type = behavior;
   // The b is of the BehaviorTrigger enum
   result.b = wait;
-  result.wristAngle = 0.7;
+  result.wristAngle = 0.8;
   result.reset = false;
   interrupt = false;
 
@@ -68,7 +68,7 @@ Result DropOffController::DoWork() {
   //to resart our search.
   if(reachedCollectionPoint)
   {  
-    if (timerTimeElapsed >= 10)
+    if (timerTimeElapsed >= 12)
     {
       if (finalInterrupt)
       {
@@ -88,14 +88,14 @@ Result DropOffController::DoWork() {
     else if (timerTimeElapsed >= 3)
     {
       result.fingerAngle = M_PI_2; //open fingers and drop cubes
-      result.pd.cmdVel = -0.2;
+      result.pd.cmdVel = -0.15;
     }
     else
     {
       isPrecisionDriving = true;
       result.type = precisionDriving;
-      result.wristAngle = -0.9; //raise wrist
-      result.pd.cmdVel = 0.06;
+      result.wristAngle = -0.05; //raise wrist
+      result.pd.cmdVel = 0.05;
       result.pd.cmdAngularError = 0.0;
     }
     
@@ -315,7 +315,7 @@ void DropOffController::Reset() {
   result.pd.cmdVel = 0;
   result.pd.cmdAngularError = 0;
   result.fingerAngle = -1;
-  result.wristAngle = 0.7;
+  result.wristAngle = 0.8;
   result.reset = false;
   result.wpts.waypoints.clear();
   spinner = 0;
