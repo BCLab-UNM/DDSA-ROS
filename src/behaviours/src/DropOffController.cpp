@@ -17,7 +17,7 @@ DropOffController::DropOffController() {
   result.type = behavior;
   // The b is of the BehaviorTrigger enum
   result.b = wait;
-  result.wristAngle = 0.8;
+  result.wristAngle = 0.7;
   result.reset = false;
   interrupt = false;
 
@@ -63,11 +63,10 @@ Result DropOffController::DoWork() {
 	  returnTimer = current_time;
 	  timerTimeElapsed = 0;
 	  }
-  
   //if we are in the routine for exiting the circle once we have dropped a block off and reseting all our flags
   //to resart our search.
   if(reachedCollectionPoint)
-  {  
+  {
     if (timerTimeElapsed >= 12)
     {
       if (finalInterrupt)
@@ -94,12 +93,10 @@ Result DropOffController::DoWork() {
     {
       isPrecisionDriving = true;
       result.type = precisionDriving;
-      result.wristAngle = -0.05; //raise wrist
+      result.wristAngle = 0; //raise wrist
       result.pd.cmdVel = 0.05;
       result.pd.cmdAngularError = 0.0;
     }
-    
-    
     return result;
   }
 
@@ -120,7 +117,7 @@ Result DropOffController::DoWork() {
     isPrecisionDriving = false;
     // Reset elapsed time
     timerTimeElapsed = 0;
-    
+
     SetCPFAState(return_to_nest);
     return result;
 
@@ -257,7 +254,7 @@ Result DropOffController::DoWork() {
   //was on approach to center and did not seenEnoughCenterTags
   //for lostCenterCutoff seconds so reset.
   else if (centerApproach) {
-     
+
     long int elapsed = current_time - lastCenterTagThresholdTime;
     float timeSinceSeeingEnoughCenterTags = elapsed/1e3; // Convert from milliseconds to seconds
     if (timeSinceSeeingEnoughCenterTags > lostCenterCutoff)
@@ -315,7 +312,7 @@ void DropOffController::Reset() {
   result.pd.cmdVel = 0;
   result.pd.cmdAngularError = 0;
   result.fingerAngle = -1;
-  result.wristAngle = 0.8;
+  result.wristAngle = 0.7;
   result.reset = false;
   result.wpts.waypoints.clear();
   spinner = 0;

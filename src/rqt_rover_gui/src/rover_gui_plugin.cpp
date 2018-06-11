@@ -1233,7 +1233,7 @@ void RoverGUIPlugin::displayDiagLogMessage(QString msg)
     // Calculate the number of characters in the log. If the log size is larger than the max size specified
     // then find the position of the first newline that reduces the log size to less than the max size.
     // Delete all characters up to that position.
-    int overflow = diag_log_messages.size() - max_diag_log_length; 
+    int overflow = diag_log_messages.size() - max_diag_log_length;
 
     // Get the position of the the first newline after the overflow amount
     int newline_pos = diag_log_messages.indexOf( "<br>", overflow, Qt::CaseSensitive );
@@ -1265,7 +1265,7 @@ void RoverGUIPlugin::displayInfoLogMessage(QString msg)
     // Calculate the number of characters in the log. If the log size is larger than the max size specified
     // then find the position of the first newline that reduces the log size to less than the max size.
     // Delete all characters up to that position.
-    int overflow = info_log_messages.size() - max_info_log_length; 
+    int overflow = info_log_messages.size() - max_info_log_length;
 
     // Get the position of the the first newline after the overflow amount
     int newline_pos = info_log_messages.indexOf( "<br>", overflow, Qt::CaseSensitive );
@@ -1909,7 +1909,7 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
         QPointF(-1.848, 0.765),
 	    };
 
-        /* In this case, the yaw is the value that turns rover "left" and "right" */
+    /* In this case, the yaw is the value that turns rover "left" and "right" */
         float rover_yaw[16] =
         {
            0.000, //  0.00 * PI

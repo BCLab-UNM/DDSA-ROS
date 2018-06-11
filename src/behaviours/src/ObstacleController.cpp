@@ -29,14 +29,14 @@ void ObstacleController::avoidObstacle() {
 	//cout<<"TestStatus: avoidObstacle..."<<endl;
     if (left <= right && left <= center && left <triggerDistance) 
     {  
-		if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
-		{
-			result.pd.cmdAngular = -2*K_angular;
-		}
-		else
-		{
-			result.pd.cmdAngular = -K_angular;
-		} 
+	if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
+	{
+	    result.pd.cmdAngular = -2*K_angular;
+	}
+	else
+	{
+	    result.pd.cmdAngular = -K_angular;
+	} 
     }
     else if (right < left && right < center && right < triggerDistance) //turn left
     {
@@ -121,9 +121,9 @@ Result ObstacleController::DoWork() {
 	}
     else
     {
-		//cout<<"TestStatusA: ****normal sample wpt..."<<endl;
+	//cout<<"TestStatusA: ****normal sample wpt..."<<endl;
 		stepSize = rng->uniformReal(0.5, 0.8);
-		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
+	forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
         forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
     }
 
@@ -186,7 +186,7 @@ void ObstacleController::ProcessData() {
     //this code is to protect against a held block causing a false short distance
     //currently pointless due to above code
     if (center < 3.0) {
-      result.wristAngle = 0.8;
+      result.wristAngle = 0.7;
     }
     else {
       result.wristAngle = -1;

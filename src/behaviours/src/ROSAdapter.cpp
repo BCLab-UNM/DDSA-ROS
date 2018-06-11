@@ -119,7 +119,7 @@ Result result;
 
 std_msgs::String msg;
 
-float arena_dim =14.0; //qilu 01/2018
+float arena_dim =14.0;
 
 //vector<Point> roverPositions;
 vector<string> roverNames;
@@ -204,7 +204,6 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 long int getROSTimeInMilliSecs();
 
 
-      
 int main(int argc, char **argv) {
   
   gethostname(host, sizeof (host));
@@ -239,7 +238,7 @@ int main(int argc, char **argv) {
   nameSubscriber = mNH.subscribe("/names", 36, nameHandler);
   virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);
   arenaDimSubscriber = mNH.subscribe("/arena_dim", 10, arenaDimHandler); //qilu 08/2017
-  
+
   manualWaypointSubscriber = mNH.subscribe((publishedName + "/waypoints/cmd"), 10, manualWaypointHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
@@ -311,9 +310,9 @@ void behaviourStateMachine(const ros::TimerEvent&)
   // auto mode but wont work in main goes here)
       if (!initilized)
       {
-          if (timerTimeElapsed > startDelayInSeconds)
-	  {
-	
+        if (timerTimeElapsed > startDelayInSeconds)
+        {
+
 	      // initialization has run
 	      //cout<<"initialization has run..."<<endl;
 	      initilized = true;
@@ -338,7 +337,7 @@ void behaviourStateMachine(const ros::TimerEvent&)
 	      
 	      startTime = getROSTimeInMilliSecs();
 	      
-		  logicController.SetArenaSize(arena_dim);
+	  logicController.SetArenaSize(arena_dim);
 	    }
 	    else
 	    {
@@ -418,14 +417,14 @@ void behaviourStateMachine(const ros::TimerEvent&)
         prevWrist = result.wristAngle;
       }
     }
-    
-    collision_msg.data = logicController.getCollisionCalls();
-    obstaclePubisher.publish(collision_msg);
-    	
+
+  collision_msg.data = logicController.getCollisionCalls();
+  obstaclePubisher.publish(collision_msg);
+
     //publishHandeling here
     //logicController.getPublishData(); suggested
     //adds a blank space between sets of debugging data to easily tell one tick from the next
-    //cout << endl;
+    cout << endl;
   }
   
   // mode is NOT auto
@@ -527,7 +526,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
       tags.push_back(loc);
     }
    
-    if(num_center_tags >= 5)
+    if(num_center_tags >= 1)
     {
 		centerLocationMap.x = currentLocationMap.x + 1.0*cos(currentLocationMap.theta);
         centerLocationMap.y = currentLocationMap.y + 1.0*sin(currentLocationMap.theta);
