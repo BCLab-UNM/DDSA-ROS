@@ -94,7 +94,7 @@ Result DropOffController::DoWork() {
       isPrecisionDriving = true;
       result.type = precisionDriving;
       result.wristAngle = 0; //raise wrist
-      result.pd.cmdVel = 0.05;
+      result.pd.cmdVel = 0.07;
       result.pd.cmdAngularError = 0.0;
     }
     return result;
