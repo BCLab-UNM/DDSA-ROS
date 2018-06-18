@@ -59,7 +59,7 @@ void ObstacleController::avoidObstacle() {
       }
       else //turn right
       {
-	result.pd.cmdAngular = -K_angular;
+        result.pd.cmdAngular = -K_angular;
 	  }
     }
     result.type = precisionDriving;
@@ -115,7 +115,7 @@ Result ObstacleController::DoWork() {
     double stepSize;
     if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
     {
-		stepSize = rng->uniformReal(0.05, 0.1);
+		stepSize = rng->uniformReal(0.15, 0.25);// the minimum should be greater than 0.15 (waypoint tolerance)
 		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
         forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
 	}
@@ -159,11 +159,11 @@ void ObstacleController::ProcessData() {
 	  //cout<<"TestStatus: set collection_zone_seen to false; "<<collection_zone_seen<<endl;
     collection_zone_seen = false; 
     phys= false;
-    //if (!obstacleAvoided)
-    //{
+    if (!obstacleAvoided)
+    {
 	//cout<<"TestStatusA: obstacle not avoid..."<<endl;
       can_set_waypoint = true;
-    //}
+    }
   }
 
   //If we are ignoring the center sonar
