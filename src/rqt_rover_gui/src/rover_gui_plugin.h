@@ -89,7 +89,7 @@ namespace rqt_rover_gui {
   class RoverGUIPlugin : public rqt_gui_cpp::Plugin
   {
     Q_OBJECT
-      
+
   public:
 
     RoverGUIPlugin();
@@ -117,7 +117,7 @@ namespace rqt_rover_gui {
     void scoreEventHandler(const ros::MessageEvent<std_msgs::String const> &event);
     void simulationTimerEventHandler(const rosgraph_msgs::Clock& msg);
     void diagnosticEventHandler(const ros::MessageEvent<std_msgs::Float32MultiArray const> &event);
-
+    void centerLocationOffsetHandler(const ros::MessageEvent<std_msgs::Float32MultiArray const> &event);
     void centerUSEventHandler(const sensor_msgs::Range::ConstPtr& msg);
     void leftUSEventHandler(const sensor_msgs::Range::ConstPtr& msg);
     void rightUSEventHandler(const sensor_msgs::Range::ConstPtr& msg);
@@ -146,7 +146,7 @@ namespace rqt_rover_gui {
 
     void sendWaypointReached(int waypoint_id);
     void sendInfoLogMessage(QString); // log message updates need to be implemented as signals so they can be used in ROS event handlers.
-    void sendDiagLogMessage(QString);    
+    void sendDiagLogMessage(QString);
     void sendDiagsDataUpdate(QString, QString, QColor); // Provide the item to update and the diags text and text color
 
     // Joystick output - Drive
@@ -230,6 +230,7 @@ namespace rqt_rover_gui {
     map<string,ros::Subscriber> ekf_subscribers;
     map<string,ros::Subscriber> rover_diagnostic_subscribers;
     map<string,ros::Subscriber> waypoint_subscribers;
+    map<string,ros::Subscriber> center_location_offset_subscribers;
     ros::Subscriber us_center_subscriber;
     ros::Subscriber us_left_subscriber;
     ros::Subscriber us_right_subscriber;
@@ -273,20 +274,20 @@ namespace rqt_rover_gui {
     double getHours(double seconds);
     double getMinutes(double seconds);
     double getSeconds(double seconds);
-    
+
     int previous_collected_tags =0;
     int current_collected_tags = 0;
     string score_data_filename = "DDSA_score_data";
-    ofstream score_data; 
+    ofstream score_data;
     double foragingElapsed = 0;
     double lastCollisionElapsedTime = 0;
-    
-    
+
+
     int previous_collisions =0;
     int current_collisions = 0;
     string collision_data_filename = "DDSA_collision_data";
-    ofstream collision_data; 
-     
+    ofstream collision_data;
+
     bool display_sim_visualization;
 
     // Object clearance. These values are used to quickly determine where objects can be placed in the simulation
@@ -322,4 +323,3 @@ namespace rqt_rover_gui {
 } // end namespace
 
 #endif // ROVERGUIPLUGIN
-
