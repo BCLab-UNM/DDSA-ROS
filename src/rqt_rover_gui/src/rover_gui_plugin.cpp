@@ -1183,30 +1183,21 @@ void RoverGUIPlugin::diagnosticEventHandler(const ros::MessageEvent<const std_ms
 void RoverGUIPlugin::centerLocationOffsetHandler(const ros::MessageEvent<std_msgs::Float32MultiArray const> &event)
 {
   const std::string& publisher_name = event.getPublisherName();
+
+  // We need to parse the publisher name to get the rover name
+  //     publisher_name = /roverName_BEHAVIOUR; we just want "roverName"
+  const std::string& rover_name = publisher_name.substr(1, publisher_name.find("_") - 1);
   const boost::shared_ptr<const std_msgs::Float32MultiArray> msg = event.getMessage();
 
+  // data[0] = X
+  // data[1] = Y
+  // data[2] = theta
   std::vector<float> data = msg->data;
 
-  ui.map_frame->SetGlobalOffsetForRover(publisher_name, data[0], data[1]);
-  // adgj todo; get rover name in message...
-  // ui.map_frame->SetGlobalOffsetForRover("test", float x, float y);
-/*
-// some example code
+  // for debugging
+  // emit sendInfoLogMessage("[CenterLocationOffsetHandler] !!! updating global offset for: " + QString::fromStdString(rover_name));
 
-const std::string& publisher_name = event.getPublisherName();
-const ros::M_string& header = event.getConnectionHeader();
-ros::Time receipt_time = event.getReceiptTime();
-
-const boost::shared_ptr<const std_msgs::String> msg = event.getMessage();
-
-string log_msg = msg->data;
-
-emit sendInfoLogMessage(QString::fromStdString(publisher_name)
-                       + " <font color=Lime size=1>"
-                       + QString::fromStdString(log_msg)
-                       + "</font>");
-
-*/
+  ui.map_frame->SetGlobalOffsetForRover(rover_name, data[0], data[1]);
 }
 
 // We use item changed signal as a proxy for the checkbox being clicked
