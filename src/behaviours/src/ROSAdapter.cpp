@@ -330,11 +330,11 @@ void behaviourStateMachine(const ros::TimerEvent&)
 	      logicController.SetCenterLocationOdom(centerOdom);
 
         // Set the global offset for physical rovers; we assume that a robot
-        // is placed a specified distance from the center as defined with the
-        // centerOdom variable..
+        // is placed a specified distance from the center... This position
+        // will be the negative of centerOdom.
         std_msgs::Float32MultiArray centerOdomOffsetMessage;
-        centerOdomOffsetMessage.data.push_back(centerOdom.x);
-        centerOdomOffsetMessage.data.push_back(centerOdom.y);
+        centerOdomOffsetMessage.data.push_back(-centerOdom.x);
+        centerOdomOffsetMessage.data.push_back(-centerOdom.y);
         centerOdomOffsetMessage.data.push_back(centerOdom.theta);
         centerLocationOffsetPublisher.publish(centerOdomOffsetMessage);
 
