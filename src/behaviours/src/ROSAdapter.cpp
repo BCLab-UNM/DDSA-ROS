@@ -255,6 +255,7 @@ int main(int argc, char **argv) {
   heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
   waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
   namePublish = mNH.advertise<std_msgs::String>("/names", 6, true);
+  centerLocationOffsetPublisher = mNH.advertise<std_msgs::Float32MultiArray>((publishedName + "/centerLocationOffset"), 10, true);
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   stateMachineTimer = mNH.createTimer(ros::Duration(behaviourLoopTimeStep), behaviourStateMachine);
   
