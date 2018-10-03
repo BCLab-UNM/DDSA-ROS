@@ -638,7 +638,7 @@ void arenaDimHandler(const std_msgs::Float32::ConstPtr& message)
 		Point pos(rover_info.positions[i].x, rover_info.positions[i].y, rover_info.positions[i].theta);
 		roverPositions.push_back(pos);
 	}
-}
+}*/
 
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
