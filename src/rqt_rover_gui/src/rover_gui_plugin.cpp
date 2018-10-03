@@ -45,7 +45,7 @@ using namespace std;
 
 using boost::property_tree::ptree;
 
-namespace rqt_rover_gui
+namespace rqt_rover_gui 
 {
   RoverGUIPlugin::RoverGUIPlugin() :
       rqt_gui_cpp::Plugin(),
@@ -99,7 +99,7 @@ namespace rqt_rover_gui
     widget = new QWidget();
 
     ui.setupUi(widget);
-
+    
     context.addWidget(widget);
 
     // Next two lines allow us to catch keyboard input
@@ -172,7 +172,7 @@ namespace rqt_rover_gui
     // Receive waypoint commands from MapFrame
     connect(ui.map_frame, SIGNAL(sendWaypointCmd(WaypointCmd, int, float, float)), this, SLOT(receiveWaypointCmd(WaypointCmd, int, float, float)));
     connect(this, SIGNAL(sendWaypointReached(int)), ui.map_frame, SLOT(ReceiveWaypointReached(int)));
-
+    
     // Receive log messages from contained frames
     connect(ui.map_frame, SIGNAL(sendInfoLogMessage(QString)), this, SLOT(receiveInfoLogMessage(QString)));
 
@@ -208,7 +208,7 @@ namespace rqt_rover_gui
     ui.number_of_tags_combobox->setEnabled(false);
     ui.number_of_tags_combobox->setStyleSheet("color: grey; border:1px solid grey;");
 
-    ui.tab_widget->setCurrentIndex(1); //0: show sensor display tab; 1: show simulation parameters tab
+    ui.tab_widget->setCurrentIndex(1); //0: show sensor display tab; 1: show simulation parameters tab 
     ui.log_tab->setCurrentIndex(1);
 
     ui.texture_combobox->setItemData(0, QColor(Qt::white), Qt::TextColorRole);
@@ -259,7 +259,7 @@ void RoverGUIPlugin::joyEventHandler(const sensor_msgs::Joy::ConstPtr& joy_msg)
   {
     return;
   }
-
+  
      // Give the array values some helpful names:
     int left_stick_x_axis = 0; // Gripper fingers close and open
     int left_stick_y_axis = 1; // Gripper wrist up and down
@@ -573,6 +573,7 @@ void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs
     {
         emit updateObstacleCallCount("<font color='white'>"+QString::number(++obstacle_call_count)+"</font>");
     }
+    
     foragingElapsed = current_simulated_time_in_seconds - timer_start_time_in_seconds;
 
     //record the collision into files
@@ -590,7 +591,10 @@ void RoverGUIPlugin::obstacleEventHandler(const ros::MessageEvent<const std_msgs
 				collision_data.close();
 			}
 		}
+		
 	}
+	
+	
 }
 
 // Takes the published score value from the ScorePlugin and updates the GUI
@@ -1384,11 +1388,11 @@ void RoverGUIPlugin::joystickRadioButtonEventHandler(bool marked)
 
     QString return_msg = startROSJoyNode();
     emit sendInfoLogMessage(return_msg);
-
+    
     //Enable all autonomous button
     ui.all_autonomous_button->setEnabled(true);
     ui.all_autonomous_button->setStyleSheet("color: white; border:2px solid white;");
-
+    
     //Show joystick frame
     ui.joystick_frame->setHidden(false);
 
@@ -1539,14 +1543,14 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
 
     /* generate number between 0 and 1000: */
     int randNum = rand() % 5000;
-
+  
     score_data_filename += "_"+to_string(randNum)+".txt";
     score_data.open("results/"+score_data_filename);
-
+        
     collision_data_filename += "_"+to_string(randNum)+".txt";
     collision_data.open("results/"+collision_data_filename);
-
-
+        
+        
     // Experiment Timer END
 }
 
@@ -1621,7 +1625,7 @@ void RoverGUIPlugin::allStopButtonEventHandler()
     ui.joystick_control_radio_button->setChecked(true);
     ui.autonomous_control_radio_button->setChecked(false);
     ui.joystick_frame->setHidden(false);
-
+    
     //Disable all stop button
     ui.all_stop_button->setEnabled(false);
     ui.all_stop_button->setStyleSheet("color: grey; border:2px solid grey;");
@@ -1678,7 +1682,7 @@ void RoverGUIPlugin::customNumCubesRadioButtonEventHandler(bool toggled)
 	{
 	  ui.number_of_tags_combobox->setStyleSheet("color: grey; border:2px solid grey;");
 	}
-
+	
 }
 // Enable or disable custom distributions
 void RoverGUIPlugin::customWorldRadioButtonEventHandler(bool toggled)
@@ -1909,7 +1913,6 @@ void RoverGUIPlugin::buildSimulationButtonEventHandler()
           QPointF( 0.000, -1.308), //             + 50 cm distance to rover
           QPointF( 1.308,  0.000), //             + 30 cm distance_from_center_of_rover_to_edge_of_rover
           QPointF( 0.000,  1.308), // 1.308m = 0.508m + 0.5m + 0.3m
-
 
           /* corner rovers: Northeast, Southwest */
           QPointF( 1.074,  1.074), // 1.074 = diagonal_distance_from_center_to_edge_of_collection_zone
@@ -2163,8 +2166,8 @@ void RoverGUIPlugin::clearSimulationButtonEventHandler()
 	it->second.shutdown();
       }
     waypoint_cmd_publishers.clear();
-
-
+    
+    
     return_msg += sim_mgr.stopGazeboClient();
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     return_msg += "<br>";
@@ -2428,7 +2431,7 @@ QString RoverGUIPlugin::addPowerLawTargets()
     PowerRank = priorPowerRank + 1;
     diffFoodCount = FoodCount - number_of_tags.toInt();
     modDiff = diffFoodCount % PowerRank;
-
+    
     if (number_of_tags.toInt() % PowerRank == 0){
         singleClusterCount = number_of_tags.toInt() / PowerRank;
         otherClusterCount = singleClusterCount;
@@ -2437,7 +2440,7 @@ QString RoverGUIPlugin::addPowerLawTargets()
         otherClusterCount = number_of_tags.toInt() / PowerRank + 1;
         singleClusterCount = otherClusterCount - modDiff;
     }
-
+    
     for(int i = 0; i < PowerRank; i++) {
 		clusterNums.push_back(powerLawLength * powerLawLength);
 		powerLawLength *= 2;
@@ -2822,7 +2825,7 @@ bool RoverGUIPlugin::eventFilter(QObject *target, QEvent *event)
 {
     sensor_msgs::Joy joy_msg;
     joy_msg.axes = {0.0,0.0,0.0,0.0,0.0,0.0};
-
+    
     if (joystick_publisher)
     {
 

@@ -60,6 +60,7 @@ Result SearchController::DoWork()
 
     ReachedSiteFidelity();
     ReachedSearchLocation();
+
     if (succesfullPickup) 
     {
       searchState = INSERT_SITEFIDELITY;
@@ -118,6 +119,7 @@ Result SearchController::DoWork()
     }
     case TARGET_CURRENTCORNER:
     {
+      cout << "SearchController -> 7" << endl;
       result.wpts.waypoints.clear();
       result.wpts.waypoints.insert(result.wpts.waypoints.end(), searchLocation);
       return result;
@@ -270,6 +272,8 @@ void SearchController::ReachedSiteFidelity(){
 }
 
 void SearchController::ReachedSearchLocation(){
+  cout << "SearchController -> 16" << endl;
+
   if (hypot(searchLocation.x-currentLocation.x, searchLocation.y-currentLocation.y) < 0.15) {
     searchlocationReached = true;
   }
@@ -316,6 +320,8 @@ float SearchController::CalculateSides( int circuitNum, int slot){
     }
 
   }
+  cout << "SearchController -> 18" << endl;
+
 
 }	
 

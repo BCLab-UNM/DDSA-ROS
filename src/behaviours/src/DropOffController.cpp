@@ -64,6 +64,18 @@ Result DropOffController::DoWork() {
 	  returnTimer = current_time;
 	  timerTimeElapsed = 0;
 	  }
+  cout<<"TestTimeout:TestStatusA: timerTimeElapsed="<<timerTimeElapsed<<endl;
+  
+    //cout<<"TestTimeout: seenEnoughCenterTags="<<seenEnoughCenterTags<<endl;
+  //cout<<"TestTimeout: count="<<count<<endl;
+  /*(if(timerTimeElapsed > 60 && !seenEnoughCenterTags)//timeout the dropoff. If the rover can not find the collection disk in certain time, then give up. 
+  {
+	reachedCollectionPoint = true;
+	//returnTimer = current_time;  
+	//finalInterrupt = true;
+	
+	//cout<<"TestTimeout: give up dropoff...."<<endl;
+  }*/
   //if we are in the routine for exiting the circle once we have dropped a block off and reseting all our flags
   //to resart our search.
   if(reachedCollectionPoint)
@@ -98,11 +110,39 @@ Result DropOffController::DoWork() {
       result.pd.cmdVel = 0.05;
       result.pd.cmdAngularError = 0.0;
     }
+
     return result;
   }
 
   // Calculates the shortest distance to the center location from the current location
   double distanceToCenter = hypot(this->centerLocation.x - this->currentLocation.x, this->centerLocation.y - this->currentLocation.y);
+   cout<<"TestTimeout: distanceToCenter="<<distanceToCenter<<endl; 
+	   
+  /*if(timerTimeElapsed > 50 && !seenEnoughCenterTags)
+  {
+	  cout<<"TestStatusA: timeout and reset to center *****"<<endl;
+	  Point centerPoint;
+	  centerPoint.x = 2.0 * cos(roverInitLocation.theta);
+      centerPoint.y = 2.0 * sin(roverInitLocation.theta);    
+	  
+	  returnTimer = current_time;
+	  
+	  result.type = waypoint;
+    // Clears all the waypoints in the vector
+    result.wpts.waypoints.clear();
+    // Adds the current location's point into the waypoint vector
+    result.wpts.waypoints.push_back(centerPoint);
+    // Do not start following waypoints
+    startWaypoint = false;
+    // Disable precision driving
+    isPrecisionDriving = false;
+    // Reset elapsed time
+    timerTimeElapsed = 0;
+    circularCenterSearching = true;
+    SetCPFAState(return_to_nest);
+
+    return result;	  
+  }*/
 
   //check to see if we are driving to the center location or if we need to drive in a circle and look.
   if (distanceToCenter > collectionPointVisualDistance && !circularCenterSearching && (count == 0)) {
@@ -118,8 +158,8 @@ Result DropOffController::DoWork() {
     isPrecisionDriving = false;
     // Reset elapsed time
     timerTimeElapsed = 0;
-
     SetCPFAState(return_to_nest);
+    //cout<<"TestStatusA: dropoff: set status to return to nest..."<<endl;
     return result;
 
   }
@@ -168,6 +208,7 @@ Result DropOffController::DoWork() {
 
     //cout << "DropTest: drive to center" << endl;
     centerSeen = true;
+
     if (first_center && isPrecisionDriving)
     {
       first_center = false;
@@ -241,8 +282,7 @@ Result DropOffController::DoWork() {
     float timeSinceSeeingEnoughCenterTags = elapsed/1e3; // Convert from milliseconds to seconds
 
     //we have driven far enough forward to have passed over the circle.
-    //if (count < 5 && seenEnoughCenterTags && timeSinceSeeingEnoughCenterTags > dropDelay) {
-    if (seenEnoughCenterTags && timeSinceSeeingEnoughCenterTags > dropDelay) {
+    if (count < 5 && seenEnoughCenterTags && timeSinceSeeingEnoughCenterTags > dropDelay) {
       centerSeen = false;
     }
     centerApproach = true;
@@ -260,7 +300,7 @@ Result DropOffController::DoWork() {
     float timeSinceSeeingEnoughCenterTags = elapsed/1e3; // Convert from milliseconds to seconds
     if (timeSinceSeeingEnoughCenterTags > lostCenterCutoff)
     {
-      //cout << "TestStatus: back to drive to center base location..." << endl;
+      cout << "TestStatus: back to drive to center base location..." << endl;
       //go back to drive to center base location instead of drop off attempt
       reachedCollectionPoint = false;
       seenEnoughCenterTags = false;
@@ -292,7 +332,6 @@ Result DropOffController::DoWork() {
     reachedCollectionPoint = true;
     centerApproach = false;
     returnTimer = current_time;
-    
   }
 
   return result;

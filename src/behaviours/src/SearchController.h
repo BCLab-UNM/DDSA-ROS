@@ -81,6 +81,7 @@ private:
   float sideLength = 1.5;
   //struct for returning data to ROS adapter
   Result result;
+  
    
   // Search state
   // Flag to allow special behaviour for the first waypoint

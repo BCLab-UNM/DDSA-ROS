@@ -89,7 +89,7 @@ public:
   void SetCurrentTimeInMilliSecs( long int time );
   void SetCPFAState(CPFAState state) override;
   CPFAState GetCPFAState() override;
-  
+
   // Tell the logic controller whether rovers should automatically
   // resstrict their foraging range. If so provide the shape of the
   // allowed range.
@@ -125,9 +125,6 @@ private:
   
   LogicState logicState;
   ProcessState processState;
-  
-  //this guarantees no upate of the center location before the rover reaches the first waypoint on the spiral search 
-  bool reached_first_waypoint = false;	
 
   PickUpController pickUpController;
   DropOffController dropOffController;

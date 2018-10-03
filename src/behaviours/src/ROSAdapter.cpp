@@ -22,6 +22,7 @@
 #include <apriltags_ros/AprilTagDetectionArray.h>
 #include <std_msgs/Float32MultiArray.h>
 #include "swarmie_msgs/Waypoint.h"
+#include "swarmie_msgs/RoverInfo.h"
 // Include Controllers
 #include "LogicController.h"
 #include <vector>
@@ -205,6 +206,7 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 long int getROSTimeInMilliSecs();
 
 
+      
 int main(int argc, char **argv) {
   
   gethostname(host, sizeof (host));
@@ -255,7 +257,6 @@ int main(int argc, char **argv) {
   heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
   waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
   namePublish = mNH.advertise<std_msgs::String>("/names", 6, true);
-  centerLocationOffsetPublisher = mNH.advertise<std_msgs::Float32MultiArray>((publishedName + "/centerLocationOffset"), 10, true);
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   stateMachineTimer = mNH.createTimer(ros::Duration(behaviourLoopTimeStep), behaviourStateMachine);
   
@@ -300,10 +301,50 @@ void behaviourStateMachine(const ros::TimerEvent&)
   // time since timerStartTime was set to current time
   timerTimeElapsed = time(0) - timerStartTime;
   
+  // init code goes here. (code that runs only once at start of
+  // auto mode but wont work in main goes here)
+  if (!initilized)
+  {
+
+    if (timerTimeElapsed > startDelayInSeconds)
+    {
+
+      // initialization has run
+      //cout<<"initialization has run..."<<endl;
+      initilized = true;
+      //TODO: this just sets center to 0 over and over and needs to change
+      Point centerOdom;
+      centerOdom.x = 1.3 * cos(currentLocation.theta);
+      centerOdom.y = 1.3 * sin(currentLocation.theta);
+      centerOdom.theta = centerLocation.theta;
+      logicController.SetCenterLocationOdom(centerOdom);
+      
+      Point centerMap;
+      centerMap.x = currentLocationMap.x + (1.3 * cos(currentLocationMap.theta));
+      centerMap.y = currentLocationMap.y + (1.3 * sin(currentLocationMap.theta));
+      centerMap.theta = centerLocationMap.theta;
+      logicController.SetCenterLocationMap(centerMap);
+      
+      centerLocationMap.x = centerMap.x;
+      centerLocationMap.y = centerMap.y;
+      
+      centerLocationOdom.x = centerOdom.x;
+      centerLocationOdom.y = centerOdom.y;
+      
+      startTime = getROSTimeInMilliSecs();
+      
+	  logicController.SetArenaSize(arena_dim);
+	  
       std_msgs::String name_msg;
       name_msg.data = publishedName;
-      //cout <<"nameTest: inside behavior state machine publishedName="<<publishedName<<endl;  
       namePublish.publish(name_msg);
+  }
+    else
+    {
+      return;
+    }
+    
+  }
 
   // Robot is in automode
   if (currentMode == 2 || currentMode == 3) 
@@ -420,6 +461,7 @@ void behaviourStateMachine(const ros::TimerEvent&)
         fingerAnglePublisher.publish(angle);
         prevFinger = result.fingerAngle;
       }
+
       if (result.wristAngle != -1)
       {
 	angle.data = result.wristAngle;
@@ -538,6 +580,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
    
     if(num_center_tags >= 1)
     {
+		//cout<<"TestStatusA: currentLocation=["<<currentLocation.x<<", "<<currentLocation.y<<"]"<<endl;
 		centerLocationMap.x = currentLocationMap.x + 1.0*cos(currentLocationMap.theta);
         centerLocationMap.y = currentLocationMap.y + 1.0*sin(currentLocationMap.theta);
         centerLocationOdom.x = currentLocation.x + 1.0*cos(currentLocation.theta);
@@ -715,7 +758,6 @@ void nameHandler(const std_msgs::String::ConstPtr& message)
   if(rover_names.empty()) {
     rover_names.push_back(message->data);
     self_index = 1;
-    //cout <<"nameTest: first rover_name="<<rover_names[0]<<endl;
   } else {
     cout<< "tag: roverlist is Not empty" << endl;
     size_t pos = rover_names.size();
@@ -724,13 +766,10 @@ void nameHandler(const std_msgs::String::ConstPtr& message)
 
       if(message->data < rover_names[i]) {
         pos = i;
-        //cout<< "nameTest: published name "<<message->data<<"<"<<rover_names[i]<<endl;
         break;
       }
 
       if(message->data == rover_names[i]) {
-		//cout<< "nameTest: published name "<<message->data<<"=="<<rover_names[i]<<endl;
-          
         return;
       }
     }
@@ -755,7 +794,6 @@ void nameHandler(const std_msgs::String::ConstPtr& message)
 
   std_msgs::String name_msg;
   name_msg.data = publishedName;
-  //cout <<"nameTest: inside nameHandler **** publishedName="<<publishedName<<endl;
   namePublish.publish(name_msg);
 }
 
@@ -844,6 +882,7 @@ void transformMapCentertoOdom()
     infoLogPublisher.publish(msg);
     cout << msg.data << endl;
   }
+  
   // Use the position and orientation provided by the ros transform.
   centerLocationMapRef.x = odomPose.pose.position.x; //set centerLocation in odom frame
   centerLocationMapRef.y = odomPose.pose.position.y;
@@ -854,6 +893,7 @@ void transformMapCentertoOdom()
   float ydiff = centerLocationMapRef.y - centerLocationOdom.y;
   
   float diff = hypot(xdiff, ydiff);
+  
   if (diff > drift_tolerance)
   {
     centerLocationOdom.x += xdiff/diff;
