@@ -100,7 +100,7 @@ public:
   
   Point GetCurrentLocation(); //qilu 12/2017
   bool CreatedFirstWayPoint();
-
+  
 protected:
   void ProcessData();
 
@@ -126,8 +126,6 @@ private:
   LogicState logicState;
   ProcessState processState;
 
-  //this guarantees no upate of the center location before the rover reaches the first waypoint on the spiral search 
-  bool reached_first_waypoint = false;	
   PickUpController pickUpController;
   DropOffController dropOffController;
   SearchController searchController;

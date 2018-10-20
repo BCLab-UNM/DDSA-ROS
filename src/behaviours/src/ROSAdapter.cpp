@@ -114,15 +114,15 @@ long int startTime = 0;
 float minutesTime = 0;
 float hoursTime = 0;
 
-float drift_tolerance = 0.5; // meters
+float drift_tolerance = 1.0; // meters
 
 Result result;
 
 std_msgs::String msg;
 
-float arena_dim =0.0; //qilu 01/2018
+float arena_dim =14.0;
 
-vector<Point> roverPositions;
+//vector<Point> roverPositions;
 vector<string> roverNames;
 
 geometry_msgs::Twist velocity;
@@ -134,7 +134,7 @@ char prev_state_machine[128];
 vector<string> rover_names;
 bool first_auto = false;
 size_t self_index = (size_t)(-1);
-size_t swarm_size = 0;
+//size_t swarm_size = 0;
 
 // Publishers
 ros::Publisher stateMachinePublisher;
@@ -195,7 +195,7 @@ void mapHandler(const nav_msgs::Odometry::ConstPtr& message);
 void nameHandler(const std_msgs::String::ConstPtr& message);
 void virtualFenceHandler(const std_msgs::Float32MultiArray& message);
 void arenaDimHandler(const std_msgs::Float32::ConstPtr& message);
-void roverHandler(const swarmie_msgs::RoverInfo& message);
+//void roverHandler(const swarmie_msgs::RoverInfo& message);
 void manualWaypointHandler(const swarmie_msgs::Waypoint& message);
 void behaviourStateMachine(const ros::TimerEvent&);
 void publishStatusTimerEventHandler(const ros::TimerEvent& event);
@@ -236,8 +236,6 @@ int main(int argc, char **argv) {
   targetSubscriber = mNH.subscribe((publishedName + "/targets"), 10, targetHandler);
   odometrySubscriber = mNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
   mapSubscriber = mNH.subscribe((publishedName + "/odom/ekf"), 10, mapHandler);
-
-  roverSubscriber = mNH.subscribe("/rovers", 10, roverHandler);
   nameSubscriber = mNH.subscribe("/names", 36, nameHandler);
   virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);
   arenaDimSubscriber = mNH.subscribe("/arena_dim", 10, arenaDimHandler); //qilu 08/2017
@@ -301,10 +299,52 @@ void behaviourStateMachine(const ros::TimerEvent&)
 
   // time since timerStartTime was set to current time
   timerTimeElapsed = time(0) - timerStartTime;
+  
+  // init code goes here. (code that runs only once at start of
+  // auto mode but wont work in main goes here)
+  if (!initilized)
+  {
+
+    if (timerTimeElapsed > startDelayInSeconds)
+    {
+
+      // initialization has run
+      //cout<<"initialization has run..."<<endl;
+      initilized = true;
+      //TODO: this just sets center to 0 over and over and needs to change
+      Point centerOdom;
+      centerOdom.x = 1.3 * cos(currentLocation.theta);
+      centerOdom.y = 1.3 * sin(currentLocation.theta);
+      centerOdom.theta = centerLocation.theta;
+      logicController.SetCenterLocationOdom(centerOdom);
+      
+      Point centerMap;
+      centerMap.x = currentLocationMap.x + (1.3 * cos(currentLocationMap.theta));
+      centerMap.y = currentLocationMap.y + (1.3 * sin(currentLocationMap.theta));
+      centerMap.theta = centerLocationMap.theta;
+      logicController.SetCenterLocationMap(centerMap);
+      
+      centerLocationMap.x = centerMap.x;
+      centerLocationMap.y = centerMap.y;
+      
+      centerLocationOdom.x = centerOdom.x;
+      centerLocationOdom.y = centerOdom.y;
+      
+      startTime = getROSTimeInMilliSecs();
+      
+	  logicController.SetArenaSize(arena_dim);
+	  
 
       std_msgs::String name_msg;
       name_msg.data = publishedName;
       namePublish.publish(name_msg);
+  }
+    else
+    {
+      return;
+    }
+    
+  }
 
   // Robot is in automode
   if (currentMode == 2 || currentMode == 3)
@@ -313,8 +353,11 @@ void behaviourStateMachine(const ros::TimerEvent&)
   // auto mode but wont work in main goes here)
       if (!initilized)
       {
-		if (timerTimeElapsed > startDelayInSeconds)
-	    {
+
+        if (timerTimeElapsed > startDelayInSeconds)
+        {
+
+
 	      // initialization has run
 	      //cout<<"initialization has run..."<<endl;
 	      initilized = true;
@@ -358,18 +401,18 @@ void behaviourStateMachine(const ros::TimerEvent&)
 	    {
 	      return;
 	    }
-    }
-    if(!first_auto) {
-      cout <<"tag:" << publishedName << " - known rovers list:\n";
-      for(size_t i = 0; i < rover_names.size(); i++) {
-        cout << "\t" <<"tag:"<< rover_names[i] << "\n";
-      }
+        }
+        if(!first_auto) {
+          cout <<"SpiralTest: tag:" << publishedName << " - known rovers list:\n";
+          for(size_t i = 0; i < rover_names.size(); i++) {
+          cout << "\t" <<"tag:"<< rover_names[i] << "\n";
+        }
 
-      cout << "\n";
+        cout << "\n";
 
-      first_auto = true;
-      logicController.SetRoverIndex(self_index);
-      logicController.SetSwarmSize(rover_names.size());
+        first_auto = true;
+        logicController.SetRoverIndex(self_index);
+        logicController.SetSwarmSize(rover_names.size());
     }
 
     humanTime();
@@ -378,9 +421,10 @@ void behaviourStateMachine(const ros::TimerEvent&)
     logicController.SetCurrentTimeInMilliSecs( getROSTimeInMilliSecs() );
 
     //update center location
+    //cout<<"SpiralTest: Update center location..."<<logicController.CreatedFirstWayPoint()<<endl;
     if(logicController.CreatedFirstWayPoint())
     {
-    logicController.SetCenterLocationOdom( updateCenterLocation() );
+		logicController.SetCenterLocationOdom( updateCenterLocation() );
 		}
 
     //ask logic controller for the next set of actuator commands
@@ -427,11 +471,12 @@ void behaviourStateMachine(const ros::TimerEvent&)
 
       if (result.wristAngle != -1)
       {
-        angle.data = result.wristAngle;
+	angle.data = result.wristAngle;
         wristAnglePublisher.publish(angle);
         prevWrist = result.wristAngle;
       }
     }
+
 
     collision_msg.data = logicController.getCollisionCalls();
     obstaclePubisher.publish(collision_msg);
@@ -439,7 +484,7 @@ void behaviourStateMachine(const ros::TimerEvent&)
     //publishHandeling here
     //logicController.getPublishData(); suggested
     //adds a blank space between sets of debugging data to easily tell one tick from the next
-    //cout << endl;
+    cout << endl;
   }
 
   // mode is NOT auto
@@ -540,15 +585,14 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 							    tagPose.pose.orientation.w ) );
       tags.push_back(loc);
     }
-    if(num_center_tags >= 5)// reset the location of the center
+   
+    if(num_center_tags >= 1)
     {
 		//cout<<"TestStatusA: currentLocation=["<<currentLocation.x<<", "<<currentLocation.y<<"]"<<endl;
 		centerLocationMap.x = currentLocationMap.x + 1.0*cos(currentLocationMap.theta);
         centerLocationMap.y = currentLocationMap.y + 1.0*sin(currentLocationMap.theta);
         centerLocationOdom.x = currentLocation.x + 1.0*cos(currentLocation.theta);
-        centerLocationOdom.y = currentLocation.y + 1.0*sin(currentLocation.theta);
-        //cout<<"TestStatusA: centerLocationMap=["<<centerLocationMap.x<<", "<<centerLocationMap.y<<"]"<<endl;
-        //cout<<"TestStatusA: centerLocationOdom=["<<centerLocationOdom.x<<", "<<centerLocationOdom.y<<"]"<<endl;
+        centerLocationOdom.y = currentLocation.y + 1.0*sin(currentLocation.theta);  
 	}
 
 
@@ -580,7 +624,7 @@ void arenaDimHandler(const std_msgs::Float32::ConstPtr& message)
 }
 
 
-void roverHandler(const swarmie_msgs::RoverInfo& message)
+/*void roverHandler(const swarmie_msgs::RoverInfo& message)
 {
 	swarmie_msgs::RoverInfo rover_info = message;
 
@@ -594,7 +638,8 @@ void roverHandler(const swarmie_msgs::RoverInfo& message)
 		Point pos(rover_info.positions[i].x, rover_info.positions[i].y, rover_info.positions[i].theta);
 		roverPositions.push_back(pos);
 	}
-}
+}*/
+
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
   //Get (x,y) location directly from pose

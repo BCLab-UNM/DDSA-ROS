@@ -32,7 +32,7 @@ void DriveController::SetCurrentTimeInMilliSecs( long int time )
 
 Result DriveController::DoWork()
 {
-  
+  //cout<<"DropTest: drive ctlr...DoWork()"<<endl;
   ///WARNING waypoint input must use FAST_PID at this point in time failure to set fast pid will result in no movment
 
   if(result.type == behavior)

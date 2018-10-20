@@ -18,7 +18,7 @@ LogicController::~LogicController() {}
 
 void LogicController::Reset() {
 
-  std::cout << "LogicController.Reset()" << std::endl;
+  //std::cout << "LogicController.Reset()" << std::endl;
   logicState = LOGIC_STATE_INTERRUPT;
   processState = PROCCESS_STATE_SEARCHING;
 
@@ -35,7 +35,7 @@ Result LogicController::DoWork()
 {
   Result result;
   
-  cout << "LogicController:DoWork()...Proccess State is " << processState << endl;
+  //cout << "LogicController:DoWork()...Proccess State is " << processState << endl;
   //first a loop runs through all the controllers who have a priority of 0 or above with the largest number being
   // above with the largest number being most important. A priority of less than
   // 0 is an ignored controller (we will use -1 as the standard for an ignored
@@ -45,7 +45,7 @@ Result LogicController::DoWork()
   {
     if(cntrlr.controller->ShouldInterrupt() && cntrlr.priority >= 0)
     {
-	  cout<<" is interrupt..."<<endl;
+	//cout<<" is interrupt..."<<endl;
       logicState = LOGIC_STATE_INTERRUPT;
       //do not break all shouldInterupts may need calling in order to properly pre-proccess data.
     }
@@ -65,8 +65,8 @@ Result LogicController::DoWork()
 
     //check what controllers have work to do all that say yes will be added to the priority queue.
     for(PrioritizedController cntrlr : prioritizedControllers) {
-		//cout <<"priority="<<cntrlr.priority<<endl;
-		//cout<< "name="<<cntrlr.controller <<endl;
+		cout <<"priority="<<cntrlr.priority<<endl;
+		cout<< "name="<<cntrlr.controller <<endl;
       if(cntrlr.controller->HasWork()) {
         if (cntrlr.priority < 0) {
           continue;
@@ -182,14 +182,14 @@ Result LogicController::DoWork()
     // priority queue so it must be checked here.
     if (result.type == behavior) 
     {
-		//cout <<"logic state== waiting; result type == behavior"<<endl;
+		cout <<"logic state== waiting; result type == behavior"<<endl;
 		if(driveController.ShouldInterrupt()) 
         {
           logicState = LOGIC_STATE_INTERRUPT;
          //cout<<"SwitchStatus: driver controller interrupt...true"<<endl;
           if(processState == PROCCESS_STATE_SEARCHING)
           {
-		  // cout<<"TestStatusSwitchStatus: searchCtrl set reached..."<<endl;
+		   //cout<<"TestStatusSwitchStatus: searchCtrl set reached..."<<endl;
 		    searchController.SetReachedWaypoint(true);
 		    
 		  } 
@@ -378,7 +378,7 @@ void LogicController::controllerInterconnect()
 	} 
 	if(obstacleController.GetCPFAState() == reached_nest)
 	{
-		//cout<<"TestStatusSwitchStatus: interconnect, set reached_nest..."<<endl;
+		cout<<"TestStatusSwitchStatus: interconnect, set reached_nest..."<<endl;
 		searchController.SetCPFAState(reached_nest);
 		//searchController.SetReachedWaypoint(true);
 		obstacleController.SetCPFAState(start_state);
@@ -393,7 +393,7 @@ void LogicController::controllerInterconnect()
 		  if(obstacleController.HasWork()) 
 		  {
 			  obstacleController.SetCPFAState(return_to_nest);
-		      //cout<<"TestStatusA: obstacle set to return to nest by dropoff..."<<endl;
+		      cout<<"TestStatusA: obstacle set to return to nest by dropoff..."<<endl;
 		  }
 		
 	  }

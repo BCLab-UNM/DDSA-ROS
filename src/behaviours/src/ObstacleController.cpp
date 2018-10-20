@@ -26,37 +26,19 @@ void ObstacleController::Reset() {
 
 // Avoid crashing into objects detected by the ultraound
 void ObstacleController::avoidObstacle() {
-	cout<<"TestStatus: avoidObstacle..."<<endl;
- 	//cout<<"CollisionStatus: left="<<left<<", center="<<center<<", right="<<right<<endl;
-    if (left <= right && left <= center && left <triggerDistance) 
+	//cout<<"TestStatus: avoidObstacle..."<<endl;
+    if (left <= right && left <= triggerDistance)//turn to right 
     {  
-		//cout<<"CollisionStatus: 1. turn to right"<<endl;
-      result.pd.cmdAngular = -K_angular; 
+	    result.pd.cmdAngular = -K_angular; 
     }
-    else if (right < left && right < center && right < triggerDistance) //turn left
+    else if (right < left && right <= triggerDistance) //turn to left
     {
-		//cout<<"CollisionStatus: 1. turn to left"<<endl;
-      result.pd.cmdAngular = K_angular;
-    }
-    else //the obstacle is in front 
-    {
-		double p = rng->uniformReal(0, 1.0);
-      if(p <= 0.5) //turn left
-      {
-    //obstacle on right side
 		result.pd.cmdAngular = K_angular;
-      }
-      else //turn right
-      {
-		  //cout<<"CollisionStatus: 2. turn to right"<<endl;
-        result.pd.cmdAngular = -K_angular;
-	  }
-    }
+	}
+    
     result.type = precisionDriving;
     result.pd.setPointVel = 0.0;
     
-    //double vel = rng->uniformReal(0.05, 0.2);
-    //result.pd.cmdVel = vel;
     result.pd.cmdVel = 0;
     result.pd.setPointYaw = 0;
     
@@ -65,40 +47,25 @@ void ObstacleController::avoidObstacle() {
 // A collection zone was seen in front of the rover and we are not carrying a target
 // so avoid running over the collection zone and possibly pushing cubes out.
 void ObstacleController::avoidCollectionZone() {
- cout<<"TestStatusA: avoid collection zone..."<<endl;
+ //cout<<"TestStatusA: avoid collection zone..."<<endl;
     result.type = precisionDriving;
 
-    //result.pd.cmdVel = 0.0;
-
-    // Decide which side of the rover sees the most april tags and turn away
-    // from that side
-    /*if(count_left_collection_zone_tags < count_right_collection_zone_tags) {
-      result.pd.cmdAngular = K_angular;
-    } else {
-      result.pd.cmdAngular = -K_angular;
-    }*/
-    
     if (pitches < 0) //turn to the right
       {
 		  result.pd.cmdAngular = -K_angular;
-		  //cout<<"CollisionStatus: avoid disk, turn to right"<<endl;
       }
       else //turn to the left
       {
 		  result.pd.cmdAngular = K_angular;
-		  //cout<<"CollisionStatus: avoid disk, turn to left"<<endl;
       }   
     result.pd.setPointVel = 0.0;
     result.pd.cmdVel = 0;
-	//double vel = rng->uniformReal(0.05, 0.1);
-      
-    //result.pd.cmdVel = vel; //qilu 02/2018
-    result.pd.setPointYaw = 0;
+	result.pd.setPointYaw = 0;
 }
 
 
 Result ObstacleController::DoWork() {
- cout<<"TestStatusA: ObstacleController::DoWork()..."<<endl;
+ //cout<<"DropTest: ObstacleController::DoWork()..."<<endl;
   clearWaypoints = true;
   set_waypoint = true;
   result.PIDMode = CONST_PID;
@@ -119,22 +86,22 @@ Result ObstacleController::DoWork() {
     result.type = waypoint; 
     result.PIDMode = FAST_PID; //use fast pid for waypoints
     Point forward;            //waypoint is directly ahead of current heading
-    //if(haveAvoidCollectionZone)// if seen collection zone in the past and avoid it now, sample a further location
+    double stepSize;
     if(GetCPFAState() == return_to_nest || GetCPFAState() == reached_nest)
     {
-		cout<<"TestStatusA: ****sample another location to avoid collection disk..."<<endl;
-		//double stepSize = rng->uniformReal(1.0, 2.0);
-		forward.x = currentLocation.x + (0.2 * cos(currentLocation.theta));
-        forward.y = currentLocation.y + (0.2 * sin(currentLocation.theta));
+		//stepSize = rng->uniformReal(0.15, 0.25);// the minimum should be greater than 0.15 (waypoint tolerance)
+		stepSize = 0.3;
+		forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
+        forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
 	}
     else
     {
-		cout<<"TestStatusA: ****normal sample wpt..."<<endl;
-		forward.x = currentLocation.x + (0.5 * cos(currentLocation.theta));
-        forward.y = currentLocation.y + (0.5 * sin(currentLocation.theta));
+	//cout<<"TestStatusA: ****normal sample wpt..."<<endl;
+		stepSize = rng->uniformReal(0.6, 0.8);
+	forward.x = currentLocation.x + (stepSize * cos(currentLocation.theta));
+        forward.y = currentLocation.y + (stepSize * sin(currentLocation.theta));
     }
-    //haveAvoidCollectionZone = false;
-    //cout<<"TestStatusA: obstacleCTRL sampled waypoint=["<<forward.x<<","<<forward.y<<"]"<<endl;
+
     result.wpts.waypoints.clear();
     result.wpts.waypoints.push_back(forward);
   }
@@ -169,7 +136,7 @@ void ObstacleController::ProcessData() {
     phys= false;
     if (!obstacleAvoided)
     {
-		cout<<"TestStatusA: obstacle not avoid..."<<endl;
+	//cout<<"TestStatusA: obstacle not avoid..."<<endl;
       can_set_waypoint = true;
     }
   }
@@ -242,7 +209,7 @@ void ObstacleController::SetTagData(vector<Tag> tags){
       if (tags[i].getID() == 256) 
 	  {
      	collection_zone_seen = checkForCollectionZoneTags( tags );
-     	cout<<"TestStatus: detect collection disk --"<<collection_zone_seen<<endl;
+     	//cout<<"TestStatus: detect collection disk --"<<collection_zone_seen<<endl;
         timeSinceTags = current_time;
       }
     }
@@ -303,20 +270,20 @@ bool ObstacleController::ShouldInterrupt() {
       //cout<<"TestStatus: obstacle interrupt: GetCPFAState()="<<GetCPFAState()<<endl;
       if(GetCPFAState() == return_to_nest)
       {
-		  cout<<"TestStatusA: Obstacle avoid and set to reach nest... interrupt...true"<<endl;
+		  //cout<<"TestStatusA: Obstacle avoid and set to reach nest... interrupt...true"<<endl;
 		  SetCPFAState(reached_nest);
 	  }
       
       
     return true;
     } else {
-      return false;
+    return false;
     }
   }
 }
 
 bool ObstacleController::HasWork() {
-	cout<<"Obstacle has work..."<<endl;
+	//cout<<"Obstacle has work..."<<endl;
   if (can_set_waypoint && set_waypoint)
   {
     return true;

@@ -46,7 +46,7 @@ void PickUpController::SetTagData(vector<Tag> tags)
       {
 
         targetFound = true;
-	    cout <<"target found..."<<endl;
+	//cout <<"target found..."<<endl;
         //absolute distance to block from camera lens
         double test = hypot(hypot(tags[i].getPositionX(), tags[i].getPositionY()), tags[i].getPositionZ()); //absolute distance to block from camera lens
       
@@ -95,7 +95,7 @@ void PickUpController::SetTagData(vector<Tag> tags)
       float epsilon = 0.00001; // A small non-zero positive number
       blockDistance = epsilon;
     }
-cout << "PickUPController -> 3" << endl;
+    //cout << "PickUPController -> 3" << endl;
     //cout << "blockDistance  TAGDATA:  " << blockDistance << endl;
 
     blockYawError = atan((tags[target].getPositionX() + cameraOffsetCorrection)/blockDistance)*1.05; //angle to block from bottom center of chassis on the horizontal.
@@ -165,7 +165,8 @@ void PickUpController::ProcessData()
     //cout << "CPFAStatus Lower wrist and open fingers if no locked target..."<<endl;
     //set gripper;
     result.fingerAngle = M_PI_2;
-    result.wristAngle = 1.25;
+    result.wristAngle = 1.2;
+    //result.wristAngle = 0.87;
   }
 }
 
@@ -178,7 +179,7 @@ bool PickUpController::ShouldInterrupt()
   // saw center tags, so don't try to pick up the cube.
   if (release_control)
   {
-    cout << "PickUPController -> 8" << endl;
+    //cout << "PickUPController -> 8" << endl;
     release_control = false;
     has_control = false;
    //cout<<"P: true d1"<<endl;
@@ -213,7 +214,7 @@ bool PickUpController::ShouldInterrupt()
 
 Result PickUpController::DoWork()
 {
- cout<<"CPFAStatus: PickUpController::DoWork()"<<endl;
+ //cout<<"DropTest: PickUpController::DoWork()"<<endl;
 
   has_control = true;
 
@@ -292,7 +293,8 @@ Result PickUpController::DoWork()
 		  //cout<<"CPFAStatus if not timeOut..."<<endl;
         result.pd.cmdVel = 0.0;
         result.pd.cmdAngularError= 0.0;
-        result.wristAngle = 1.25;
+        //result.wristAngle = 1.25;
+        result.wristAngle = 1.2;
         // result.fingerAngle does not need to be set here
 
         // We are getting ready to start the pre-programmed pickup routine now! Maybe? <(^_^)/"

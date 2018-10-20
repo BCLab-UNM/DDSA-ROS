@@ -17,7 +17,8 @@ DropOffController::DropOffController() {
   result.type = behavior;
   // The b is of the BehaviorTrigger enum
   result.b = wait;
-  result.wristAngle = 0.7;
+  //result.wristAngle = 0.7;
+  result.wristAngle = 1.0;
   result.reset = false;
   interrupt = false;
 
@@ -48,7 +49,7 @@ DropOffController::~DropOffController() {
 
 Result DropOffController::DoWork() {
 
-  cout << "TestStatus: DropOffController::DoWork() " << endl;
+  //cout << "DropTest: DropOffController::DoWork() " << endl;
   // Getting the total tag count from the left and the right side of the rover
   int count = countLeft + countRight;
 
@@ -63,7 +64,7 @@ Result DropOffController::DoWork() {
 	  returnTimer = current_time;
 	  timerTimeElapsed = 0;
 	  }
-  //cout<<"TestTimeout:TestStatusA: timerTimeElapsed="<<timerTimeElapsed<<endl;
+  cout<<"TestTimeout:TestStatusA: timerTimeElapsed="<<timerTimeElapsed<<endl;
   
     //cout<<"TestTimeout: seenEnoughCenterTags="<<seenEnoughCenterTags<<endl;
   //cout<<"TestTimeout: count="<<count<<endl;
@@ -79,7 +80,7 @@ Result DropOffController::DoWork() {
   //to resart our search.
   if(reachedCollectionPoint)
   {
-    if (timerTimeElapsed >= 5)
+    if (timerTimeElapsed >= 12)
     {
       if (finalInterrupt)
       {
@@ -95,15 +96,18 @@ Result DropOffController::DoWork() {
         //cout << "finalInterrupt, true" << endl;
       }
     }
-    else if (timerTimeElapsed >= 0.1)
+    
+    else if (timerTimeElapsed >= 3)
+    {
+      result.fingerAngle = M_PI_2; //open fingers and drop cubes
+      result.pd.cmdVel = -0.15;
+    }
+    else
     {
       isPrecisionDriving = true;
       result.type = precisionDriving;
-
-      result.fingerAngle = M_PI_2; //open fingers
       result.wristAngle = 0; //raise wrist
-
-      result.pd.cmdVel = -0.3;
+      result.pd.cmdVel = 0.05;
       result.pd.cmdAngularError = 0.0;
     }
 
@@ -112,7 +116,7 @@ Result DropOffController::DoWork() {
 
   // Calculates the shortest distance to the center location from the current location
   double distanceToCenter = hypot(this->centerLocation.x - this->currentLocation.x, this->centerLocation.y - this->currentLocation.y);
-   //cout<<"TestTimeout: distanceToCenter="<<distanceToCenter<<endl; 
+   cout<<"TestTimeout: distanceToCenter="<<distanceToCenter<<endl; 
 	   
   /*if(timerTimeElapsed > 50 && !seenEnoughCenterTags)
   {
@@ -202,7 +206,7 @@ Result DropOffController::DoWork() {
   if (count > 0 || seenEnoughCenterTags || prevCount > 0) //if we have a target and the center is located drive towards it.
   {
 
-    //cout << "TestStatus: drive to center" << endl;
+    //cout << "DropTest: drive to center" << endl;
     centerSeen = true;
 
     if (first_center && isPrecisionDriving)
@@ -342,13 +346,14 @@ void DropOffController::SetRoverInitLocation(Point location)
 
 // Reset to default values
 void DropOffController::Reset() {
-  cout<<"DropOffController::Reset()"<<endl;
+  //cout<<"DropOffController::Reset()"<<endl;
   result.type = behavior;
   result.b = wait;
   result.pd.cmdVel = 0;
   result.pd.cmdAngularError = 0;
   result.fingerAngle = -1;
-  result.wristAngle = 0.7;
+  //result.wristAngle = 0.7;
+  result.wristAngle = 1.0;
   result.reset = false;
   result.wpts.waypoints.clear();
   spinner = 0;
@@ -435,7 +440,7 @@ bool DropOffController::ShouldInterrupt() {
     return true;
   }
   if (finalInterrupt) {
-	//  cout<<"D: true d3"<<endl;
+	  //cout<<"D: true d3"<<endl;
     return true;
   }
 }
