@@ -3,7 +3,7 @@
 using namespace std;
 
 LogicController::LogicController() {
- //cout<<"start logic controller..."<<endl;
+ robotName = GetRobotName();
   logicState = LOGIC_STATE_INTERRUPT;
   processState = PROCCESS_STATE_SEARCHING;
   rng = new random_numbers::RandomNumberGenerator();
@@ -412,6 +412,16 @@ void LogicController::controllerInterconnect()
   }
 
 }
+void LogicController::SetRobotName(string name)
+{
+   // cout<<"robot name ="<<robotName<<endl;
+    robotName = name;
+    }
+
+string LogicController::GetRobotName()
+{
+    return robotName;   
+    }
 
 void LogicController::SetArenaSize(int size)
 {

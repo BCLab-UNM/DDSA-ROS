@@ -100,6 +100,9 @@ public:
   
   Point GetCurrentLocation(); //qilu 12/2017
   bool CreatedFirstWayPoint();
+  void SetRobotName(string name);
+  string GetRobotName();
+  string robotName;
   
 protected:
   void ProcessData();
