@@ -64,7 +64,7 @@ Result DropOffController::DoWork() {
 	  returnTimer = current_time;
 	  timerTimeElapsed = 0;
 	  }
-  cout<<"TestTimeout:TestStatusA: timerTimeElapsed="<<timerTimeElapsed<<endl;
+  //cout<<"TestTimeout:TestStatusA: timerTimeElapsed="<<timerTimeElapsed<<endl;
   
     //cout<<"TestTimeout: seenEnoughCenterTags="<<seenEnoughCenterTags<<endl;
   //cout<<"TestTimeout: count="<<count<<endl;
@@ -116,7 +116,7 @@ Result DropOffController::DoWork() {
 
   // Calculates the shortest distance to the center location from the current location
   double distanceToCenter = hypot(this->centerLocation.x - this->currentLocation.x, this->centerLocation.y - this->currentLocation.y);
-   cout<<"TestTimeout: distanceToCenter="<<distanceToCenter<<endl; 
+   //cout<<"TestTimeout: distanceToCenter="<<distanceToCenter<<endl; 
 	   
   /*if(timerTimeElapsed > 50 && !seenEnoughCenterTags)
   {

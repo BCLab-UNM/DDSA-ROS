@@ -95,6 +95,7 @@ Result DriveController::DoWork()
       if (hypot(waypoints.back().x-currentLocation.x, waypoints.back().y-currentLocation.y) < waypointTolerance)//repeated calculation? qilu
       {
         //if too close remove it
+        //cout<<"if too close remove it"<<endl;
         waypoints.pop_back();
       }
       else
@@ -109,7 +110,7 @@ Result DriveController::DoWork()
     {
       result.wpts.waypoints.clear();//qilu 02/2018
       stateMachineState = STATE_MACHINE_WAITING;
-      //cout<<"TestStatus: waiting"<<endl;
+      //cout<<"TestStatus: waiting, reach goal..."<<endl;
       result.type = behavior;
       interupt = true; //reach goal and interupt
       return result;

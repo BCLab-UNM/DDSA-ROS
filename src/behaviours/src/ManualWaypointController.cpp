@@ -31,7 +31,7 @@ bool ManualWaypointController::ShouldInterrupt() {
 }
 
 Result ManualWaypointController::DoWork() {
-	cout<<"ManualWaypointController::DoWork()"<<endl;
+	//cout<<"ManualWaypointController::DoWork()"<<endl;
   Result result;
   result.type = waypoint;
   result.wpts.waypoints.push_back(waypoints.begin()->second);

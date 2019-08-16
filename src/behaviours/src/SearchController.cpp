@@ -190,7 +190,7 @@ bool SearchController::HasWork() {
 void SearchController::SetSuccesfullPickup() {
   succesfullPickup = true;
   if(siteFidelityReached){
-	  cout<<"TestStatusC: set check point after pickup...&&&&&&"<<endl;
+	 // cout<<"TestStatusC: set check point after pickup...&&&&&&"<<endl;
     SetSiteFidelity();
     siteFidelityReached =false;
 

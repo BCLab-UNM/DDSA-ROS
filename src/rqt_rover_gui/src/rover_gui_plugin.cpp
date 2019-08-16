@@ -1410,7 +1410,7 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
     std::string remember_selected_rover_name = selected_rover_name;
     int remember_selected_index = ui.rover_list->currentRow();
     int selected_index = -1; // zero array indexing, ensure last selected index is in range
-
+    int runTime=0;
     // manually trigger the autonomous radio button event for all rovers
     for (set<string>::iterator it = rover_names.begin(); it != rover_names.end(); it++)
     {
@@ -1448,78 +1448,29 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
     // AKA: when we are not running a simulation
     if (current_simulated_time_in_seconds > 0.0) {
         if (ui.simulation_timer_combobox->currentText() == "no time limit") {
+            runTime = 0;
+        } else if (ui.simulation_timer_combobox->currentText() == "10 min (Testing)") {
+            runTime = 600; 
+        } else if (ui.simulation_timer_combobox->currentText() == "20 min (Preliminary)") {
+            runTime = 1200;
+        }else if (ui.simulation_timer_combobox->currentText() == "30 min") {
+            runTime = 1800;
+        } else if (ui.simulation_timer_combobox->currentText() == "40 min") {
+            runTime = 2400;
+        } else if (ui.simulation_timer_combobox->currentText() == "60 min (Final)") {
+            runTime = 3600;
+        }
+        
+        if(runTime == 0)
+        {
             timer_start_time_in_seconds = 0.0;
             timer_stop_time_in_seconds = 0.0;
             is_timer_on = false;
-        } else if (ui.simulation_timer_combobox->currentText() == "10 min (Testing)") {
+        }
+        else
+        {
             timer_start_time_in_seconds = current_simulated_time_in_seconds;
-            timer_stop_time_in_seconds = timer_start_time_in_seconds + 600.0;
-            is_timer_on = true;
-            emit sendInfoLogMessage("\nSetting experiment timer to start at: " +
-                                    QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
-                                    QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
-                                    QString::number(getSeconds(timer_start_time_in_seconds)) + " seconds");
-            ui.simulationTimerStartLabel->setText("<font color='white'>" +
-                                                  QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
-                                                  QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
-                                                  QString::number(floor(getSeconds(timer_start_time_in_seconds))) + " seconds</font>");
-            emit sendInfoLogMessage("Setting experiment timer to stop at: " +
-                                    QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
-                                    QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
-                                    QString::number(getSeconds(timer_stop_time_in_seconds)) + " seconds\n");
-            ui.simulationTimerStopLabel->setText("<font color='white'>" +
-                                                 QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
-                                                 QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
-                                                 QString::number(floor(getSeconds(timer_stop_time_in_seconds))) + " seconds</font>");
-            ui.simulation_timer_combobox->setEnabled(false);
-            ui.simulation_timer_combobox->setStyleSheet("color: grey; border:2px solid grey;");
-        } else if (ui.simulation_timer_combobox->currentText() == "20 min (Preliminary)") {
-            timer_start_time_in_seconds = current_simulated_time_in_seconds;
-            timer_stop_time_in_seconds = timer_start_time_in_seconds + 1200.0;
-            is_timer_on = true;
-            emit sendInfoLogMessage("\nSetting experiment timer to start at: " +
-                                    QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
-                                    QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
-                                    QString::number(getSeconds(timer_start_time_in_seconds)) + " seconds");
-            ui.simulationTimerStartLabel->setText("<font color='white'>" +
-                                                  QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
-                                                  QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
-                                                  QString::number(floor(getSeconds(timer_start_time_in_seconds))) + " seconds</font>");
-            emit sendInfoLogMessage("Setting experiment timer to stop at: " +
-                                    QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
-                                    QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
-                                    QString::number(getSeconds(timer_stop_time_in_seconds)) + " seconds\n");
-            ui.simulationTimerStopLabel->setText("<font color='white'>" +
-                                                 QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
-                                                 QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
-                                                 QString::number(floor(getSeconds(timer_stop_time_in_seconds))) + " seconds</font>");
-            ui.simulation_timer_combobox->setEnabled(false);
-            ui.simulation_timer_combobox->setStyleSheet("color: grey; border:2px solid grey;");
-        } else if (ui.simulation_timer_combobox->currentText() == "40 min") {
-            timer_start_time_in_seconds = current_simulated_time_in_seconds;
-            timer_stop_time_in_seconds = timer_start_time_in_seconds + 2400.0;
-            is_timer_on = true;
-            emit sendInfoLogMessage("\nSetting experiment timer to start at: " +
-                                    QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
-                                    QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
-                                    QString::number(getSeconds(timer_start_time_in_seconds)) + " seconds");
-            ui.simulationTimerStartLabel->setText("<font color='white'>" +
-                                                  QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
-                                                  QString::number(getMinutes(timer_start_time_in_seconds)) + " minutes, " +
-                                                  QString::number(floor(getSeconds(timer_start_time_in_seconds))) + " seconds</font>");
-            emit sendInfoLogMessage("Setting experiment timer to stop at: " +
-                                    QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
-                                    QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
-                                    QString::number(getSeconds(timer_stop_time_in_seconds)) + " seconds\n");
-            ui.simulationTimerStopLabel->setText("<font color='white'>" +
-                                                 QString::number(getHours(timer_stop_time_in_seconds)) + " hours, " +
-                                                 QString::number(getMinutes(timer_stop_time_in_seconds)) + " minutes, " +
-                                                 QString::number(floor(getSeconds(timer_stop_time_in_seconds))) + " seconds</font>");
-            ui.simulation_timer_combobox->setEnabled(false);
-            ui.simulation_timer_combobox->setStyleSheet("color: grey; border:2px solid grey;");
-        } else if (ui.simulation_timer_combobox->currentText() == "60 min (Final)") {
-            timer_start_time_in_seconds = current_simulated_time_in_seconds;
-            timer_stop_time_in_seconds = timer_start_time_in_seconds + 3600.0;
+            timer_stop_time_in_seconds = timer_start_time_in_seconds + runTime;
             is_timer_on = true;
             emit sendInfoLogMessage("\nSetting experiment timer to start at: " +
                                     QString::number(getHours(timer_start_time_in_seconds)) + " hours, " +
@@ -1540,6 +1491,8 @@ void RoverGUIPlugin::allAutonomousButtonEventHandler()
             ui.simulation_timer_combobox->setEnabled(false);
             ui.simulation_timer_combobox->setStyleSheet("color: grey; border:2px solid grey;");
         }
+        
+        
     }
     /* initialize random seed: */
     srand (time(NULL));
